@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PDF Dark Mode Converter - LITAS</title>
+    <title>PDF Dark Mode Converter - LitasDark</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" href="favicon.ico">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
@@ -10,13 +10,33 @@
 </head>
 <body>
     <header>
-        <h1>LITAS: PDF Dark Mode Converter</h1>
-        <img src="logo.png" alt="LITAS Logo" id="logo">
+        <h1>LitasDark: PDF Dark Mode Converter</h1>
+        <img src="logo.png" alt="LitasDark Logo" id="logo">
     </header>
     <main>
         <input type="file" id="pdfUpload" accept="application/pdf">
-        <button onclick="convertToDarkMode()">Convert to Dark Mode</button>
+        <div id="themeSettings">
+            <label for="themeSelect">Choose Theme:</label>
+            <select id="themeSelect">
+                <option value="dark">Dark</option>
+                <option value="darker">Darker</option>
+                <option value="darkest">Darkest</option>
+            </select>
+            <label for="brightness">Brightness:</label>
+            <input type="range" id="brightness" min="0" max="100" value="50">
+            <label for="contrast">Contrast:</label>
+            <input type="range" id="contrast" min="0" max="100" value="50">
+        </div>
+        <button onclick="generatePreview()">Generate Preview</button>
+        <div id="preview">
+            <canvas id="previewCanvas"></canvas>
+        </div>
+        <button id="convertButton" onclick="convertToDarkMode()">Convert to Dark Mode</button>
         <a id="downloadLink" href="#" download="dark-mode.pdf">Download Converted PDF</a>
+        <div id="loading" class="hidden">
+            <div class="spinner"></div>
+            <p>Loading...</p>
+        </div>
     </main>
     <script src="script.js"></script>
 </body>
