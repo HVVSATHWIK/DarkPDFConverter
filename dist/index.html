@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Convert your PDF files to dark mode with LitasDark - the best PDF dark mode converter.">
+    <title>PDF Dark Mode Converter - LitasDark</title>
+    <link rel="stylesheet" href="dist/styles.css">
+    <link rel="icon" href="favi.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js" defer></script>
+</head>
+<body>
+    <div id="errorContainer" role="alert" aria-live="assertive" style="display:none; color: red;"></div>
+    
+    <div class="animated-gradient-background"></div>
+
+    <header>
+        <h1>LitasDark: PDF Dark Mode Converter</h1>
+        <img src="pdfdark.jpg" alt="LitasDark Logo" id="logo">
+    </header>
+    <main>
+        <section>
+            <input type="file" id="pdfUpload" accept="application/pdf" aria-label="Upload PDF">
+        </section>
+        <section id="themeSettings" role="region" aria-labelledby="themeSettingsLabel">
+            <h2 id="themeSettingsLabel">Theme Settings</h2>
+            <label for="themeSelect">Choose Theme:</label>
+            <select id="themeSelect">
+                <option value="dark">Dark</option>
+                <option value="darker">Darker</option>
+                <option value="darkest">Darkest</option>
+            </select>
+            <label for="brightness">Brightness:</label>
+            <input type="range" id="brightness" min="0" max="100" value="50">
+            <label for="contrast">Contrast:</label>
+            <input type="range" id="contrast" min="0" max="100" value="50">
+        </section>
+        <section>
+            <button onclick="generatePreview()">Generate Preview</button>
+            <div id="preview">
+                <canvas id="previewCanvas" aria-label="PDF Preview"></canvas>
+            </div>
+            <button id="convertButton" onclick="convertToDarkMode()">Convert to Dark Mode</button>
+            <a id="downloadLink" href="#" download="dark-mode.pdf">Download Converted PDF</a>
+        </section>
+        <div id="loading" class="hidden" role="status" aria-live="polite">
+            <div class="spinner"></div>
+            <p>Loading...</p>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2024 LitasDark. All rights reserved.</p>
+    </footer>
+    <a href="#" id="backToTop">↑</a>
+    <script src="dist/script.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
+    <script>
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: '#ffffff' },
+                shape: {
+                    type: 'circle',
+                    stroke: { width: 0, color: '#000000' },
+                    polygon: { nb_sides: 5 },
+                },
+                opacity: {
+                    value: 0.5,
+                    random: false,
+                    anim: { enable: false, speed: 1, opacity_min: 0.1, sync: false },
+                },
+                size: {
+                    value: 3,
+                    random: true,
+                    anim: { enable: false, speed: 40, size_min: 0.1, sync: false },
+                },
+                line_linked: {
+                    enable: true,
+                    distance: 150,
+                    color: '#ffffff',
+                    opacity: 0.4,
+                    width: 1,
+                },
+                move: {
+                    enable: true,
+                    speed: 6,
+                    direction: 'none',
+                    random: false,
+                    straight: false,
+                    out_mode: 'out',
+                    bounce: false,
+                    attract: { enable: false, rotateX: 600, rotateY: 1200 },
+                },
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: {
+                    onhover: { enable: true, mode: 'repulse' },
+                    onclick: { enable: true, mode: 'push' },
+                    resize: true,
+                },
+                modes: {
+                    grab: { distance: 400, line_linked: { opacity: 1 } },
+                    bubble: { distance: 400, size: 40, duration: 2, opacity: 8, speed: 3 },
+                    repulse: { distance: 200, duration: 0.4 },
+                    push: { particles_nb: 4 },
+                    remove: { particles_nb: 2 },
+                },
+            },
+            retina_detect: true,
+        });
+    </script>
+</body>
+</html>
