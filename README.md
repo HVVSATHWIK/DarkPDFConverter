@@ -24,11 +24,11 @@ Follow these instructions to set up the project locally.
 
 1. **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/litasdark.git
+    git clone https://github.com/HVVSATHWIK/DARKPDFConverter.git
     ```
 2. **Navigate to the project directory:**
     ```bash
-    cd litasdark
+    cd DARKPDFConverter
     ```
 3. **Open `index.html` in your web browser:**
     ```bash
@@ -54,6 +54,32 @@ Follow these instructions to set up the project locally.
 
 6. **Download Converted PDF:**
     - Click on the "Download Converted PDF" link to download the modified PDF file.
+
+
+## Built With
+
+- **HTML5**
+- **CSS3**
+- **JavaScript**
+- **PDF.js** - For rendering PDFs in the browser
+- **PDF-Lib** - For manipulating PDF files
+
+## Contributing
+
+Contributions are welcome! Please fork the repository and submit a pull request for any enhancements or bug fixes.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgements
+
+- Thanks to the creators of [PDF.js](https://mozilla.github.io/pdf.js/) and [PDF-Lib](https://pdf-lib.js.org/) for their amazing libraries.
+
+## Contact
+
+For any inquiries or feedback, please contact [hvvsathwik27@gmail.com](mailto:hvvsathwik@gmail.com).
+
 
 
 
