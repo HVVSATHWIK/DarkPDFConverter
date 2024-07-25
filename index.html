@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Convert your PDF files to dark mode with LitasDark - the best PDF dark mode converter.">
     <title>PDF Dark Mode Converter - LitasDark</title>
-    <link rel="stylesheet" href="dist/styles.css">
+    <link rel="stylesheet" href="styles.css">
     <link rel="icon" href="favi.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js" defer></script>
 </head>
 <body>
     <div id="errorContainer" role="alert" aria-live="assertive" style="display:none; color: red;"></div>
-    
-    <div class="animated-gradient-background"></div>
+
+    <div id="particles-js" class="animated-gradient-background"></div>
 
     <header>
         <h1>LitasDark: PDF Dark Mode Converter</h1>
@@ -21,12 +21,13 @@
     </header>
     <main>
         <section>
+            <label for="pdfUpload">Upload PDF:</label>
             <input type="file" id="pdfUpload" accept="application/pdf" aria-label="Upload PDF">
         </section>
         <section id="themeSettings" role="region" aria-labelledby="themeSettingsLabel">
             <h2 id="themeSettingsLabel">Theme Settings</h2>
             <label for="themeSelect">Choose Theme:</label>
-            <select id="themeSelect">
+            <select id="themeSelect" aria-label="Theme Selection">
                 <option value="dark">Dark</option>
                 <option value="darker">Darker</option>
                 <option value="darkest">Darkest</option>
@@ -52,8 +53,8 @@
     <footer>
         <p>&copy; 2024 LitasDark. All rights reserved.</p>
     </footer>
-    <a href="#" id="backToTop">↑</a>
-    <script src="dist/script.js" defer></script>
+    <a href="#" id="backToTop" aria-label="Back to Top">↑</a>
+    <script src="script.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
     <script>
         particlesJS('particles-js', {
