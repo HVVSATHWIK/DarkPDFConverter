@@ -1,175 +1,185 @@
+// Set the worker source for PDF.js
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.worker.min.js';
 
-let globalPdfDoc;
+let globalPdfDoc = null;
+let originalFileName = '';
 
-document.getElementById('pdfUpload').addEventListener('change', loadPdf);
+// Element references
+const pdfUpload = document.getElementById('pdfUpload');
+const themeSelect = document.getElementById('themeSelect');
+const brightnessInput = document.getElementById('brightness');
+const contrastInput = document.getElementById('contrast');
+const previewCanvas = document.getElementById('previewCanvas');
+const downloadLink = document.getElementById('downloadLink');
+const loadingIndicator = document.getElementById('loading');
+const errorContainer = document.getElementById('errorContainer'); // Error container for displaying messages
+const backToTopButton = document.getElementById('backToTop');
 
-async function loadPdf() {
-    const input = document.getElementById('pdfUpload');
+// Event listeners
+pdfUpload.addEventListener('change', loadPdf);
+themeSelect.addEventListener('change', debounce(generatePreview, 300));
+brightnessInput.addEventListener('input', debounce(generatePreview, 300));
+contrastInput.addEventListener('input', debounce(generatePreview, 300));
 
-    if (!input.files.length) {
-        alert('Please upload a PDF file.');
-        return;
+// Scroll to top functionality
+window.addEventListener('scroll', function () {
+    if (window.scrollY > 300) {
+        backToTopButton.style.display = 'block';
+    } else {
+        backToTopButton.style.display = 'none';
     }
+});
 
-    const file = input.files[0];
-    const arrayBuffer = await file.arrayBuffer();
+backToTopButton.addEventListener('click', function (e) {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
 
-    try {
-        globalPdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
-        alert('PDF loaded successfully! Now generate a preview.');
-    } catch (error) {
-        console.error('Error loading PDF:', error);
-        alert('Error loading PDF. Please make sure the file is a valid PDF.');
+function loadPdf(event) {
+    const file = event.target.files[0];
+    if (file && file.type === 'application/pdf') {
+        const fileReader = new FileReader();
+        fileReader.onload = function() {
+            const typedArray = new Uint8Array(this.result);
+            pdfjsLib.getDocument(typedArray).promise.then(pdfDoc => {
+                globalPdfDoc = pdfDoc;
+                originalFileName = file.name.replace('.pdf', '');
+                generatePreview(); // Automatically generate preview on load
+            }).catch(err => {
+                displayError(`Failed to load PDF: ${err.message}`);
+            });
+        };
+        fileReader.readAsArrayBuffer(file);
+    } else {
+        displayError('Please upload a valid PDF file.');
     }
 }
 
 async function generatePreview() {
-    const loading = document.getElementById('loading');
-    const preview = document.getElementById('preview');
-    const previewCanvas = document.getElementById('previewCanvas');
-    const theme = document.getElementById('themeSelect').value;
-    const brightness = document.getElementById('brightness').value;
-    const contrast = document.getElementById('contrast').value;
+    if (!globalPdfDoc) return;
 
-    if (!globalPdfDoc) {
-        alert('Please upload a PDF file first.');
-        return;
-    }
-
-    loading.classList.remove('hidden');
-    loading.classList.add('visible');
-
-    const pdfBytes = await globalPdfDoc.save();
-    let pdf;
-    try {
-        pdf = await pdfjsLib.getDocument({ data: pdfBytes }).promise;
-    } catch (error) {
-        console.error('Error parsing PDF:', error);
-        alert('Error parsing PDF. Please try another file.');
-        loading.classList.remove('visible');
-        loading.classList.add('hidden');
-        return;
-    }
+    showLoading(true);
 
     try {
-        const page = await pdf.getPage(1);
-        const viewport = page.getViewport({ scale: 1.5 });
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
+        const ctx = previewCanvas.getContext('2d');
+        const page = await globalPdfDoc.getPage(1);
+        const viewport = page.getViewport({ scale: 1 }); // Better quality with higher scale
+        previewCanvas.width = viewport.width;
+        previewCanvas.height = viewport.height;
 
         const renderContext = {
             canvasContext: ctx,
-            viewport: viewport,
+            viewport: viewport
         };
-
         await page.render(renderContext).promise;
 
-        ctx.globalCompositeOperation = 'difference';
-        ctx.fillStyle = theme === 'dark' ? 'white' : theme === 'darker' ? '#ccc' : '#999';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
+        applyDarkModeToCanvas(ctx, previewCanvas);
+    } catch (err) {
+        displayError(`Failed to generate preview: ${err.message}`);
+    } finally {
+        showLoading(false);
+    }
+}
 
-        previewCanvas.width = canvas.width;
-        previewCanvas.height = canvas.height;
-        previewCanvas.getContext('2d').drawImage(canvas, 0, 0);
-        preview.style.display = 'block';
-    } catch (error) {
-        console.error('Error generating preview:', error);
-        alert('Error generating preview. Please try another file.');
+function applyDarkModeToCanvas(ctx, canvas) {
+    const imgData = ctx.getImageData(0, 0, canvas.width);
+    const data = imgData.data;
+    const theme = themeSelect.value;
+    const brightness = parseFloat(brightnessInput.value);
+    const contrast = parseFloat(contrastInput.value);
+
+    // Function to check if a pixel is part of an image
+    function isImagePixel(r, g, b) {
+        const threshold = 20;
+        return Math.abs(r - g) < threshold && Math.abs(g - b) < threshold && Math.abs(b - r) < threshold;
     }
 
-    loading.classList.remove('visible');
-    loading.classList.add('hidden');
+    // Enhanced dark mode effect
+    for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+
+        // Apply dark mode effect based on luminance
+        if (!isImagePixel(r, g, b)) {
+            const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+
+            if (theme === 'dark' || theme === 'darker' || theme === 'darkest') {
+                if (luminance > 127) {
+                    data[i] = r * (brightness / 100);
+                    data[i + 1] = g * (brightness / 100);
+                    data[i + 2] = b * (brightness / 100);
+                } else {
+                    data[i] = r * (contrast / 100);
+                    data[i + 1] = g * (contrast / 100);
+                    data[i + 2] = b * (contrast / 100);
+                }
+            }
+        }
+    }
+    ctx.putImageData(imgData, 0, 0);
 }
 
 async function convertToDarkMode() {
-    const loading = document.getElementById('loading');
-    const theme = document.getElementById('themeSelect').value;
-    const brightness = document.getElementById('brightness').value;
-    const contrast = document.getElementById('contrast').value;
+    if (!globalPdfDoc) return;
 
-    if (!globalPdfDoc) {
-        alert('Please upload a PDF file first.');
-        return;
-    }
+    showLoading(true);
 
-    loading.classList.remove('hidden');
-    loading.classList.add('visible');
-
-    const pdfBytes = await globalPdfDoc.save();
-    let pdf;
     try {
-        pdf = await pdfjsLib.getDocument({ data: pdfBytes }).promise;
-    } catch (error) {
-        console.error('Error parsing PDF:', error);
-        alert('Error parsing PDF. Please try another file.');
-        loading.classList.remove('visible');
-        loading.classList.add('hidden');
-        return;
-    }
+        const pdfDoc = await PDFLib.PDFDocument.create();
 
-    const numPages = pdf.numPages;
-    const darkPdfDoc = await PDFLib.PDFDocument.create();
-
-    for (let i = 1; i <= numPages; i++) {
-        try {
-            const page = await pdf.getPage(i);
-            const viewport = page.getViewport({ scale: 1.5 });
+        for (let i = 1; i <= globalPdfDoc.numPages; i++) {
+            const page = await globalPdfDoc.getPage(i);
+            const viewport = page.getViewport({ scale: 2 });
             const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
             canvas.width = viewport.width;
             canvas.height = viewport.height;
+            const ctx = canvas.getContext('2d');
 
-            const renderContext = {
-                canvasContext: ctx,
-                viewport: viewport,
-            };
+            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+            applyDarkModeToCanvas(ctx, canvas);
 
-            await page.render(renderContext).promise;
-
-            ctx.globalCompositeOperation = 'difference';
-            ctx.fillStyle = theme === 'dark' ? 'white' : theme === 'darker' ? '#ccc' : '#999';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
-
+            const pdfPage = pdfDoc.addPage([canvas.width, canvas.height]);
             const imgData = canvas.toDataURL('image/png');
-            const [image] = await Promise.all([
-                darkPdfDoc.embedPng(imgData),
-            ]);
+            const img = await pdfDoc.embedPng(imgData);
 
-            const pageDims = darkPdfDoc.addPage([viewport.width, viewport.height]);
-            pageDims.drawImage(image, {
+            pdfPage.drawImage(img, {
                 x: 0,
                 y: 0,
-                width: pageDims.getWidth(),
-                height: pageDims.getHeight(),
+                width: canvas.width,
+                height: canvas.height
             });
-        } catch (error) {
-            console.error(`Error processing page ${i}:`, error);
-            alert(`Error processing page ${i}. Skipping to next page.`);
-            continue;
         }
-    }
 
-    try {
-        const darkPdfBytes = await darkPdfDoc.save();
-        const blob = new Blob([darkPdfBytes], { type: 'application/pdf' });
+        const pdfBytes = await pdfDoc.save();
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
-
-        const downloadLink = document.getElementById('downloadLink');
         downloadLink.href = url;
-        downloadLink.style.display = 'block';
-        downloadLink.download = 'dark_mode_pdf.pdf';
-    } catch (error) {
-        console.error('Error saving dark mode PDF:', error);
-        alert('Error saving dark mode PDF. Please try again.');
+        downloadLink.style.display = 'inline-block';
+    } catch (err) {
+        displayError(`Failed to convert PDF: ${err.message}`);
+    } finally {
+        showLoading(false);
     }
-
-    loading.classList.remove('visible');
-    loading.classList.add('hidden');
 }
+
+function showLoading(isLoading) {
+    loadingIndicator.classList.toggle('visible', isLoading);
+    loadingIndicator.classList.toggle('hidden', !isLoading);
+}
+
+function displayError(message) {
+    errorContainer.textContent = message;
+    errorContainer.style.display = 'block';
+}
+
+// Debounce function for generatePreview
+const debounce = (func, delay) => {
+    let debounceTimer;
+    return function() {
+        const context = this;
+        const args = arguments;
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => func.apply(context, args), delay);
+    };
+};
