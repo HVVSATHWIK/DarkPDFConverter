@@ -6,18 +6,19 @@
     <meta name="description" content="Convert your PDF files to dark mode with LitasDark - the best PDF dark mode converter.">
     <title>PDF Dark Mode Converter - LitasDark</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="favi.png">
+    <link rel="icon" href="assets/icons/favi.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js" defer></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.worker.min.js';
+    </script>  
     <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js" defer></script>
 </head>
 <body>
     <div id="errorContainer" role="alert" aria-live="assertive" style="display:none; color: red;"></div>
-
     <div id="particles-js" class="animated-gradient-background"></div>
-
     <header>
         <h1>LitasDark: PDF Dark Mode Converter</h1>
-        <img src="pdfdark.jpg" alt="LitasDark Logo" id="logo">
+        <img src="assets/images/pdfdark.jpg" alt="LitasDark Logo" id="logo">
     </header>
     <main>
         <section>
@@ -33,17 +34,40 @@
                 <option value="darkest">Darkest</option>
             </select>
             <label for="brightness">Brightness:</label>
-            <input type="range" id="brightness" min="0" max="100" value="50">
+            <input type="range" id="brightness" min="50" max="150" value="100">
             <label for="contrast">Contrast:</label>
-            <input type="range" id="contrast" min="0" max="100" value="50">
+            <input type="range" id="contrast" min="50" max="150" value="100">
         </section>
         <section>
-            <button onclick="generatePreview()">Generate Preview</button>
+            <button id="generatePreviewButton">Generate Preview</button>
             <div id="preview">
+                <div id="thumbnails"></div>
                 <canvas id="previewCanvas" aria-label="PDF Preview"></canvas>
             </div>
-            <button id="convertButton" onclick="convertToDarkMode()">Convert to Dark Mode</button>
-            <a id="downloadLink" href="#" download="dark-mode.pdf">Download Converted PDF</a>
+            <button id="convertButton">Convert to Dark Mode</button>
+            <a id="downloadLink" href="#" download="dark-mode.pdf" style="display: none;">Download Converted PDF</a>
+        </section>
+        <section>
+            <label for="startPage">Start Page:</label>
+            <input type="number" id="startPage" min="1" aria-label="Start Page">
+            <label for="endPage">End Page:</label>
+            <input type="number" id="endPage" min="1" aria-label="End Page">
+            <button id="splitButton">Split PDF</button>
+            <a id="splitDownloadLink" href="#" download="split_pdf.pdf" style="display: none;">Download Split PDF</a>
+        </section>
+        <section>
+            <label for="pdfFiles">Upload PDFs to Merge:</label>
+            <input type="file" id="pdfFiles" accept="application/pdf" multiple aria-label="Upload PDFs">
+            <button id="mergeButton">Merge PDFs</button>
+            <a id="mergeDownloadLink" href="#" download="merged_pdf.pdf" style="display: none;">Download Merged PDF</a>
+        </section>
+        <section>
+            <label for="rotatePageNumber">Page Number:</label>
+            <input type="number" id="rotatePageNumber" min="1" aria-label="Page Number">
+            <label for="rotateAngle">Angle:</label>
+            <input type="number" id="rotateAngle" step="90" min="0" max="270" aria-label="Rotation Angle">
+            <button id="rotateButton">Rotate Page</button>
+            <a id="rotateDownloadLink" href="#" download="rotated_pdf.pdf" style="display: none;">Download Rotated PDF</a>
         </section>
         <div id="loading" class="hidden" role="status" aria-live="polite">
             <div class="spinner"></div>
@@ -54,57 +78,62 @@
         <p>&copy; 2024 LitasDark. All rights reserved.</p>
     </footer>
     <a href="#" id="backToTop" aria-label="Back to Top">↑</a>
-    <script src="script.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
+    <script type="module" src="messages.js" defer></script>
+    <script type="module" src="pdfProcessing.js" defer></script>
+    <script type="module" src="script.js" defer></script>
+
     <script>
         particlesJS('particles-js', {
             particles: {
-                number: { value: 80, density: { enable: true, value_area: 800 } },
-                color: { value: '#ffffff' },
+                number: { value: 150, density: { enable: true, value_area: 1000 } },
+                color: {
+                    value: ['#ffffff', '#ff0000', '#00ff00', '#0000ff']
+                },
                 shape: {
-                    type: 'circle',
+                    type: ['circle', 'triangle', 'polygon', 'star', 'edge'],
                     stroke: { width: 0, color: '#000000' },
-                    polygon: { nb_sides: 5 },
+                    polygon: { nb_sides: 6 },
                 },
                 opacity: {
-                    value: 0.5,
-                    random: false,
-                    anim: { enable: false, speed: 1, opacity_min: 0.1, sync: false },
+                    value: 0.8,
+                    random: true,
+                    anim: { enable: true, speed: 2, opacity_min: 0.2, sync: false },
                 },
                 size: {
-                    value: 3,
+                    value: 5,
                     random: true,
-                    anim: { enable: false, speed: 40, size_min: 0.1, sync: false },
+                    anim: { enable: true, speed: 30, size_min: 0.1, sync: false },
                 },
                 line_linked: {
                     enable: true,
-                    distance: 150,
+                    distance: 120,
                     color: '#ffffff',
-                    opacity: 0.4,
+                    opacity: 0.8,
                     width: 1,
                 },
                 move: {
                     enable: true,
-                    speed: 6,
+                    speed: 10,
                     direction: 'none',
-                    random: false,
+                    random: true,
                     straight: false,
                     out_mode: 'out',
-                    bounce: false,
-                    attract: { enable: false, rotateX: 600, rotateY: 1200 },
+                    bounce: true,
+                    attract: { enable: true, rotateX: 800, rotateY: 1600 },
                 },
             },
             interactivity: {
                 detect_on: 'canvas',
                 events: {
-                    onhover: { enable: true, mode: 'repulse' },
-                    onclick: { enable: true, mode: 'push' },
+                    onhover: { enable: true, mode: ['grab', 'bubble', 'repulse'] },
+                    onclick: { enable: true, mode: ['push', 'remove', 'bubble'] },
                     resize: true,
                 },
                 modes: {
-                    grab: { distance: 400, line_linked: { opacity: 1 } },
-                    bubble: { distance: 400, size: 40, duration: 2, opacity: 8, speed: 3 },
-                    repulse: { distance: 200, duration: 0.4 },
+                    grab: { distance: 350, line_linked: { opacity: 1 } },
+                    bubble: { distance: 400, size: 20, duration: 2, opacity: 0.8, speed: 3 },
+                    repulse: { distance: 250, duration: 0.6 },
                     push: { particles_nb: 4 },
                     remove: { particles_nb: 2 },
                 },
