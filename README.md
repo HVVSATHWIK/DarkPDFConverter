@@ -11,6 +11,9 @@ LitasDark is a user-friendly web application designed to convert your PDF files 
 - **Brightness and Contrast Adjustment**: Fine-tune the brightness and contrast of the converted PDF.
 - **Real-time Preview**: Generate a preview of the PDF in dark mode before conversion.
 - **Download Converted PDF**: Download the converted PDF file with a single click.
+- **Split PDF**: Split your PDF into multiple parts by specifying the start and end pages.
+- **Merge PDFs**: Merge multiple PDF files into one.
+- **Rotate PDF Pages**: Rotate specific pages within your PDF file.
 
 ## Getting Started
 
@@ -55,6 +58,14 @@ Follow these instructions to set up the project locally.
 6. **Download Converted PDF:**
     - Click on the "Download Converted PDF" link to download the modified PDF file.
 
+7. **Split PDF:**
+    - Specify the start and end pages, then click the "Split PDF" button to split the PDF. Download the split PDF by clicking the "Download Split PDF" link.
+
+8. **Merge PDFs:**
+    - Upload multiple PDF files, then click the "Merge PDFs" button. Download the merged PDF by clicking the "Download Merged PDF" link.
+
+9. **Rotate PDF Pages:**
+    - Specify the page number and the rotation angle, then click the "Rotate Page" button. Download the rotated PDF by clicking the "Download Rotated PDF" link.
 
 ## Built With
 
@@ -79,7 +90,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Contact
 
 For any inquiries or feedback, please contact [hvvsathwik27@gmail.com](mailto:hvvsathwik@gmail.com).
-
-
-
-
