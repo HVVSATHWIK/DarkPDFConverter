@@ -1,0 +1,247 @@
+:root {
+  --background-color: #121212;
+  --text-color: #FFFFFF;
+  --accent-color: #6200ea;
+  --input-bg-color: #333;
+  --input-text-color: #fff;
+  --button-hover-bg-color: #3700b3;
+  --spinner-border-color: #888;
+  --spinner-border-top-color: var(--accent-color);
+  --error-color: #ff4444;
+  --info-color: #2196F3;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-container {
+  flex: 1;
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.main-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+@media (min-width: 768px) {
+  .main-content {
+    grid-template-columns: 300px 1fr;
+  }
+}
+
+/* Preview Section */
+.preview-container {
+  background: #1E1E1E;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.preview-content {
+  position: relative;
+  min-height: 600px;
+  border: 2px solid var(--input-bg-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.pdf-canvas {
+  width: 100%;
+  height: 100%;
+  transition: filter 0.3s ease;
+}
+
+.page-nav {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.nav-button {
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.nav-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.nav-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+/* Controls Section */
+.control-group {
+  margin-top: 1.5rem;
+  background: #1E1E1E;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+input[type="number"],
+input[type="file"] {
+  background: var(--input-bg-color);
+  color: var(--input-text-color);
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+}
+
+input[type="number"]:focus,
+input[type="file"]:focus {
+  border-color: var(--accent-color);
+  outline: none;
+}
+
+.btn-primary {
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: var(--button-hover-bg-color);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+}
+
+/* Messages */
+.messages {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 1000;
+}
+
+.message {
+  padding: 12px 20px;
+  border-radius: 6px;
+  animation: slideIn 0.3s ease-out;
+  backdrop-filter: blur(4px);
+}
+
+.message--error {
+  background: rgba(255, 68, 68, 0.9);
+  border: 1px solid var(--error-color);
+}
+
+.message--info {
+  background: rgba(33, 150, 243, 0.9);
+  border: 1px solid var(--info-color);
+}
+
+@keyframes slideIn {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--spinner-border-color);
+  border-top-color: var(--spinner-border-top-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Theme Settings */
+.theme-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.slider {
+  width: 100%;
+  height: 6px;
+  background: var(--input-bg-color);
+  border-radius: 3px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  background: var(--accent-color);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* Error Fallback */
+.error-fallback {
+  padding: 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  color: var(--error-color);
+}
