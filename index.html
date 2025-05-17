@@ -7,14 +7,15 @@
     <title>PDF Dark Mode Converter - LitasDark</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" href="favi.png">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js" defer></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
     <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.worker.min.js';
-    </script>  
-    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js" defer></script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" defer></script>
+
 </head>
 <body>
-    <div id="errorContainer" role="alert" aria-live="assertive" style="display:none; color: red;"></div>
     <div id="particles-js" class="animated-gradient-background"></div>
     <header>
         <h1>LitasDark: PDF Dark Mode Converter</h1>
@@ -22,53 +23,109 @@
     </header>
     <main>
         <section>
-            <label for="pdfUpload">Upload PDF:</label>
-            <input type="file" id="pdfUpload" accept="application/pdf" aria-label="Upload PDF">
+            <div class="form-group">
+                <label for="pdfUpload">Upload PDF:</label>
+                <input type="file" id="pdfUpload" accept="application/pdf" aria-label="Upload PDF">
+            </div>
         </section>
         <section id="themeSettings" role="region" aria-labelledby="themeSettingsLabel">
             <h2 id="themeSettingsLabel">Theme Settings</h2>
-            <label for="themeSelect">Choose Theme:</label>
-            <select id="themeSelect" aria-label="Theme Selection">
-                <option value="dark">Dark</option>
-                <option value="darker">Darker</option>
-                <option value="darkest">Darkest</option>
-            </select>
-            <label for="brightness">Brightness:</label>
-            <input type="range" id="brightness" min="50" max="150" value="100">
-            <label for="contrast">Contrast:</label>
-            <input type="range" id="contrast" min="50" max="150" value="100">
-        </section>
-        <section>
-            <button id="generatePreviewButton">Generate Preview</button>
-            <div id="preview">
-                <div id="thumbnails"></div>
-                <canvas id="previewCanvas" aria-label="PDF Preview"></canvas>
+            <div class="form-group">
+                <label for="themeSelect">Choose Theme:</label>
+                <select id="themeSelect" aria-label="Theme Selection">
+                    <option value="dark">Dark</option>
+                    <option value="darker">Darker</option>
+                    <option value="darkest">Darkest</option>
+                </select>
             </div>
-            <button id="convertButton">Convert to Dark Mode</button>
-            <a id="downloadLink" href="#" download="dark-mode.pdf" style="display: none;">Download Converted PDF</a>
+            <div class="form-group">
+                <label for="brightness">Brightness:</label>
+                <input type="range" id="brightness" min="50" max="150" value="100" aria-label="Brightness">
+            </div>
+            <div class="form-group">
+                <label for="contrast">Contrast:</label>
+                <input type="range" id="contrast" min="50" max="150" value="100" aria-label="Contrast">
+            </div>
         </section>
-        <section>
-            <label for="startPage">Start Page:</label>
-            <input type="number" id="startPage" min="1" aria-label="Start Page">
-            <label for="endPage">End Page:</label>
-            <input type="number" id="endPage" min="1" aria-label="End Page">
-            <button id="splitButton">Split PDF</button>
-            <a id="splitDownloadLink" href="#" download="split_pdf.pdf" style="display: none;">Download Split PDF</a>
+        
+        <section id="viewerControlsAndDownloadSection" style="grid-column: 1 / -1;"> 
+            <div class="form-group">
+                 <button id="generatePreviewButton">Generate Dark Mode Preview</button> 
+            </div>
+            <div class="form-group">
+                <button id="convertButton">Convert to Dark Mode & Download</button> 
+            </div>
+            <div class="form-group">
+                <a id="downloadLink" href="#" download="dark-mode.pdf" style="display: none;">Download Converted PDF</a>
+            </div>
         </section>
-        <section>
-            <label for="pdfFiles">Upload PDFs to Merge:</label>
-            <input type="file" id="pdfFiles" accept="application/pdf" multiple aria-label="Upload PDFs">
-            <button id="mergeButton">Merge PDFs</button>
-            <a id="mergeDownloadLink" href="#" download="merged_pdf.pdf" style="display: none;">Download Merged PDF</a>
+
+        <!-- New Section for Side-by-Side Viewers and Sync Button -->
+        <section id="pdfViewersMainSection" style="grid-column: 1 / -1;">
+            <div class="form-group" style="text-align: center; margin-bottom: 15px;">
+                <button id="syncScrollButton">Enable Scroll Sync</button>
+            </div>
+            <div class="pdf-viewers-wrapper"> 
+                <section id="originalPdfViewerSection" class="viewer-column">
+                    <h3>Original PDF Document</h3>
+                    <!-- Thumbnails div removed -->
+                    <div id="originalPdfPagesContainer" class="pdf-viewer-container" style="background-color: #f0f0f0;">
+                        <!-- Canvases for original PDF pages will be appended here by JS -->
+                    </div>
+                </section>
+
+                <section id="darkModePdfViewerSection" class="viewer-column" style="display: none;"> 
+                    <h3>Dark Mode Preview</h3>
+                    <div id="darkModePdfPagesContainer" class="pdf-viewer-container" style="background-color: #1a1a1a;">
+                        <!-- Canvases for dark mode PDF pages will be appended here by JS -->
+                    </div>
+                </section>
+            </div>
         </section>
-        <section>
-            <label for="rotatePageNumber">Page Number:</label>
-            <input type="number" id="rotatePageNumber" min="1" aria-label="Page Number">
-            <label for="rotateAngle">Angle:</label>
-            <input type="number" id="rotateAngle" step="90" min="0" max="270" aria-label="Rotation Angle">
-            <button id="rotateButton">Rotate Page</button>
-            <a id="rotateDownloadLink" href="#" download="rotated_pdf.pdf" style="display: none;">Download Rotated PDF</a>
+
+        <section id="pdfActionsSection" style="grid-column: 1 / -1;">
+            <div style="display:flex; flex-wrap:wrap; justify-content:space-around;"> 
+                <div class="form-group" style="flex-basis: 45%;">
+                    <label for="startPage">Start Page:</label>
+                    <input type="number" id="startPage" min="1" aria-label="Start Page">
+                </div>
+                <div class="form-group" style="flex-basis: 45%;">
+                    <label for="endPage">End Page:</label>
+                    <input type="number" id="endPage" min="1" aria-label="End Page">
+                </div>
+                <div class="form-group" style="flex-basis: 100%; text-align:center;">
+                    <button id="splitButton">Split PDF</button>
+                    <a id="splitDownloadLink" href="#" download="split_pdf.pdf" style="display: none; margin-left:10px;">Download Split PDF</a>
+                </div>
+            </div>
+
+            <div style="display:flex; flex-wrap:wrap; justify-content:space-around; margin-top:20px;">
+                <div class="form-group" style="flex-basis: 100%;">
+                    <label for="pdfFiles">Upload PDFs to Merge (select multiple):</label>
+                    <input type="file" id="pdfFiles" accept="application/pdf" multiple aria-label="Upload PDFs">
+                </div>
+                <div class="form-group" style="flex-basis: 100%; text-align:center;">
+                    <button id="mergeButton">Merge PDFs</button>
+                    <a id="mergeDownloadLink" href="#" download="merged_pdf.pdf" style="display: none; margin-left:10px;">Download Merged PDF</a>
+                </div>
+            </div>
+
+            <div style="display:flex; flex-wrap:wrap; justify-content:space-around; margin-top:20px;">
+                <div class="form-group" style="flex-basis: 45%;">
+                    <label for="rotatePageNumber">Page Number to Rotate:</label>
+                    <input type="number" id="rotatePageNumber" min="1" aria-label="Page Number">
+                </div>
+                <div class="form-group" style="flex-basis: 45%;">
+                    <label for="rotateAngle">Angle (e.g., 90, 180):</label>
+                    <input type="number" id="rotateAngle" step="90" min="0" max="270" aria-label="Rotation Angle">
+                </div>
+                <div class="form-group" style="flex-basis: 100%; text-align:center;">
+                    <button id="rotateButton">Rotate Page</button>
+                    <a id="rotateDownloadLink" href="#" download="rotated_pdf.pdf" style="display: none; margin-left:10px;">Download Rotated PDF</a>
+                </div>
+            </div>
         </section>
+
         <div id="loading" class="hidden" role="status" aria-live="polite">
             <div class="spinner"></div>
             <p>Loading...</p>
@@ -77,8 +134,10 @@
     <footer>
         <p>&copy; 2024 LitasDark. All rights reserved.</p>
     </footer>
+    <div id="messageContainer" class="message hidden" role="alert" aria-live="assertive"></div>
     <a href="#" id="backToTop" aria-label="Back to Top">↑</a>
     <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
+    
     <script type="module" src="messages.js" defer></script>
     <script type="module" src="pdfProcessing.js" defer></script>
     <script type="module" src="script.js" defer></script>
