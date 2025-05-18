@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background-color: #121212;
+  --text-color: #FFFFFF;
+  --accent-color: #6200ea;
+  --input-bg-color: #333;
+  --input-text-color: #fff;
+  --button-hover-bg-color: #3700b3;
+}
+
+body {
+  @apply bg-dark text-white m-0 min-h-screen;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.card {
+  @apply bg-darker rounded-xl shadow-lg p-6 transition-all duration-300;
+}
+
+.card-hover {
+  @apply hover:scale-105 hover:shadow-xl cursor-pointer;
+}
+
+.btn-primary {
+  @apply bg-primary text-white px-4 py-2 rounded-lg transition-all duration-300
+         hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50;
+}
