@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tool } from '../types';
+import PDFProcessorWithErrorBoundary from './PDFProcessor';
 
 interface WorkspacePanelProps {
   activeTool: Tool | null;
@@ -8,6 +9,15 @@ interface WorkspacePanelProps {
 
 export default function WorkspacePanel({ activeTool, onClose }: WorkspacePanelProps) {
   if (!activeTool) return null;
+
+  const handleComplete = async (result: any) => {
+    // Process the PDF based on the active tool
+    console.log(`Processing complete for ${activeTool.name}:`, result);
+  };
+
+  const handleError = (error: Error) => {
+    console.error('PDF processing error:', error);
+  };
 
   return (
     <AnimatePresence>
@@ -32,28 +42,10 @@ export default function WorkspacePanel({ activeTool, onClose }: WorkspacePanelPr
           <h2 className="text-2xl font-bold mb-4">{activeTool.name}</h2>
           
           <div className="bg-darkest rounded-lg p-4">
-            <div className="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center">
-              <p className="text-lg mb-4">Drop your PDF here or click to upload</p>
-              <input
-                type="file"
-                accept=".pdf"
-                className="hidden"
-                id="pdf-upload"
-              />
-              <label
-                htmlFor="pdf-upload"
-                className="btn-primary inline-block"
-              >
-                Select PDF
-              </label>
-            </div>
-          </div>
-          
-          <div className="mt-4 space-y-4">
-            <div className="flex gap-4">
-              <button className="btn-primary flex-1">Process</button>
-              <button className="btn-primary flex-1">Download</button>
-            </div>
+            <PDFProcessorWithErrorBoundary
+              onComplete={handleComplete}
+              onError={handleError}
+            />
           </div>
         </motion.div>
       </motion.div>
