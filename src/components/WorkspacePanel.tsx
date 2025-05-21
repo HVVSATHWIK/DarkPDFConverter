@@ -201,9 +201,11 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
             </div>
             
             {/* Footer (Optional, for global actions if needed later) */}
-            {/* <footer className="p-4 border-t border-gray-700">
-              {/* Global action buttons can go here if not part of PDFProcessor */}*/
-            </footer> */}
+            {/* 
+            <footer className="p-4 border-t border-gray-700">
+              // Global action buttons can go here if not part of PDFProcessor
+            </footer> 
+            */}
           </motion.div>
         </motion.div>
       )}
