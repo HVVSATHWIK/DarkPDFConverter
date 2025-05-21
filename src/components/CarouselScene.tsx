@@ -1,7 +1,7 @@
 import { useRef, useEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Group } from 'three';
-import { useSpring, animated, config as springConfig } from '@react-spring/three';
+import { useSpring, animated, config as springConfig, SpringValue } from '@react-spring/three';
 import ToolCard from './ToolCard';
 import type { Tool } from '../types';
 
@@ -21,7 +21,7 @@ interface CarouselSceneProps {
   activeTool: Tool | null; // The currently active tool object from App.tsx, or null.
   onToolSelect: (tool: Tool | null) => void; // Callback function when a tool card is selected (clicked).
   onCardReachedCenter: () => void; // Callback function triggered when a selected card finishes its animation to the center.
-  onCardReturnedToRing: () => void; // Callback function triggered when an active card finishes animating back to the carousel ring.
+  onCardReturnedToRing: (returnedToolId: number) => void; // Callback function triggered when an active card finishes animating back to the carousel ring.
   isCardActuallyCentered: boolean; // Boolean flag from App.tsx indicating if the active card is considered to be in its centered state.
   isAnyToolProcessActive: boolean; // Boolean flag from App.tsx indicating if any tool is active or pending, used to pause carousel interactions.
 }
@@ -43,7 +43,7 @@ interface AnimatedToolCardWrapperProps {
 
   onSelect: () => void; // Callback when this card is clicked by the user.
   onCenterComplete: () => void; // Callback when this card finishes animating to the center.
-  onReturnComplete: () => void; // Callback when this card finishes animating back to the ring.
+  onReturnComplete: (returnedToolId: number) => void; // Callback when this card finishes animating back to the ring.
 }
 
 /**
@@ -67,7 +67,12 @@ function AnimatedToolCardWrapper({
   // Spring animation for card properties.
   // The `to` function defines the target animation states based on the component's props.
   // The spring automatically animates from its current state to the new target state when props change.
-  const { position, scale, rotation, opacity } = useSpring({
+  const { position, scale, rotation, opacity } = useSpring<{
+    position: [number, number, number];
+    scale: [number, number, number];
+    rotation: [number, number, number];
+    opacity: number;
+  }>(() => ({
     // `to` is an async function allowing sequential animations or complex logic.
     // `next` is a function to update spring values.
     to: async (next) => {
@@ -93,7 +98,7 @@ function AnimatedToolCardWrapper({
             rotation: originalRotation,
             opacity: 1,
             config: springConfig.gentle,
-            onRest: onReturnComplete, // Callback when this animation sequence completes.
+            onRest: () => onReturnComplete(tool.id), // Callback when this animation sequence completes.
           });
         }
       } else {
@@ -105,7 +110,7 @@ function AnimatedToolCardWrapper({
             position: originalPosition, // Maintain original position to avoid visual jump if it becomes active.
             scale: [0.3, 0.3, 0.3],    // Scale down significantly.
             opacity: 0,
-            config: springConfig.fast, // Use a faster animation for hiding.
+            config: springConfig.stiff, // Use a stiffer animation for hiding.
           });
         } else {
           // TARGET STATE: Inactive card, and NO tool process is active/pending in the app.
@@ -128,7 +133,7 @@ function AnimatedToolCardWrapper({
     // `cancel`: Can be used to stop ongoing animations if certain props change.
     // Potentially useful for more complex interruption scenarios, but can also make behavior unpredictable if not managed carefully.
     // cancel: isWrapperActive || isActuallyCenteredInApp || isAnyToolProcessActiveInApp, 
-  });
+  }));
   
   // Example of a commented-out subtle hover effect for individual cards in the ring.
   // This would be separate from ToolCard's internal hover logic.
@@ -208,7 +213,7 @@ export default function CarouselScene({
   }, [isAnyToolProcessActive]); // Dependency: re-evaluate if rotation lock status changes.
 
   // `useFrame` hook for animations that update on every frame.
-  useFrame((state, delta) => {
+  useFrame((state) => {
     const { clock } = state; // Three.js clock object from render state.
     if (groupRef.current) {
       if (!isAnyToolProcessActive) {
@@ -332,9 +337,9 @@ export default function CarouselScene({
               // Trigger App's callback only if this card is indeed the one that was supposed to reach center.
               if (isCurrentCardTheAppActiveTool) onCardReachedCenter();
             }}
-            onReturnComplete={() => {
+            onReturnComplete={(returnedToolId) => {
               // Trigger App's callback only if this card is indeed the one that was supposed to return.
-              if (isCurrentCardTheAppActiveTool) onCardReturnedToRing(tool.id); // Pass tool.id for App.tsx logic
+              if (isCurrentCardTheAppActiveTool) onCardReturnedToRing(returnedToolId);
             }}
           />
         );
@@ -508,8 +513,8 @@ export default function CarouselScene({
             onCenterComplete={() => {
               if (isCurrentCardTheAppActiveTool) onCardReachedCenter();
             }}
-            onReturnComplete={() => {
-              if (isCurrentCardTheAppActiveTool) onCardReturnedToRing();
+            onReturnComplete={(returnedToolId) => {
+              if (isCurrentCardTheAppActiveTool) onCardReturnedToRing(returnedToolId);
             }}
           />
         );
