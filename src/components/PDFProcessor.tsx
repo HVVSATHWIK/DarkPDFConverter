@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { motion } from 'framer-motion';
 import { useProcessPDF } from '../hooks/useProcessPDF';

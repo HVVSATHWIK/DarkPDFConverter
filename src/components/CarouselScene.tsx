@@ -1,7 +1,8 @@
 import { useRef, useEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Group } from 'three';
-import { useSpring, animated, config as springConfig, SpringValue } from '@react-spring/three';
+// SpringValue removed as it's not directly used and useSpring is typed explicitly
+import { useSpring, animated, config as springConfig } from '@react-spring/three';
 import ToolCard from './ToolCard';
 import type { Tool } from '../types';
 
@@ -67,7 +68,8 @@ function AnimatedToolCardWrapper({
   // Spring animation for card properties.
   // The `to` function defines the target animation states based on the component's props.
   // The spring automatically animates from its current state to the new target state when props change.
-  const { position, scale, rotation, opacity } = useSpring<{
+  // useSpring(() => config) returns [props, api], so we take the first element (the styles object).
+  const [styles] = useSpring<{ // Destructure to get the styles object directly
     position: [number, number, number];
     scale: [number, number, number];
     rotation: [number, number, number];
@@ -146,11 +148,13 @@ function AnimatedToolCardWrapper({
   return (
     <animated.group
       ref={cardGroupRef}
-      position={position} // Apply animated position
-      scale={scale}         // Apply animated scale
-      rotation={rotation}   // Apply animated rotation
-      visible={opacity.to(o => o > 0.05)} // Hide if mostly transparent to avoid ghost interactions
-      opacity={opacity}     // Apply animated opacity
+      position={styles.position} // Apply animated position
+      scale={styles.scale}         // Apply animated scale
+      rotation={styles.rotation as any}   // Apply animated rotation, casting to any as a workaround
+      // The 'visible' prop takes a boolean. Controlling visibility via opacity is handled by the 'opacity' prop itself.
+      // visible={styles.opacity.to((o: number) => o > 0.05)} // This was likely incorrect
+      // Opacity is removed from here as it's not a valid prop for animated.group
+      // It will be passed down to ToolCard instead.
       // Example: Attach hover events if the above hoverSpring was used.
       // onPointerOver={() => !isWrapperActive && setIsHovered(true)} 
       // onPointerOut={() => setIsHovered(false)}
@@ -165,6 +169,7 @@ function AnimatedToolCardWrapper({
         // A card is considered "active" in ToolCard's context if it's the globally active tool AND is centered.
         isActive={isWrapperActive && isActuallyCenteredInApp} 
         onClick={onSelect} // Pass down the onSelect callback for when the card is clicked.
+        opacity={styles.opacity} // Pass the opacity SpringValue to ToolCard
       />
     </animated.group>
   );
@@ -339,181 +344,6 @@ export default function CarouselScene({
             }}
             onReturnComplete={(returnedToolId) => {
               // Trigger App's callback only if this card is indeed the one that was supposed to return.
-              if (isCurrentCardTheAppActiveTool) onCardReturnedToRing(returnedToolId);
-            }}
-          />
-        );
-      })}
-    </animated.group>
-  );
-}
-  // For example, slightly lift the card or change its shadow.
-  // This is separate from ToolCard's internal hover.
-  // const [isHovered, setIsHovered] = useState(false);
-  // const hoverSpring = useSpring({
-  //   transform: isHovered ? 'translateY(-5px)' : 'translateY(0px)',
-  //   boxShadow: isHovered ? '0px 10px 20px rgba(0,0,0,0.2)' : '0px 5px 10px rgba(0,0,0,0.1)',
-  // });
-
-  return (
-    <animated.group
-      ref={cardGroupRef}
-      position={position}
-      scale={scale}
-      rotation={rotation}
-      visible={opacity.to(o => o > 0.05)} // Hide if mostly transparent
-      opacity={opacity}
-      // onPointerOver={() => !isWrapperActive && setIsHovered(true)} // Example hover
-      // onPointerOut={() => setIsHovered(false)}
-    >
-      <ToolCard
-        tool={tool}
-        position={[0,0,0]} 
-        rotation={[0,0,0]}
-        isActive={isWrapperActive && isActuallyCenteredInApp} 
-        onClick={onSelect}
-      />
-    </animated.group>
-  );
-}
-
-
-export default function CarouselScene({ 
-  tools, 
-  activeTool, 
-  onToolSelect, 
-  onCardReachedCenter,
-  onCardReturnedToRing,
-  isCardActuallyCentered,
-  isAnyToolProcessActive,
-}: CarouselSceneProps) {
-  const groupRef = useRef<Group>(null); 
-  const isCarouselRotatingEnabled = useRef(true); 
-  const carouselRotationSpeed = useRef(0.05); // Slightly slower rotation
-  const lastElapsedTime = useRef(0);
-
-  const [groupSpring, groupApi] = useSpring(() => ({
-    rotationY: 0,
-    scale: 1,
-    config: { mass: 1, tension: 120, friction: 14 } // Gentle spring for scale changes
-  }));
-
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && !isAnyToolProcessActive) { 
-        isCarouselRotatingEnabled.current = !isCarouselRotatingEnabled.current;
-      }
-    };
-    window.addEventListener('keypress', handleKeyPress);
-    return () => window.removeEventListener('keypress', handleKeyPress);
-  }, [isAnyToolProcessActive]); 
-
-  useFrame((state, delta) => {
-    const { clock } = state;
-    if (groupRef.current) {
-      if (!isAnyToolProcessActive) {
-        // Carousel Rotation
-        if (isCarouselRotatingEnabled.current) {
-          // Continuous rotation based on elapsed time difference to avoid jumps if frame rate varies
-          const elapsedTimeDelta = clock.elapsedTime - lastElapsedTime.current;
-          const newRotationY = groupSpring.rotationY.get() + carouselRotationSpeed.current * elapsedTimeDelta * 60; // Normalize speed
-          groupApi.start({ rotationY: newRotationY, immediate: true }); // Immediate to avoid spring lag for rotation
-        }
-        
-        // Breathing Animation for the whole group
-        const breathAmplitude = 0.02; // Max scale change (e.g., 1.0 to 1.02)
-        const breathSpeed = 0.7; // Speed of the breathing cycle
-        const currentBreathScale = 1 + Math.sin(clock.elapsedTime * breathSpeed) * breathAmplitude;
-        groupApi.start({ scale: currentBreathScale }); // Let spring handle scale for smoothness
-
-      } else {
-        // If a tool process is active, ensure scale returns to 1 smoothly
-        groupApi.start({ scale: 1 });
-      }
-      groupRef.current.rotation.y = groupSpring.rotationY.get();
-      groupRef.current.scale.set(groupSpring.scale.get(), groupSpring.scale.get(), groupSpring.scale.get());
-    }
-    lastElapsedTime.current = clock.elapsedTime;
-  });
-  
-  const radius = 5;
-  const angleStep = (2 * Math.PI) / tools.length;
-
-  const cardTransforms = useMemo(() => {
-    return tools.map((tool, index) => {
-      const angle = index * angleStep;
-      const x = radius * Math.cos(angle);
-      const z = radius * Math.sin(angle);
-      return {
-        tool,
-        originalPosition: [x, 0, z] as [number, number, number],
-        originalRotation: [0, -angle + Math.PI / 2, 0] as [number, number, number], 
-      };
-    });
-  }, [tools, radius, angleStep]);
-
-
-  if (!Array.isArray(tools) || tools.length === 0) {
-    return null;
-  }
-
-  return (
-    <animated.group ref={groupRef} rotation-y={groupSpring.rotationY} scale={groupSpring.scale}>
-      {/* 
-        Future Sub-Tools/Nested Options Logic:
-        1. Data Structure: `Tool` interface in `src/types.ts` would have `subTools?: Tool[]`.
-        2. State Management: 
-           - `CarouselScene` might have a state like `expandedToolId: number | null` or `submenuForToolId: number | null`.
-           - This state would be set when a ToolCard's chevron (placeholder added in ToolCard.tsx) is clicked.
-             The ToolCard would call a prop like `onToggleSubmenu(toolId)`.
-        3. Rendering Sub-Cards:
-           - Inside this map, if `tool.id === expandedToolId` and `tool.subTools` exists:
-             - Hide or de-emphasize other main tools.
-             - The parent tool itself might animate to a specific position (e.g., slightly forward or to the side).
-             - Map over `tool.subTools` and render them as `AnimatedToolCardWrapper` instances.
-             - Their `originalPosition` and `originalRotation` would need to be calculated relative to the parent card,
-               fanning out (e.g., in an arc or a row below/beside the parent).
-             - Example positioning for sub-cards:
-               const subCardAngleOffset = Math.PI / 6; // Angle between sub-cards
-               const subCardRadius = 1.5; // Distance from parent card
-               subTool.originalPosition = [
-                 parentCardPosition.x + subCardRadius * Math.cos(subIndex * subCardAngleOffset - Math.PI/2),
-                 parentCardPosition.y, // Or slightly offset
-                 parentCardPosition.z + subCardRadius * Math.sin(subIndex * subCardAngleOffset - Math.PI/2)
-               ];
-           - These sub-cards would themselves be interactive (flippable, activatable).
-           - Clicking a sub-card would call `onToolSelect(subTool)`, making it the active tool.
-           - A "back" button or clicking the parent card again might close the submenu.
-        4. Animation:
-           - Parent card animates to its "submenu open" position/rotation.
-           - Sub-cards animate into their fanned-out positions.
-           - When closing, sub-cards animate out, and parent card returns to normal carousel position.
-      */}
-      {cardTransforms.map(({ tool, originalPosition, originalRotation }) => {
-        if (!tool?.id || !tool?.name || !tool?.icon) {
-          return null;
-        }
-        const isCurrentCardTheAppActiveTool = tool.id === activeTool?.id;
-        
-        // Future: If tool.id === expandedToolId, potentially render sub-tools instead or alongside
-        // For now, just render the main tool card.
-
-        return (
-          <AnimatedToolCardWrapper
-            key={tool.id}
-            tool={tool}
-            originalPosition={originalPosition}
-            originalRotation={originalRotation}
-            
-            isWrapperActive={isCurrentCardTheAppActiveTool}
-            isActuallyCenteredInApp={isCardActuallyCentered}
-            isAnyToolProcessActiveInApp={isAnyToolProcessActive}
-            
-            onSelect={() => onToolSelect(tool)}
-            onCenterComplete={() => {
-              if (isCurrentCardTheAppActiveTool) onCardReachedCenter();
-            }}
-            onReturnComplete={(returnedToolId) => {
               if (isCurrentCardTheAppActiveTool) onCardReturnedToRing(returnedToolId);
             }}
           />
