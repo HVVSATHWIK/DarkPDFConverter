@@ -1,8 +1,7 @@
 import { useRef, useEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Group } from 'three';
-// SpringValue removed as it's not directly used and useSpring is typed explicitly
-import { useSpring, animated, config as springConfig } from '@react-spring/three';
+import { useSpring, animated, config as springConfig, SpringValue } from '@react-spring/three';
 import ToolCard from './ToolCard';
 import type { Tool } from '../types';
 
@@ -68,8 +67,7 @@ function AnimatedToolCardWrapper({
   // Spring animation for card properties.
   // The `to` function defines the target animation states based on the component's props.
   // The spring automatically animates from its current state to the new target state when props change.
-  // useSpring(() => config) returns [props, api], so we take the first element (the styles object).
-  const [styles] = useSpring<{ // Destructure to get the styles object directly
+  const { position, scale, rotation, opacity } = useSpring<{
     position: [number, number, number];
     scale: [number, number, number];
     rotation: [number, number, number];
@@ -148,13 +146,11 @@ function AnimatedToolCardWrapper({
   return (
     <animated.group
       ref={cardGroupRef}
-      position={styles.position} // Apply animated position
-      scale={styles.scale}         // Apply animated scale
-      rotation={styles.rotation as any}   // Apply animated rotation, casting to any as a workaround
-      // The 'visible' prop takes a boolean. Controlling visibility via opacity is handled by the 'opacity' prop itself.
-      // visible={styles.opacity.to((o: number) => o > 0.05)} // This was likely incorrect
-      // Opacity is removed from here as it's not a valid prop for animated.group
-      // It will be passed down to ToolCard instead.
+      position={position} // Apply animated position
+      scale={scale}         // Apply animated scale
+      rotation={rotation}   // Apply animated rotation
+      visible={opacity.to(o => o > 0.05)} // Hide if mostly transparent to avoid ghost interactions
+      opacity={opacity}     // Apply animated opacity
       // Example: Attach hover events if the above hoverSpring was used.
       // onPointerOver={() => !isWrapperActive && setIsHovered(true)} 
       // onPointerOut={() => setIsHovered(false)}
@@ -169,7 +165,6 @@ function AnimatedToolCardWrapper({
         // A card is considered "active" in ToolCard's context if it's the globally active tool AND is centered.
         isActive={isWrapperActive && isActuallyCenteredInApp} 
         onClick={onSelect} // Pass down the onSelect callback for when the card is clicked.
-        opacity={styles.opacity} // Pass the opacity SpringValue to ToolCard
       />
     </animated.group>
   );

@@ -33,10 +33,7 @@
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
     "@vitejs/plugin-react": "^4.2.1",
-    "typescript": "^5.8.3",
+    "typescript": "^5.3.3",
     "vite": "^5.1.3"
-  },
-  "overrides": {
-    "three-mesh-bvh": "0.8.0"
   }
 }

@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react'; // PointerEvent, WheelEvent removed
-import { useFrame, ThreeEvent } from '@react-three/fiber'; // Added ThreeEvent
+import { useState, useRef, PointerEvent, WheelEvent } from 'react'; // Added PointerEvent, WheelEvent
+import { useFrame, ThreeEvent } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
 import { Mesh } from 'three';
 import { animated, useSpring } from '@react-spring/three';
@@ -19,7 +19,6 @@ interface ToolCardProps {
   isActive: boolean; // True if this card is the globally active and centered tool.
                      // This affects hover behavior (e.g., prevents flipping).
   onClick: () => void; // Callback function when the card's main body or "Go" button is clicked.
-  opacity?: any; // Animated opacity value from the parent
 }
 
 /**
@@ -32,8 +31,7 @@ export default function ToolCard({
   rotation: initialRotation, // Renamed for clarity as the group handles overall initial rotation
   tool, 
   isActive, // Is this card the main active tool, centered in the workspace?
-  onClick,
-  opacity // Destructure the opacity prop
+  onClick 
 }: ToolCardProps) {
   // Ref for the main mesh of the card, used for direct manipulation (e.g., wiggle animation).
   const meshRef = useRef<Mesh>(null);
@@ -79,7 +77,7 @@ export default function ToolCard({
    * If the card is not `isActive` (i.e., not the main centered tool),
    * it initiates a timeout to flip the card, showing its back face.
    */
-  const handlePointerOver = (event: ThreeEvent<PointerEvent>) => {
+  const handlePointerOver = (event: PointerEvent) => {
     // Stop event propagation to prevent unintended interactions with parent elements in complex scenes.
     event.stopPropagation(); 
     setHovered(true);
@@ -101,7 +99,7 @@ export default function ToolCard({
    * Clears any pending flip timeout.
    * If the card is not `isActive`, it flips the card back to its front face.
    */
-  const handlePointerOut = (event: ThreeEvent<PointerEvent>) => {
+  const handlePointerOut = (event: PointerEvent) => {
     event.stopPropagation();
     setHovered(false);
     if (flipTimeoutRef.current) clearTimeout(flipTimeoutRef.current);
@@ -142,8 +140,6 @@ export default function ToolCard({
           color={color}
           metalness={0.5} // Adjust for metallic appearance.
           roughness={0.5} // Adjust for surface roughness.
-          opacity={opacity} // Apply the opacity spring
-          transparent={true}  // Enable transparency for opacity to work
         />
         
         {/* Conditional rendering for FRONT FACE content (visible when !flipped). */}
