@@ -13,6 +13,9 @@ let intersectedObject = null; // To keep track of the currently hovered object
 let isMouseOverCanvas = false; // Flag to check if mouse is over the canvas
 const carouselRadius = 400; // Desktop radius
 
+let activeCardForFileUpload = null; // To know which card initiated the upload
+let pdfFileInput = null; // To store reference to the input element
+
 const toolData = [
     { title: "Dark Mode Converter", iconPlaceholder: "DM" },
     { title: "Merge PDFs", iconPlaceholder: "MP" },
@@ -22,7 +25,7 @@ const toolData = [
     { title: "Convert to Image", iconPlaceholder: "CI" }
 ];
 
-function createCardTexture(title, iconPlaceholderText) {
+function createCardFrontTexture(title, iconPlaceholderText) { // RENAMED
     const canvas = document.createElement('canvas');
     const canvasWidth = 256; // For better texture quality
     const canvasHeight = 384; // canvasWidth * 1.5
@@ -73,9 +76,93 @@ function createCardTexture(title, iconPlaceholderText) {
     return new THREE.CanvasTexture(canvas);
 }
 
+function createCardBackTexture(toolTitle) {
+    const canvas = document.createElement('canvas');
+    const canvasWidth = 256; // For better texture quality
+    const canvasHeight = 384; // canvasWidth * 1.5 (same as front)
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+    const ctx = canvas.getContext('2d');
+
+    // Card background (no main shadow for back)
+    ctx.fillStyle = '#3a3a3a'; // Medium-dark grey
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+    // Scaling helper for consistency with front if needed, or define fixed sizes for back
+    const scaleFactorX = canvasWidth / cardDimensions.width;
+    const scaleFactorY = canvasHeight / cardDimensions.height;
+
+    // File Upload Area (Visual Placeholder)
+    const uploadAreaX = 20 * scaleFactorX;
+    const uploadAreaY = 40 * scaleFactorY;
+    const uploadAreaWidth = canvasWidth - (40 * scaleFactorX);
+    const uploadAreaHeight = 80 * scaleFactorY;
+    
+    ctx.fillStyle = '#4a4a4a'; // Light gray background for upload area
+    ctx.fillRect(uploadAreaX, uploadAreaY, uploadAreaWidth, uploadAreaHeight);
+    
+    ctx.setLineDash([5, 5]);
+    ctx.strokeStyle = '#777777';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(uploadAreaX, uploadAreaY, uploadAreaWidth, uploadAreaHeight);
+    ctx.setLineDash([]); // Reset line dash
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = `bold ${18 * Math.min(scaleFactorX, scaleFactorY)}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText("Drop PDF Here", canvasWidth / 2, uploadAreaY + uploadAreaHeight / 2);
+
+    // Adjustable Control (Visual Placeholder - e.g., a simple slider)
+    const controlY = 170 * scaleFactorY; // Adjusted Y position
+    const controlRailX = 40 * scaleFactorX;
+    const controlRailWidth = canvasWidth - (80 * scaleFactorX);
+    const controlRailHeight = 4 * scaleFactorY;
+    const controlKnobRadius = 8 * Math.min(scaleFactorX, scaleFactorY);
+
+    ctx.fillStyle = '#777777'; // Rail color
+    ctx.fillRect(controlRailX, controlY - controlRailHeight / 2, controlRailWidth, controlRailHeight);
+    
+    ctx.beginPath(); // Knob
+    ctx.arc(controlRailX + controlRailWidth / 3, controlY, controlKnobRadius, 0, Math.PI * 2);
+    ctx.fillStyle = '#BBBBBB'; // Knob color
+    ctx.fill();
+    
+    ctx.font = ` ${14 * Math.min(scaleFactorX, scaleFactorY)}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.fillText("Quality Setting (Placeholder)", canvasWidth / 2, controlY + controlKnobRadius + (15 * scaleFactorY) );
+
+
+    // Go Button (Visual Placeholder)
+    const buttonWidth = (canvasWidth / 2);
+    const buttonHeight = 50 * scaleFactorY;
+    const buttonX = (canvasWidth / 2) - (buttonWidth / 2);
+    const buttonY = canvasHeight - (100 * scaleFactorY);
+
+    ctx.fillStyle = '#3B82F6'; // Blue button color
+    ctx.fillRect(buttonX, buttonY, buttonWidth, buttonHeight);
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = `bold ${20 * Math.min(scaleFactorX, scaleFactorY)}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText("Go", canvasWidth / 2, buttonY + buttonHeight / 2);
+
+    return new THREE.CanvasTexture(canvas);
+}
+
+
 function init() {
     // Scene
     scene = new THREE.Scene();
+
+    // File Input
+    pdfFileInput = document.getElementById('pdf-file-input');
+    if (pdfFileInput) { // Ensure it exists before adding listener
+        pdfFileInput.addEventListener('change', handleFileSelect, false);
+    } else {
+        console.error("PDF file input element not found!");
+    }
 
     // Raycaster
     raycaster = new THREE.Raycaster();
@@ -108,12 +195,16 @@ function init() {
 
     toolData.forEach((tool, i) => {
         const angle = (i / toolData.length) * Math.PI * 2;
-        const texture = createCardTexture(tool.title, tool.iconPlaceholder);
+        
+        const frontTexture = createCardFrontTexture(tool.title, tool.iconPlaceholder); // RENAMED call
+        const backTexture = createCardBackTexture(tool.title);
+
         const cardMaterial = new THREE.MeshStandardMaterial({
-            map: texture,
+            map: frontTexture, // Initial texture
             transparent: true,
             roughness: 0.7,
             metalness: 0.1
+            // side: THREE.DoubleSide // Not strictly needed as we change map
         });
         const card = new THREE.Mesh(cardGeometry, cardMaterial);
         
@@ -123,14 +214,18 @@ function init() {
         
         // Initialize userData for interaction and animation state
         card.userData = {
-            originalRotationX: card.rotation.x, // Should be 0
+            originalRotationX: card.rotation.x,
             targetRotationX: card.rotation.x,
-            originalRotationY: card.rotation.y, // Should be 0
+            originalRotationY: card.rotation.y,
             targetRotationY: card.rotation.y,
             isHovered: false,
             isFlipped: false,
-            toolData: tool, // Assuming 'tool' is the current item from toolData array
-            animationState: 'idle' // States: 'idle', 'awaiting_flip', 'flipping'
+            toolData: tool,
+            animationState: 'idle',
+            frontTexture: frontTexture,
+            backTexture: backTexture,
+            textureUpdatedDuringFlip: false,
+            selectedFile: null // For storing the selected PDF file
         };
         
         carouselGroup.add(card);
@@ -189,25 +284,85 @@ function onClick(event) {
 
     if (intersects.length > 0) {
         const clickedCard = intersects[0].object;
-        console.log("Card clicked (to flip):", clickedCard.userData.toolData.title);
 
+        // Reset previously intersected object's hover state if it's different
         if (intersectedObject && intersectedObject !== clickedCard) {
             intersectedObject.userData.isHovered = false;
-            intersectedObject.userData.targetRotationX = intersectedObject.userData.originalRotationX;
-            if (intersectedObject.userData.animationState !== 'flipping' && !intersectedObject.userData.isFlipped) {
-                 intersectedObject.userData.animationState = 'idle';
+            // Only reset tilt if idle and not the target of an ongoing click interaction
+            if (intersectedObject.userData.animationState === 'idle') {
+                 intersectedObject.userData.targetRotationX = intersectedObject.userData.originalRotationX;
             }
         }
-        intersectedObject = clickedCard;
+        intersectedObject = clickedCard; // Set current card as intersected
+        clickedCard.userData.isHovered = true; // Mark as hovered
+        
+        // Always apply hover tilt if not already flipping or awaiting flip from this click
+        // This ensures the card tilts even if the click immediately leads to file input.
+        if (clickedCard.userData.animationState === 'idle') {
+             clickedCard.userData.targetRotationX = clickedCard.userData.originalRotationX + THREE.MathUtils.degToRad(15);
+        }
 
-        clickedCard.userData.isHovered = true; 
-        clickedCard.userData.targetRotationX = clickedCard.userData.originalRotationX + THREE.MathUtils.degToRad(15);
-
-        if (clickedCard.userData.animationState !== 'flipping') {
+        if (clickedCard.userData.isFlipped && clickedCard.userData.animationState === 'idle') {
+            // Card is showing its back face and is stable, treat click as "upload"
+            activeCardForFileUpload = clickedCard;
+            console.log("Upload area clicked for tool:", activeCardForFileUpload.userData.toolData.title);
+            if (pdfFileInput) { // Check if pdfFileInput is available
+                pdfFileInput.value = null; // Reset to allow selecting the same file again
+                pdfFileInput.click(); // Programmatically click the hidden file input
+            }
+        } else if (clickedCard.userData.animationState !== 'flipping' && clickedCard.userData.animationState !== 'awaiting_flip') {
+            // If not flipped and stable, or not already flipping/awaiting, initiate flip sequence
+            console.log("Initiating flip for:", clickedCard.userData.toolData.title);
+            // Ensure tilt is applied if it wasn't already (e.g. quick click)
+            clickedCard.userData.targetRotationX = clickedCard.userData.originalRotationX + THREE.MathUtils.degToRad(15);
             clickedCard.userData.animationState = 'awaiting_flip';
+        }
+    } else {
+        // Clicked outside any card, reset previously intersected object if any
+        if (intersectedObject) {
+            intersectedObject.userData.isHovered = false;
+            if (intersectedObject.userData.animationState === 'idle') {
+                intersectedObject.userData.targetRotationX = intersectedObject.userData.originalRotationX;
+            }
+            intersectedObject = null;
         }
     }
 }
+
+
+function handleFileSelect(event) {
+    if (!activeCardForFileUpload) return; // Should not happen if logic is correct
+
+    const file = event.target.files[0];
+    if (file) {
+        console.log(`File selected for ${activeCardForFileUpload.userData.toolData.title}:`, file.name, `Size: ${file.size} bytes`);
+
+        // Validate file size (10MB limit)
+        const maxSize = 10 * 1024 * 1024; // 10 MB
+        if (file.size > maxSize) {
+            alert(`File "${file.name}" is too large (${(file.size / (1024*1024)).toFixed(2)} MB). Maximum size is 10 MB.`);
+            // Reset the input value so user can select another (or same) file
+            event.target.value = null;
+            activeCardForFileUpload.userData.selectedFile = null; // Clear any previously stored file
+            return;
+        }
+
+        // Store the file (or a reference) in the card's data
+        activeCardForFileUpload.userData.selectedFile = file;
+        alert(`Selected: ${file.name} for ${activeCardForFileUpload.userData.toolData.title}`);
+
+        // TODO: Update card back texture to show filename (enhancement for later)
+        // TODO: Potentially automatically proceed to "Go" or enable "Go" button
+        
+        // Reset the input value so that selecting the same file again still fires 'change'
+        event.target.value = null; 
+    } else {
+        console.log("No file selected or selection cancelled for:", activeCardForFileUpload.userData.toolData.title);
+        activeCardForFileUpload.userData.selectedFile = null; // Clear if no file chosen
+    }
+    // activeCardForFileUpload = null; // Optional: Reset after handling, or keep for context
+}
+
 
 function onWindowResize() {
     camera.left = window.innerWidth / -2;
@@ -280,7 +435,8 @@ function animate() {
         // Transition from Tilt to Flip
         if (card.userData.animationState === 'awaiting_flip') {
             if (Math.abs(card.rotation.x - card.userData.targetRotationX) < THREE.MathUtils.degToRad(2)) { 
-                card.userData.animationState = 'flipping'; 
+                card.userData.animationState = 'flipping';
+                card.userData.textureUpdatedDuringFlip = false; // Reset for current flip
                 if (!card.userData.isFlipped) {
                     card.userData.targetRotationY = card.userData.originalRotationY + Math.PI; 
                 } else {
@@ -292,9 +448,32 @@ function animate() {
         // Flip Animation (Y-axis)
         if (card.userData.animationState === 'flipping') {
             card.rotation.y += (card.userData.targetRotationY - card.rotation.y) * 0.12; 
+
+            // Texture swap logic
+            if (!card.userData.textureUpdatedDuringFlip) {
+                // Card is flipping towards back (e.g., rotation.y going from 0 to PI)
+                if (card.userData.targetRotationY > card.userData.originalRotationY) { 
+                    if (card.rotation.y >= card.userData.originalRotationY + Math.PI / 2) {
+                        card.material.map = card.userData.backTexture;
+                        card.material.needsUpdate = true;
+                        card.userData.textureUpdatedDuringFlip = true;
+                    }
+                } 
+                // Card is flipping towards front (e.g., rotation.y going from PI to 0)
+                else if (card.userData.targetRotationY < card.userData.originalRotationY) {
+                    if (card.rotation.y <= card.userData.originalRotationY + Math.PI / 2) {
+                        card.material.map = card.userData.frontTexture;
+                        card.material.needsUpdate = true;
+                        card.userData.textureUpdatedDuringFlip = true;
+                    }
+                }
+            }
+
+            // Check for animation completion
             if (Math.abs(card.rotation.y - card.userData.targetRotationY) < THREE.MathUtils.degToRad(2)) { 
                 card.userData.isFlipped = !card.userData.isFlipped; 
                 card.userData.animationState = 'idle'; 
+                // card.userData.textureUpdatedDuringFlip = false; // Not strictly needed here, as it's reset at start of flip
                 if (!card.userData.isFlipped && !card.userData.isHovered) {
                     card.userData.targetRotationX = card.userData.originalRotationX;
                 }
