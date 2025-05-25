@@ -1,15 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { motion } from 'framer-motion';
-import { useProcessPDF } from '../hooks/useProcessPDF';
+import { useDarkModePDF } from '../hooks/useDarkModePDF';
+import { useSplitPDF } from '../hooks/useSplitPDF';
+import { useMergePDF } from '../hooks/useMergePDF';
+import { useRotatePDF } from '../hooks/useRotatePDF';
 import { XCircleIcon, DocumentPlusIcon, ArrowUpOnSquareIcon } from '@heroicons/react/24/outline';
 
 
 interface PDFProcessorProps {
-  onComplete: (result: any) => void; // Result could be single or multiple for merge
+  onComplete: (result: { processedPdfBytes: Uint8Array, suggestedFileName: string }) => void;
   onError: (error: Error) => void;
   allowMultipleFiles: boolean;
-  toolId: string | number; // Used for resetting state when tool changes
+  toolId: string; // Assuming toolId is the string name of the tool e.g. "Dark Mode"
   processActionName?: string; // e.g. "Apply Dark Mode", "Merge PDFs"
 }
 
@@ -17,15 +20,27 @@ function PDFProcessor({
   onComplete, 
   onError, 
   allowMultipleFiles, 
-  toolId,
+  toolId, // Using this as the primary identifier for the tool's name
   processActionName = "Process PDF" 
 }: PDFProcessorProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [progress, setProgress] = useState(0);
-  const { processDocument, isProcessing } = useProcessPDF(); // processDocument is for single PDF
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [isComponentProcessing, setIsComponentProcessing] = useState(false);
+
+  const { convertToDarkMode, isProcessing: isDarkModeProcessing } = useDarkModePDF();
+  const { splitPDF, isProcessing: isSplitProcessing } = useSplitPDF();
+  const { mergePDFs, isProcessing: isMergeProcessing } = useMergePDF();
+  const { rotatePDFPage, isProcessing: isRotateProcessing } = useRotatePDF();
+
+  // Effect to update isComponentProcessing based on individual hook processing states
+  useEffect(() => {
+    setIsComponentProcessing(isDarkModeProcessing || isSplitProcessing || isMergeProcessing || isRotateProcessing);
+  }, [isDarkModeProcessing, isSplitProcessing, isMergeProcessing, isRotateProcessing]);
+  
 
   // Reset state when tool changes or initial mount
   useEffect(() => {
@@ -35,7 +50,7 @@ function PDFProcessor({
       URL.revokeObjectURL(downloadUrl);
     }
     setDownloadUrl(null);
-  }, [toolId]); // downloadUrl dependency removed to avoid loop on its own reset
+  }, [toolId]);
 
   const handleFilesSelected = (files: FileList | null) => {
     if (files) {
@@ -68,67 +83,88 @@ function PDFProcessor({
       return;
     }
 
-    // For this subtask, processDocument (single file) is used.
-    // Actual multi-file processing (e.g. merge) would need different logic here or in useProcessPDF.
-    // For "Merge PDFs", this button would trigger a merge-specific function.
-    // For "Dark Mode", it processes the first (and only) selected file.
-    const fileToProcess = selectedFiles[0]; 
+    // The toolId prop is assumed to be the string name of the tool.
+    const currentToolName = toolId; 
+    let processedPdfBytes: Uint8Array | null = null;
+
+    setIsComponentProcessing(true);
+    setProgress(0);
+    if (downloadUrl) {
+      URL.revokeObjectURL(downloadUrl);
+      setDownloadUrl(null);
+    }
 
     try {
-      setProgress(0); // Reset progress before processing
-      if (downloadUrl) URL.revokeObjectURL(downloadUrl); // Revoke old URL
-      setDownloadUrl(null);
-
-      // Example: Dark Mode just processes the first file
-      // Example: Merge PDFs would have a different function here
-      if (toolId === 'Dark Mode' || !allowMultipleFiles) {
-         const result = await processDocument(fileToProcess, (p) => {
-          setProgress(Math.round(p * 100));
-        });
-
-        if (result.processedPdf) {
-          const blob = new Blob([result.processedPdf], { type: 'application/pdf' });
-          const url = URL.createObjectURL(blob);
-          setDownloadUrl(url);
-        }
-        onComplete(result); // For Dark Mode, this is fine
-      } else if (toolId === 'Merge PDFs' && allowMultipleFiles) {
-        // Placeholder for merge logic
-        // For now, let's simulate processing multiple files by "processing" the first one
-        // and returning info about all selected files.
-        // In a real scenario, you'd pass all selectedFiles to a merge-specific hook/function.
-        console.log("Simulating merge for files:", selectedFiles.map(f => f.name));
-        const resultStub = {
-          message: `Merge operation for ${selectedFiles.length} files would happen here.`,
-          processedPdf: null, // No single PDF download for merge yet in this stub
-          pageCount: selectedFiles.reduce((acc, f) => acc + (f.size/1000),0), // dummy page count
-          title: `Merged Document (${selectedFiles.map(f=>f.name).join(', ')})`
-        };
-        // Simulate a delay and progress for demo
-        setProgress(0);
-        await new Promise(resolve => setTimeout(resolve, 500));
-        setProgress(50);
-        await new Promise(resolve => setTimeout(resolve, 500));
-        setProgress(100);
-        
-        // No download URL for merge in this basic stub
-        setDownloadUrl(null); 
-        onComplete(resultStub);
-      } else {
-        // Generic processing for other tools if not specified
-         const result = await processDocument(fileToProcess, (p) => {
-          setProgress(Math.round(p * 100));
-        });
-        if (result.processedPdf) {
-          const blob = new Blob([result.processedPdf], { type: 'application/pdf' });
-          const url = URL.createObjectURL(blob);
-          setDownloadUrl(url);
-        }
-        onComplete(result);
+      switch (currentToolName) {
+        case 'Dark Mode':
+          if (!selectedFiles[0]) {
+            onError(new Error("No file selected for Dark Mode."));
+            return;
+          }
+          processedPdfBytes = await convertToDarkMode(
+            selectedFiles[0],
+            { theme: 'dark', brightness: 100, contrast: 100 }, // Hardcoded options
+            (p) => setProgress(Math.round(p * 100))
+          );
+          break;
+        case 'Merge PDFs':
+          if (selectedFiles.length === 0) {
+            onError(new Error("No files selected for Merge PDFs."));
+            return;
+          }
+          processedPdfBytes = await mergePDFs(
+            selectedFiles,
+            (fileProgress, currentFile, overallProgress) => {
+              console.log(`Merging ${currentFile}: ${Math.round(fileProgress * 100)}%`);
+              setProgress(Math.round(overallProgress * 100));
+            }
+          );
+          break;
+        case 'Split PDF':
+          if (!selectedFiles[0]) {
+            onError(new Error("No file selected for Split PDF."));
+            return;
+          }
+          // Basic validation for hardcoded options
+          // In a real app, these would come from user input and be validated there.
+          if (selectedFiles[0].size < 100) { // Very small PDF might not have a page
+             // A more robust check would be to load the PDF and get page count if options are dynamic
+          }
+          processedPdfBytes = await splitPDF(
+            selectedFiles[0],
+            { startPage: 1, endPage: 1 }, // Hardcoded options
+            (p) => setProgress(Math.round(p * 100))
+          );
+          break;
+        case 'Rotate PDF':
+          if (!selectedFiles[0]) {
+            onError(new Error("No file selected for Rotate PDF."));
+            return;
+          }
+          processedPdfBytes = await rotatePDFPage(
+            selectedFiles[0],
+            { pageNumber: 1, angle: 90 }, // Hardcoded options
+            (p) => setProgress(Math.round(p * 100))
+          );
+          break;
+        default:
+          onError(new Error(`Processing for '${currentToolName}' is not yet implemented.`));
+          return; // Exit the function
       }
 
+      if (processedPdfBytes) {
+        const blob = new Blob([processedPdfBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        setDownloadUrl(url);
+        onComplete({ 
+          processedPdfBytes, 
+          suggestedFileName: `${currentToolName.toLowerCase().replace(/\s+/g, '_')}_processed.pdf` 
+        });
+      }
     } catch (error) {
       onError(error as Error);
+    } finally {
+      setIsComponentProcessing(false);
     }
   };
   
@@ -190,18 +226,18 @@ function PDFProcessor({
         </div>
       )}
       
-      {selectedFiles.length > 0 && !isProcessing && (
+      {selectedFiles.length > 0 && !isComponentProcessing && (
         <button
           onClick={handleProcessClick}
-          disabled={isProcessing}
+          disabled={isComponentProcessing}
           className="btn-primary w-full p-3 rounded-lg flex items-center justify-center gap-2"
         >
           <ArrowUpOnSquareIcon className="w-5 h-5" />
-          {isProcessing ? 'Processing...' : processActionName}
+          {isComponentProcessing ? 'Processing...' : processActionName}
         </button>
       )}
 
-      {isProcessing && (
+      {isComponentProcessing && (
         <div className="space-y-2">
             <p className="text-sm text-gray-300 text-center">Processing: {progress}%</p>
             <motion.div
@@ -218,13 +254,11 @@ function PDFProcessor({
         </div>
       )}
 
-      {downloadUrl && !isProcessing && (
+      {downloadUrl && !isComponentProcessing && (
          <a
           href={downloadUrl}
-          download={`processed-${toolId}.pdf`} // Customize download name based on tool
+          download={downloadUrl.endsWith('.pdf') ? downloadUrl.split('/').pop() : `processed-${toolId.replace(/\s+/g, '_')}.pdf`} // Use suggestedFileName logic
           className="btn-success block w-full text-center p-3 rounded-lg"
-          // Consider revoking URL on unmount or new file selection instead of click for better UX
-          // onClick={() => { if (downloadUrl) URL.revokeObjectURL(downloadUrl); setDownloadUrl(null); }}
         >
           Download Processed PDF
         </a>
@@ -237,7 +271,7 @@ function ErrorFallback({ error, resetErrorBoundary }: any) {
   return (
     <div role="alert" className="p-4 bg-red-700 text-white rounded-lg shadow-md">
       <h2 className="text-lg font-semibold mb-2">Oops! Something went wrong.</h2>
-      <pre className="mt-2 text-sm bg-red-600 p-2 rounded">{error.message}</pre>
+      <pre className="mt-2 text-sm bg-red-600 p-2 rounded break-words whitespace-pre-wrap">{error.message}</pre>
       <button
         onClick={resetErrorBoundary}
         className="mt-4 px-4 py-2 bg-white text-red-700 rounded hover:bg-red-100 font-semibold"
@@ -249,11 +283,13 @@ function ErrorFallback({ error, resetErrorBoundary }: any) {
 }
 
 export default function PDFProcessorWithErrorBoundary(props: PDFProcessorProps) {
+  // Ensure toolId is a string for resetKeys if it can be a number.
+  // However, the interface now defines toolId as string.
+  const resetKey = typeof props.toolId === 'string' ? props.toolId : String(props.toolId);
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback} 
-      onReset={() => { /* Consider if any specific reset logic is needed here */ }}
-      // resetKeys can be used to automatically reset if certain props change, e.g. props.toolId
-      resetKeys={[props.toolId]} 
+      onReset={() => { /* Specific reset logic if needed */ }}
+      resetKeys={[resetKey]} 
     >
       <PDFProcessor {...props} />
     </ErrorBoundary>

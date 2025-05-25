@@ -1,14 +1,9 @@
 const CACHE_NAME = 'pdf-tools-cache-v1';
 const urlsToCache = [
-    '/', // Alias for index.html
+    '/',
     '/index.html',
-    '/script.js',
-    '/favi.png', // Icon specified in manifest
-    // Key CDN resources
-    'https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css',
-    'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js'
+    '/favi.png',
+    '/manifest.json'
 ];
 
 self.addEventListener('install', event => {
