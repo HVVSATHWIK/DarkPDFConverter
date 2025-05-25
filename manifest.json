@@ -1,0 +1,23 @@
+{
+    "name": "PDF Tools",
+    "short_name": "PDFTools",
+    "description": "A suite of powerful PDF manipulation tools with a 3D interface.",
+    "start_url": "/index.html",
+    "display": "standalone",
+    "background_color": "#1a1a1a",
+    "theme_color": "#1a1a1a",
+    "icons": [
+        {
+            "src": "favi.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "favi.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable" 
+        }
+    ]
+}
