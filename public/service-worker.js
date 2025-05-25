@@ -2,7 +2,6 @@ const CACHE_NAME = 'pdf-tools-cache-v1';
 const urlsToCache = [
     '/', // Alias for index.html
     '/index.html',
-    '/script.js',
     '/favi.png', // Icon specified in manifest
     // Key CDN resources
     'https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css',
