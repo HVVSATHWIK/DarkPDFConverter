@@ -1,3 +1,11 @@
+/*
+ * NOTE: This service worker has been simplified to prevent errors during development
+ * by only caching essential static assets. It does not currently provide robust
+ * offline capabilities for all Vite build outputs.
+ * For a full Progressive Web App (PWA) experience with optimized caching of
+ * Vite's generated assets (hashed JS/CSS bundles, etc.), consider using a tool
+ * like `vite-plugin-pwa` to auto-generate a more comprehensive service worker.
+ */
 const CACHE_NAME = 'pdf-tools-cache-v1';
 const urlsToCache = [
     '/', // Alias for index.html
