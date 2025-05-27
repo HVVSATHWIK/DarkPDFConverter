@@ -16,14 +16,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(false); // Added
 
   const login = () => {
+    setIsLoading(true); // Added
     setIsAuthenticated(true);
     // setCurrentUser({ name: "Test User" }); // Example: set user on login
-    // setIsLoading(false);
+    setIsLoading(false); // Added
   };
   const logout = () => {
+    setIsLoading(true); // Added
     setIsAuthenticated(false);
     setCurrentUser(null); // Clear user on logout
-    // setIsLoading(false);
+    setIsLoading(false); // Added
   };
 
   return (

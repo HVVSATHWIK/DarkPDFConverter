@@ -1,12 +1,12 @@
-import React, { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
+import React from 'react';
+import { Navigate, Outlet } from 'react-router-dom'; // Added Outlet
 import { useAuth } from '@/contexts/AuthContext'; // Assuming useAuth hook from AuthContext
 
 interface ProtectedRouteProps {
-  children: ReactNode;
+  // children prop removed
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = () => { // children removed from signature
   const { isAuthenticated } = useAuth(); // Example usage of useAuth
 
   if (!isAuthenticated) {
@@ -15,7 +15,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  return <>{children}</>;
+  return <Outlet />; // Changed to return Outlet
 };
 
 export default ProtectedRoute;
