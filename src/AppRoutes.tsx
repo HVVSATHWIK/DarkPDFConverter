@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { LoginPage } from '@/pages/LoginPage';
-import { SignupPage } from '@/pages/SignupPage';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import LoginPage from '@/pages/LoginPage';
+import SignupPage from '@/pages/SignupPage';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { MainApplication } from '@/components/layout/MainApplication'; // Import the new component
 
 export function AppRoutes() {

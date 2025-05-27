@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from '@/components/ui/toaster';
@@ -15,6 +14,7 @@ function App() {
           <main className="flex-grow"> {/* Ensure main content can grow */}
             <AppRoutes />
           </main>
+          <p style={{ textAlign: 'center', padding: '10px', backgroundColor: 'lightblue' }}>Verification: v_final_check_01</p>
         </div>
         <Toaster />
       </AuthProvider>
