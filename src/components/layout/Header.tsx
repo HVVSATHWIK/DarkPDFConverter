@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogoutButton } from '@/components/auth/LogoutButton';
+import LogoutButton from '@/components/auth/LogoutButton';
 import { Button } from '@/components/ui/button'; // For styling links like buttons
 
 export function Header() {

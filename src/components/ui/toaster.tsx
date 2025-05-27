@@ -33,7 +33,7 @@ export const Toast: React.FC<ToastProps> = ({ message, type = 'info', onDismiss 
 };
 
 // Placeholder for a toaster container hook or component if needed
-export const ToasterContainer: React.FC = () => {
+export const Toaster: React.FC = () => {
   // In a real app, this would manage and display multiple toasts
   // For now, it's just a conceptual placeholder
   return null; 
