@@ -45,7 +45,9 @@ self.addEventListener('fetch', event => {
 
           caches.open(CACHE_NAME)
             .then(cache => {
-              cache.put(event.request, responseToCache);
+              if (event.request.url.startsWith('http')) { // Added condition
+                cache.put(event.request, responseToCache);
+              }
             });
 
           return networkResponse;
