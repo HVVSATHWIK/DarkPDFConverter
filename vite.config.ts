@@ -13,4 +13,9 @@ export default defineConfig({
     minify: 'esbuild',
     sourcemap: true,
   },
+  server: {
+    hmr: {
+      timeout: 5000
+    }
+  }
 });
