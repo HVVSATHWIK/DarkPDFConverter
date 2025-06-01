@@ -45,8 +45,15 @@ self.addEventListener('fetch', event => {
 
           caches.open(CACHE_NAME)
             .then(cache => {
-              if (event.request.url.startsWith('http')) { // Added condition
-                cache.put(event.request, responseToCache);
+              // Parse the URL and check the protocol
+              try {
+                const url = new URL(event.request.url);
+                if (url.protocol === "http:" || url.protocol === "https:") {
+                  cache.put(event.request, responseToCache);
+                }
+              } catch (e) {
+                // Handle potential errors from new URL() if request.url is malformed, though unlikely here
+                console.error('ServiceWorker: Error parsing request URL for caching:', event.request.url, e);
               }
             });
 

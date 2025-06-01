@@ -9,6 +9,16 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    hmr: {
+      timeout: 30000, // milliseconds
+      host: 'localhost',
+      protocol: 'ws'
+    }
+  },
+  optimizeDeps: {
+    include: ['pdfjs-dist/build/pdf.worker.min.js']
+  },
   build: {
     minify: 'esbuild',
     sourcemap: true,
