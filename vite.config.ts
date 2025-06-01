@@ -13,6 +13,9 @@ export default defineConfig({
     minify: 'esbuild',
     sourcemap: true,
   },
+  optimizeDeps: {
+    include: ['pdfjs-dist']
+  },
   server: {
     hmr: {
       timeout: 5000
