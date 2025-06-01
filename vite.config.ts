@@ -12,20 +12,10 @@ export default defineConfig({
   build: {
     minify: 'esbuild',
     sourcemap: true,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          pdfjs: ['pdfjs-dist'],
-        },
-      },
-    },
   },
   server: {
     hmr: {
       timeout: 5000
     }
-  },
-  optimizeDeps: {
-    include: ['pdfjs-dist']
   }
 });
