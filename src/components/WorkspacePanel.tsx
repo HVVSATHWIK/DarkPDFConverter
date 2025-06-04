@@ -1,8 +1,14 @@
+import React, { useState, useEffect } from 'react'; // Added React, useState, useEffect
+import React, { useState, useEffect } from 'react'; // Added React, useState, useEffect
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tool } from '../types';
 import PDFProcessorWithErrorBoundary from './PDFProcessor';
-import { useState, useEffect } from 'react';
+// import { useState, useEffect } from 'react'; // Removed since already imported from React
 import { ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
+import DarkModeControls from './tools/DarkModeControls'; // Import DarkModeControls
+import { DarkModeOptions } from '@/hooks/useDarkMode'; // Import DarkModeOptions
+import SplitPDFControls from './tools/SplitPDFControls'; // Import SplitPDFControls
+import { SplitOptions } from '@/hooks/useSplitPDF'; // Import SplitOptions
 
 /**
  * Props for the WorkspacePanel component.
@@ -15,23 +21,6 @@ interface WorkspacePanelProps {
 }
 
 /**
- * `DarkModeTogglePlaceholder` is a static placeholder component demonstrating
- * where tool-specific UI controls (like a dark mode toggle) would appear.
- */
-const DarkModeTogglePlaceholder = () => (
-  <div className="mt-6 p-4 bg-gray-800 rounded-lg shadow">
-    <label className="flex items-center justify-between text-white cursor-pointer">
-      <span className="font-medium">Enable Dark Mode Enhancement:</span>
-      {/* This is a visual placeholder for a toggle switch. */}
-      <span className="relative inline-flex items-center h-6 rounded-full w-11 bg-gray-600 hover:bg-gray-500 transition-colors">
-        <span className="inline-block w-4 h-4 transform bg-white rounded-full transition-transform translate-x-1 group-hover:translate-x-6" />
-      </span>
-    </label>
-    <p className="text-xs text-gray-400 mt-2">Further customize dark mode intensity (future feature).</p>
-  </div>
-);
-
-/**
  * `WorkspacePanel` is a modal-like component that displays the UI for the selected tool.
  * It includes areas for file input (via `PDFProcessor`), tool-specific controls,
  * and a preview of the processed output.
@@ -42,13 +31,23 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
   // `processedData`: Stores the result from `PDFProcessor` (e.g., metadata, file info)
   // or any error messages to be displayed in the preview area.
   const [processedData, setProcessedData] = useState<any>(null);
+  const [darkModeSettings, setDarkModeSettings] = useState<DarkModeOptions>({ theme: 'dark' });
+  const [splitPdfSettings, setSplitPdfSettings] = useState<SplitOptions | null>(null);
 
   // EFFECT HOOKS:
   // Resets `processedData` when the `activeTool` changes or when the panel becomes hidden.
   // This ensures that old processing results are cleared when switching tools or closing the panel.
+  // Also resets darkModeSettings.
   useEffect(() => {
     if (!isVisible || !activeTool) {
       setProcessedData(null);
+    }
+    // Reset settings when tool changes or panel is closed
+    if (!isVisible || (activeTool && activeTool.name !== 'Dark Mode')) {
+      setDarkModeSettings({ theme: 'dark' }); // Reset to default
+    }
+    if (!isVisible || (activeTool && activeTool.name !== 'Split PDF')) {
+      setSplitPdfSettings(null); // Reset to default
     }
   }, [activeTool, isVisible]); // Dependencies: effect runs if `activeTool` or `isVisible` changes.
 
@@ -92,12 +91,36 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
           <>
             <PDFProcessorWithErrorBoundary
               toolId={activeTool.id} // Key for resetting PDFProcessor state when tool changes.
+              activeTool={activeTool} // Pass activeTool here
               allowMultipleFiles={false} // Dark Mode tool likely processes one file at a time.
               onComplete={handleComplete}
               onError={handleError}
               processActionName="Apply Dark Mode" // Custom label for the process button.
+              darkModePreviewOptions={darkModeSettings} // Pass settings
             />
-            <DarkModeTogglePlaceholder /> {/* Example of a tool-specific control. */}
+            <DarkModeControls
+              onSettingsChange={setDarkModeSettings}
+              currentOptions={darkModeSettings}
+            />
+          </>
+        );
+      case 'Split PDF': // Add case for Split PDF
+        return (
+          <>
+            <PDFProcessorWithErrorBoundary
+              toolId={activeTool.id}
+              activeTool={activeTool}
+              allowMultipleFiles={false} // Split tool processes one file.
+              onComplete={handleComplete}
+              onError={handleError}
+              processActionName="Split PDF"
+              splitPdfOptions={splitPdfSettings} // Pass split settings
+            />
+            <SplitPDFControls
+              onSettingsChange={setSplitPdfSettings}
+              currentOptions={splitPdfSettings}
+              // totalPages={processedData?.pageCount} // Example: Pass total pages if available
+            />
           </>
         );
       case 'Merge PDFs':
@@ -105,10 +128,12 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
           <>
             <PDFProcessorWithErrorBoundary
               toolId={activeTool.id}
+              activeTool={activeTool} // Pass activeTool here
               allowMultipleFiles={true} // Merge tool requires multiple files.
               onComplete={handleComplete}
               onError={handleError}
               processActionName="Merge Selected PDFs"
+              // No darkModePreviewOptions or splitPdfOptions for Merge tool
             />
             {/* PDFProcessor itself lists selected files. Additional merge-specific controls could go here. */}
           </>
@@ -186,9 +211,13 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
                   {processedData ? (
                     <div className="text-sm text-left w-full">
                       {processedData.error && <p className="text-red-400">Error: {processedData.error}</p>}
+                      {/* Display title and page count for both single and merged PDFs */}
                       {processedData.title && <p><strong>Title:</strong> {processedData.title}</p>}
                       {processedData.pageCount && <p><strong>Pages:</strong> {processedData.pageCount}</p>}
-                      {processedData.message && <p>{processedData.message}</p>}
+                      {/* Display specific message for merged PDFs */}
+                      {processedData.isMerged && <p className="text-green-400">Successfully merged {processedData.title.match(/\((\d+) files\)/)?.[1] || 'multiple'} files.</p>}
+                      {/* Generic message if other details are missing */}
+                      {processedData.message && !processedData.isMerged && <p>{processedData.message}</p>}
                       {!processedData.error && !processedData.title && !processedData.pageCount && !processedData.message && (
                         <p>Processing completed. Result details will appear here.</p>
                       )}
