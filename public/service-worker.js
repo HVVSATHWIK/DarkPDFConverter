@@ -1,76 +1,122 @@
 const CACHE_NAME = 'litasdark-cache-v1';
-const urlsToCache = [
+const CORE_ASSETS = [
   '/',
-  '/index.html'
+  '/index.html',
+  '/manifest.json',
+  '/favi.png'
 ];
 
+// Cache version management
+const CACHE_VERSION = 1;
+const CURRENT_CACHES = {
+  static: `static-cache-v${CACHE_VERSION}`,
+  dynamic: `dynamic-cache-v${CACHE_VERSION}`
+};
+
+// Helper function to determine if a request should be cached
+function shouldCache(request) {
+  return (
+    request.method === 'GET' &&
+    request.url.startsWith('http') &&
+    !request.url.includes('chrome-extension') &&
+    !request.url.includes('ws:')
+  );
+}
+
+// Helper function to handle network errors
+async function handleNetworkError(request) {
+  const cache = await caches.open(CURRENT_CACHES.static);
+  const cachedResponse = await cache.match('/offline.html');
+  return cachedResponse || new Response('Offline. Please check your connection.');
+}
+
+// Install event handler
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
+    (async () => {
+      try {
+        const cache = await caches.open(CURRENT_CACHES.static);
         console.log('Opened cache and caching core assets');
-        return cache.addAll(urlsToCache.map(url => new Request(url, { cache: 'reload' }))); // Force reload from network
-      })
-      .catch(error => {
+        await cache.addAll(
+          CORE_ASSETS.map(url => new Request(url, { cache: 'reload' }))
+        );
+        await self.skipWaiting();
+      } catch (error) {
         console.error('Failed to cache during install:', error);
-      })
+      }
+    })()
   );
 });
 
+// Fetch event handler
 self.addEventListener('fetch', event => {
-  // Only handle GET requests and http/https URLs
-  if (event.request.method !== 'GET' || !event.request.url.startsWith('http')) {
-    // Let the browser handle it by default if not cached or for non-GET/non-http.
+  if (!shouldCache(event.request)) {
     return;
   }
 
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) {
-          return response; // Cache hit
-        }
-        // Not in cache, fetch from network
-        return fetch(event.request).then(networkResponse => {
-          // Check if we received a valid response
-          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-            return networkResponse; // Don't cache error responses or opaque responses
-          }
-
-          // IMPORTANT: Clone the response. A response is a stream
-          // and because we want the browser to consume the response
-          // as well as the cache consuming the response, we need
-          // to clone it so we have two streams.
-          const responseToCache = networkResponse.clone();
-
-          caches.open(CACHE_NAME)
-            .then(cache => {
-              if (event.request.url.startsWith('http')) { // Added condition
-                cache.put(event.request, responseToCache);
+    (async () => {
+      try {
+        // Try to get from cache first
+        const cache = await caches.open(CURRENT_CACHES.dynamic);
+        const cachedResponse = await cache.match(event.request);
+        
+        if (cachedResponse) {
+          // Return cached response and update cache in background
+          event.waitUntil(
+            (async () => {
+              try {
+                const networkResponse = await fetch(event.request);
+                if (networkResponse && networkResponse.status === 200) {
+                  await cache.put(event.request, networkResponse);
+                }
+              } catch (error) {
+                console.warn('Background cache update failed:', error);
               }
-            });
+            })()
+          );
+          return cachedResponse;
+        }
 
+        // If not in cache, get from network
+        const networkResponse = await fetch(event.request);
+        if (networkResponse && networkResponse.status === 200) {
+          const clonedResponse = networkResponse.clone();
+          event.waitUntil(cache.put(event.request, clonedResponse));
           return networkResponse;
-        }).catch(error => {
-          console.error('ServiceWorker Fetch failed for:', event.request.url, error);
-          // Optionally, return a generic fallback page or offline indicator here
-          // For example: return caches.match('/offline.html');
-        });
-      })
+        }
+
+        throw new Error('Network response was not valid');
+      } catch (error) {
+        console.error('Fetch failed:', error);
+        return handleNetworkError(event.request);
+      }
+    })()
   );
 });
 
+// Activate event handler
 self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    (async () => {
+      try {
+        // Clean up old caches
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames.map(cacheName => {
+            if (!Object.values(CURRENT_CACHES).includes(cacheName)) {
+              return caches.delete(cacheName);
+            }
+          })
+        );
+        
+        // Claim all clients
+        await clients.claim();
+        
+        console.log('Service Worker activated and claiming clients');
+      } catch (error) {
+        console.error('Activation failed:', error);
+      }
+    })()
   );
 });
