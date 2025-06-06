@@ -1,3 +1,4 @@
+/// <reference types="vitest/globals" />
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PDFDocument } from 'pdf-lib';
 import { useSplitPDF, SplitOptions } from './useSplitPDF';
@@ -7,7 +8,7 @@ vi.mock('pdf-lib', async (importOriginal) => {
   const mockPageMethods = {};
   const mockPdfDocInstance = {
     addPage: vi.fn(),
-    copyPages: vi.fn().mockImplementation(async (_, pageIndices) => // Changed sourceDoc to _
+    copyPages: vi.fn().mockImplementation(async (_, pageIndices) => // sourceDoc changed to _
       pageIndices.map(() => mockPageMethods)
     ),
     getPageIndices: vi.fn().mockReturnValue([]),
@@ -40,7 +41,7 @@ describe('useSplitPDF', () => {
     vi.clearAllMocks();
     mockLoadedPdfDoc = {
       addPage: vi.fn(),
-      copyPages: vi.fn().mockImplementation(async (_, pageIndices) => pageIndices.map(() => ({}))), // Changed sourceDoc to _
+      copyPages: vi.fn().mockImplementation(async (_, pageIndices) => pageIndices.map(() => ({}))), // sourceDoc changed to _
       getPageCount: vi.fn().mockReturnValue(10),
       getPageIndices: vi.fn().mockImplementation(() => Array.from({length: 10}, (_, i) => i)),
       save: vi.fn(),
@@ -49,7 +50,7 @@ describe('useSplitPDF', () => {
 
     const mockNewPdfDoc = {
         addPage: vi.fn(),
-        copyPages: vi.fn().mockImplementation(async (_, pageIndices) => pageIndices.map(() => ({}))), // Changed sourceDoc to _
+        copyPages: vi.fn().mockImplementation(async (_, pageIndices) => pageIndices.map(() => ({}))), // sourceDoc changed to _
         save: vi.fn().mockResolvedValue(new Uint8Array([1,2,3,4,5])),
         getPageCount: vi.fn().mockImplementation(() => mockNewPdfDoc.addPage.mock.calls.length),
     };

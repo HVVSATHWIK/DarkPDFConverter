@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // Keep one import
+import { useState, useEffect } from 'react'; // React default import removed
 // import React, { useState, useEffect } from 'react'; // Removed duplicate import
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tool } from '../types';

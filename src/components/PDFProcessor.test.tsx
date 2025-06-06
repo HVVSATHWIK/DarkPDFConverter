@@ -1,3 +1,4 @@
+/// <reference types="vitest/globals" />
 // src/components/PDFProcessor.test.tsx
 import React from 'react';
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
@@ -119,7 +120,7 @@ describe('PDFProcessor', () => {
 
   it('displays progress bar when processing', async () => {
     const onProgressCbCaptor: ((p: number, m?: string) => void)[] = [];
-    mockProcessDocumentGlobal.mockImplementation(async (selectedFile, onProgressCallback) => {
+    mockProcessDocumentGlobal.mockImplementation(async (_, onProgressCallback) => { // selectedFile changed to _
       if (onProgressCallback) {
         onProgressCbCaptor.push(onProgressCallback);
       }

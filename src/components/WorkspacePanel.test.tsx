@@ -1,3 +1,4 @@
+/// <reference types="vitest/globals" />
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 // import React from 'react'; // Removed duplicate import

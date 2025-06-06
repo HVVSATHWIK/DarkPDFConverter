@@ -86,9 +86,9 @@ function AnimatedToolCardWrapper({
   return (
     <animated.group
       ref={cardGroupRef}
-      position={styles.position}
-      scale={styles.scale}
-      rotation={styles.rotation} // Removed 'as any'
+      position={styles.position.to((...p) => [p[0], p[1], p[2]] as [number, number, number])}
+      scale={styles.scale.to((...s) => [s[0], s[1], s[2]] as [number, number, number])}
+      rotation={styles.rotation.to((...r) => [r[0], r[1], r[2]]) as any}
     >
       <ToolCard
         tool={tool}

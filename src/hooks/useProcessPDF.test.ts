@@ -1,3 +1,4 @@
+/// <reference types="vitest/globals" />
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { PDFDocument } from 'pdf-lib'; // StandardFonts, rgb removed
@@ -8,30 +9,44 @@ import { useSplitPDF, SplitOptions } from './useSplitPDF';
 
 vi.mock('./useDarkMode', () => ({
   useDarkMode: vi.fn(() => ({
-    applyDarkMode: vi.fn(async (pdfDoc) => pdfDoc),
+    applyDarkMode: vi.fn(async (pdfDoc) => pdfDoc), // Returns PDFDocument
   })),
 }));
 
+// Mock return for mergePdfs should align with ProcessResult structure indirectly (it returns Uint8Array)
 vi.mock('./useMergePDFs', () => ({
   useMergePDFs: vi.fn(() => ({
+    // mergePdfs itself returns Uint8Array | null. The hook useProcessPDF constructs ProcessResult from it.
     mergePdfs: vi.fn().mockResolvedValue(new Uint8Array([10, 20, 30])),
   })),
 }));
 
 vi.mock('./useSplitPDF', () => ({
   useSplitPDF: vi.fn(() => ({
+    // splitPdf itself returns Uint8Array | null.
     splitPdf: vi.fn().mockResolvedValue(new Uint8Array([5, 15, 25])),
   })),
 }));
 
+// Define a more complete mock for PDFDocument instance, especially for single file processing
+const mockPdfDocInstanceDefaults = {
+    getPages: vi.fn().mockReturnValue([ { getWidth: () => 600, getHeight: () => 800 } ]),
+    getPageCount: vi.fn().mockReturnValue(1),
+    getTitle: vi.fn().mockReturnValue('Mock PDF Title'),
+    getAuthor: vi.fn().mockReturnValue('Mock Author'),
+    save: vi.fn().mockResolvedValue(new Uint8Array([1,2,3,4,5])), // This is crucial for processedPdf
+    embedFont: vi.fn().mockResolvedValue('mock-font'),
+};
+
+
 describe('useProcessPDF', () => {
   const mockFile = new File(['dummy pdf content'], 'test.pdf', { type: 'application/pdf' });
-  vi.spyOn(mockFile, 'arrayBuffer').mockResolvedValue(new ArrayBuffer(0));
+  (mockFile as any).arrayBuffer = vi.fn().mockResolvedValue(new ArrayBuffer(10));
 
   const mockFile1 = new File(['pdf1'], 'file1.pdf', { type: 'application/pdf' });
-  vi.spyOn(mockFile1, 'arrayBuffer').mockResolvedValue(new ArrayBuffer(0));
+  (mockFile1 as any).arrayBuffer = vi.fn().mockResolvedValue(new ArrayBuffer(10));
   const mockFile2 = new File(['pdf2'], 'file2.pdf', { type: 'application/pdf' });
-  vi.spyOn(mockFile2, 'arrayBuffer').mockResolvedValue(new ArrayBuffer(0));
+  (mockFile2 as any).arrayBuffer = vi.fn().mockResolvedValue(new ArrayBuffer(10));
 
   const mockOnProgress = vi.fn();
 
@@ -39,25 +54,30 @@ describe('useProcessPDF', () => {
     vi.clearAllMocks();
 
     (useDarkMode as vi.Mock).mockReturnValue({
-        applyDarkMode: vi.fn(async (pdfDoc) => pdfDoc),
+        applyDarkMode: vi.fn(async (pdfDoc) => pdfDoc), // Returns PDFDocument
     });
 
-    (PDFDocument.load as vi.Mock).mockImplementation(async (bytes: ArrayBuffer | Uint8Array | string) => { // Typed bytes
-        if (bytes && bytes.byteLength === 3 && (bytes as Uint8Array)[0] === 10) return { getPageCount: vi.fn().mockReturnValue(5) }; // Merged
-        if (bytes && bytes.byteLength === 3 && (bytes as Uint8Array)[0] === 5) return { getPageCount: vi.fn().mockReturnValue(2) }; // Split
+    (PDFDocument.load as vi.Mock).mockImplementation(async (bytes: ArrayBuffer | Uint8Array | string) => {
+        // Type guard for byteLength
+        if (typeof bytes !== 'string') {
+            if (bytes && bytes.byteLength === 3 && (bytes as Uint8Array)[0] === 10) { // Merged PDF check
+                 return { getPageCount: vi.fn().mockReturnValue(5) };
+            }
+            if (bytes && bytes.byteLength === 3 && (bytes as Uint8Array)[0] === 5) { // Split PDF check
+                return { getPageCount: vi.fn().mockReturnValue(2) };
+            }
+        }
         // Default mock for original PDF loading in single file processing
-        return {
-            getPages: vi.fn().mockReturnValue([ { getWidth: () => 600, getHeight: () => 800 } ]),
-            getPageCount: vi.fn().mockReturnValue(1),
-            getTitle: vi.fn().mockReturnValue('Mock PDF Title'),
-            getAuthor: vi.fn().mockReturnValue('Mock Author'),
-            save:vi.fn().mockResolvedValue(new Uint8Array([1,2,3,4,5])),
-            embedFont: vi.fn().mockResolvedValue('mock-font'),
-        };
+        return { ...mockPdfDocInstanceDefaults };
     });
 
-    (useMergePDFs as vi.Mock).mockReturnValue({ mergePdfs: vi.fn().mockResolvedValue(new Uint8Array([10,20,30])) });
-    (useSplitPDF as vi.Mock).mockReturnValue({ splitPdf: vi.fn().mockResolvedValue(new Uint8Array([5,15,25])) });
+    // Ensure mergePdfs and splitPdf mocks are reset and return values that allow ProcessResult construction
+    (useMergePDFs as vi.Mock).mockReturnValue({
+        mergePdfs: vi.fn().mockResolvedValue(new Uint8Array([10,20,30]))
+    });
+    (useSplitPDF as vi.Mock).mockReturnValue({
+        splitPdf: vi.fn().mockResolvedValue(new Uint8Array([5,15,25]))
+    });
   });
 
   it('should process a document without dark mode if not specified', async () => {
@@ -68,7 +88,9 @@ describe('useProcessPDF', () => {
     });
 
     expect(PDFDocument.load).toHaveBeenCalled();
+    // Check properties on processResult safely
     expect(processResult?.processedPdf).toBeInstanceOf(Uint8Array);
+    expect(processResult?.title).toBe('Mock PDF Title'); // From mockPdfDocInstanceDefaults
     expect(mockOnProgress).toHaveBeenCalled();
   });
 

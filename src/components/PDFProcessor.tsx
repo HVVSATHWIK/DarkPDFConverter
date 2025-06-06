@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion'; // AnimatePresence removed
 import { useProcessPDF, ProcessOptions } from '../hooks/useProcessPDF';
 import { XCircleIcon, DocumentPlusIcon, ArrowUpOnSquareIcon } from '@heroicons/react/24/outline';
 import { DarkModeOptions } from '@/hooks/useDarkMode';
 import { SplitOptions } from '@/hooks/useSplitPDF';
 import type { Tool } from '../types';
 
-interface PDFProcessorProps {
+export interface PDFProcessorProps { // Added export
   onComplete: (result: any) => void;
   onError: (error: Error) => void;
   allowMultipleFiles: boolean;
