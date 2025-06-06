@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { PDFDocument, StandardFonts, PDFOperator, PDFOperatorNames, Color } from 'pdf-lib'; // Correctly removed 'rgb'
 import { useDarkMode } from './useDarkMode';
 
 // Mock pdf-lib

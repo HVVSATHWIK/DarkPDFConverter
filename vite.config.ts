@@ -21,7 +21,7 @@ export default defineConfig({
       timeout: 5000,
       overlay: true,
       clientPort: 5173,
-      host: true
+      // host: true, // This line is removed
     }
   }
 });

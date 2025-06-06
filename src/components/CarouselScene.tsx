@@ -88,7 +88,7 @@ function AnimatedToolCardWrapper({
       ref={cardGroupRef}
       position={styles.position}
       scale={styles.scale}
-      rotation={styles.rotation as any}
+      rotation={styles.rotation} // Removed 'as any'
     >
       <ToolCard
         tool={tool}

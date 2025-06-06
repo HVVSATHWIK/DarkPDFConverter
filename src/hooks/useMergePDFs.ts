@@ -11,7 +11,7 @@ export function useMergePDFs() {
     }
     if (files.length === 1) {
       console.warn('Only one file provided for merging. Returning the original file.');
-      return await files[0].arrayBuffer();
+      return new Uint8Array(await files[0].arrayBuffer()); // Corrected here
     }
 
     const newPdfDoc = await PDFDocument.create();
@@ -25,21 +25,18 @@ export function useMergePDFs() {
         const pages = await newPdfDoc.copyPages(pdfToMerge, pdfToMerge.getPageIndices());
         pages.forEach(page => newPdfDoc.addPage(page));
 
-        // Report progress: (current file number / total files)
         onProgress( (i + 1) / totalFiles, i + 1, totalFiles);
-        // Add a small delay to allow UI to update if needed, simulates work
         await new Promise(resolve => setTimeout(resolve, 50));
 
       } catch (error) {
         console.error(`Error processing file ${file.name} for merging:`, error);
-        // Optionally, re-throw the error or return null to indicate failure
         throw new Error(`Failed to merge ${file.name}. Please ensure all files are valid PDFs.`);
       }
     }
 
     try {
       const mergedPdfBytes = await newPdfDoc.save();
-      onProgress(1, totalFiles, totalFiles); // Final progress update
+      onProgress(1, totalFiles, totalFiles);
       return mergedPdfBytes;
     } catch (error) {
       console.error('Error saving merged PDF:', error);
