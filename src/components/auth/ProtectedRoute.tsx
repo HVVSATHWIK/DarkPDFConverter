@@ -1,21 +1,27 @@
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom'; // Added Outlet
-import { useAuth } from '@/contexts/AuthContext'; // Assuming useAuth hook from AuthContext
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
-interface ProtectedRouteProps {
-  // children prop removed
-}
+const ProtectedRoute: React.FC = () => {
+  const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = () => { // children removed from signature
-  const { isAuthenticated } = useAuth(); // Example usage of useAuth
-
-  if (!isAuthenticated) {
-    // Redirect them to the /login page, but save the current location they were
-    // trying to go to when they were redirected.
-    return <Navigate to="/login" replace />;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
-  return <Outlet />; // Changed to return Outlet
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return <Outlet />;
 };
 
 export default ProtectedRoute;

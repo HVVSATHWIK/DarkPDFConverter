@@ -4,18 +4,7 @@ import LogoutButton from '@/components/auth/LogoutButton';
 import { Button } from '@/components/ui/button'; // For styling links like buttons
 
 export function Header() {
-  const { currentUser, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <header className="bg-secondary text-secondary-foreground p-4 shadow-md">
-        <div className="container mx-auto flex justify-between items-center">
-          <Link to="/" className="text-xl font-bold">LitasDark PDF Tools</Link>
-          <div>Loading...</div>
-        </div>
-      </header>
-    );
-  }
+  const { currentUser, isAuthenticated } = useAuth();
 
   return (
     <header className="bg-card text-card-foreground p-4 shadow-md">
@@ -25,8 +14,11 @@ export function Header() {
         </Link>
         <nav>
           <ul className="flex items-center space-x-4">
-            {currentUser ? (
+            {isAuthenticated && currentUser ? (
               <>
+                <li className="text-sm text-gray-600">
+                  {currentUser.email}
+                </li>
                 <li>
                   <LogoutButton />
                 </li>

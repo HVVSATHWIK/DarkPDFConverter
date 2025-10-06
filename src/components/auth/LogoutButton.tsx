@@ -1,19 +1,25 @@
 import React from 'react';
-import { useAuth } from '@/contexts/AuthContext'; // Assuming useAuth hook
-// import { Button } from '@/components/ui/button'; // Assuming a Button component might be used
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
 
 const LogoutButton: React.FC = () => {
-  const { logout } = useAuth(); // Example usage
+  const { logout } = useAuth();
+  const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    // Optionally, redirect to home or login page after logout
-    // e.g., window.location.href = '/login';
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Failed to log out:', error);
+    }
   };
 
   return (
-    // <Button onClick={handleLogout}>Logout</Button> // Placeholder if using a Button component
-    <button onClick={handleLogout}>Logout</button> // Basic button for now
+    <Button onClick={handleLogout} variant="outline">
+      Logout
+    </Button>
   );
 };
 
