@@ -1,5 +1,5 @@
 /// <reference types="vitest/globals" />
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { PDFDocument } from 'pdf-lib';
 import { useSplitPDF, SplitOptions } from './useSplitPDF';
 
@@ -46,7 +46,7 @@ describe('useSplitPDF', () => {
       getPageIndices: vi.fn().mockImplementation(() => Array.from({length: 10}, (_, i) => i)),
       save: vi.fn(),
     };
-    (PDFDocument.load as vi.Mock).mockResolvedValue(mockLoadedPdfDoc);
+    (PDFDocument.load as Mock).mockResolvedValue(mockLoadedPdfDoc);
 
     const mockNewPdfDoc = {
         addPage: vi.fn(),
@@ -54,7 +54,7 @@ describe('useSplitPDF', () => {
         save: vi.fn().mockResolvedValue(new Uint8Array([1,2,3,4,5])),
         getPageCount: vi.fn().mockImplementation(() => mockNewPdfDoc.addPage.mock.calls.length),
     };
-    (PDFDocument.create as vi.Mock).mockResolvedValue(mockNewPdfDoc);
+    (PDFDocument.create as Mock).mockResolvedValue(mockNewPdfDoc);
   });
 
   it('should split a PDF successfully with valid page range', async () => {
@@ -67,7 +67,7 @@ describe('useSplitPDF', () => {
     expect(PDFDocument.load).toHaveBeenCalledWith(await mockFile.arrayBuffer());
     expect(PDFDocument.create).toHaveBeenCalledTimes(1);
 
-    const newPdfInstance = await (PDFDocument.create as vi.Mock).mock.results[0].value;
+    const newPdfInstance = await (PDFDocument.create as Mock).mock.results[0].value;
     expect(newPdfInstance.copyPages).toHaveBeenCalledWith(mockLoadedPdfDoc, [1, 2, 3]);
     expect(newPdfInstance.addPage).toHaveBeenCalledTimes(3);
     expect(newPdfInstance.save).toHaveBeenCalledTimes(1);
@@ -96,7 +96,7 @@ describe('useSplitPDF', () => {
     const options: SplitOptions = { startPage: 3, endPage: 10 };
 
     await splitPdf(createMockFile(), options, mockOnProgress);
-    const newPdfInstance = await (PDFDocument.create as vi.Mock).mock.results[0].value;
+    const newPdfInstance = await (PDFDocument.create as Mock).mock.results[0].value;
     expect(newPdfInstance.copyPages).toHaveBeenCalledWith(mockLoadedPdfDoc, [2, 3, 4]);
     expect(newPdfInstance.addPage).toHaveBeenCalledTimes(3);
   });

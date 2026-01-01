@@ -1,5 +1,5 @@
 /// <reference types="vitest/globals" />
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { PDFDocument } from 'pdf-lib';
 import { useMergePDFs } from './useMergePDFs';
 
@@ -40,13 +40,13 @@ describe('useMergePDFs', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (PDFDocument.create as vi.Mock).mockClear().mockResolvedValue({
+    (PDFDocument.create as Mock).mockClear().mockResolvedValue({
         addPage: vi.fn(),
         copyPages: vi.fn().mockImplementation(async (_, pageIndices) => pageIndices.map(() => ({}))), // Changed sourceDoc to _
         getPageIndices: vi.fn().mockReturnValue([0]),
         save: vi.fn().mockResolvedValue(new Uint8Array([1,2,3,4,5])),
     });
-    (PDFDocument.load as vi.Mock).mockClear().mockResolvedValue({
+    (PDFDocument.load as Mock).mockClear().mockResolvedValue({
         addPage: vi.fn(),
         copyPages: vi.fn().mockImplementation(async (_, pageIndices) => pageIndices.map(() => ({}))), // Changed sourceDoc to _
         getPageIndices: vi.fn().mockReturnValue([0]),
@@ -86,7 +86,7 @@ describe('useMergePDFs', () => {
     const mockPdfDocInstance2 = {
         getPageIndices: vi.fn().mockReturnValue([0]),
     };
-    (PDFDocument.load as vi.Mock)
+    (PDFDocument.load as Mock)
         .mockResolvedValueOnce(mockPdfDocInstance1)
         .mockResolvedValueOnce(mockPdfDocInstance2);
 
@@ -95,7 +95,7 @@ describe('useMergePDFs', () => {
         copyPages: vi.fn().mockImplementation(async (_, pageIndices) => pageIndices.map(() => ({}))), // Changed sourceDoc to _
         save: vi.fn().mockResolvedValue(new Uint8Array([1,2,3,4,5])),
     };
-    (PDFDocument.create as vi.Mock).mockResolvedValue(createdDocMock);
+    (PDFDocument.create as Mock).mockResolvedValue(createdDocMock);
 
     await mergePdfs([mockFile1, mockFile2], mockOnProgress);
 
@@ -121,7 +121,7 @@ describe('useMergePDFs', () => {
     const mockFile1 = createMockFile('valid.pdf');
     const mockFile2 = createMockFile('invalid.pdf');
 
-    (PDFDocument.load as vi.Mock)
+    (PDFDocument.load as Mock)
       .mockResolvedValueOnce({ getPageIndices: vi.fn().mockReturnValue([0]) })
       .mockRejectedValueOnce(new Error('Failed to load invalid.pdf'));
 
