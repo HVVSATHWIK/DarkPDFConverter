@@ -1,14 +1,17 @@
-import { useState, useEffect } from 'react'; // React default import removed
-// import React, { useState, useEffect } from 'react'; // Removed duplicate import
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 import { Tool } from '../types';
 import PDFProcessorWithErrorBoundary from './PDFProcessor';
-// import { useState, useEffect } from 'react'; // This specific line was commented out in original, but the duplicate React import was the main issue
-import { ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 import DarkModeControls from './tools/DarkModeControls';
 import { DarkModeOptions } from '@/hooks/useDarkMode';
 import SplitPDFControls from './tools/SplitPDFControls';
 import { SplitOptions } from '@/hooks/useSplitPDF';
+import RotatePDFControls from './tools/RotatePDFControls';
+import { RotateOptions } from '@/hooks/useRotatePDF';
+import ExtractPagesControls from './tools/ExtractPagesControls';
+import { ExtractOptions } from '@/hooks/useExtractPages';
+// ...
 
 interface WorkspacePanelProps {
   activeTool: Tool | null;
@@ -20,28 +23,27 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
   const [processedData, setProcessedData] = useState<any>(null);
   const [darkModeSettings, setDarkModeSettings] = useState<DarkModeOptions>({ theme: 'dark' });
   const [splitPdfSettings, setSplitPdfSettings] = useState<SplitOptions | null>(null);
+  const [rotateSettings, setRotateSettings] = useState<RotateOptions | null>(null);
+  const [extractSettings, setExtractSettings] = useState<ExtractOptions | null>(null);
 
   useEffect(() => {
     if (!isVisible || !activeTool) {
       setProcessedData(null);
     }
-    if (!isVisible || (activeTool && activeTool.name !== 'Dark Mode')) {
-      setDarkModeSettings({ theme: 'dark' });
-    }
-    if (!isVisible || (activeTool && activeTool.name !== 'Split PDF')) {
-      setSplitPdfSettings(null);
-    }
+    // Cleanup settings when switching tools
+    if (!isVisible || (activeTool && activeTool.name !== 'Dark Mode')) setDarkModeSettings({ theme: 'dark' });
+    if (!isVisible || (activeTool && activeTool.name !== 'Split PDF')) setSplitPdfSettings(null);
+    if (!isVisible || (activeTool && activeTool.name !== 'Rotate PDF')) setRotateSettings(null);
+    if (!isVisible || (activeTool && activeTool.name !== 'Extract Pages')) setExtractSettings(null);
   }, [activeTool, isVisible]);
 
-  if (!isVisible || !activeTool) return null;
-
   const handleComplete = (result: any) => {
-    console.log(`Processing complete for ${activeTool.name}:`, result);
+    console.log(`Processing complete for ${activeTool?.name}:`, result);
     setProcessedData(result);
   };
 
   const handleError = (error: Error) => {
-    console.error(`Error during processing for ${activeTool.name}:`, error);
+    console.error(`Error during processing for ${activeTool?.name}:`, error);
     setProcessedData({ error: error.message });
   };
 
@@ -77,7 +79,7 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
               onComplete={handleComplete}
               onError={handleError}
               processActionName="Split PDF"
-              splitPdfOptions={splitPdfSettings || undefined} // Changed here: null to undefined
+              splitPdfOptions={splitPdfSettings || undefined}
             />
             <SplitPDFControls
               onSettingsChange={setSplitPdfSettings}
@@ -87,16 +89,61 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
         );
       case 'Merge PDFs':
         return (
+          <PDFProcessorWithErrorBoundary
+            toolId={activeTool.id}
+            activeTool={activeTool}
+            allowMultipleFiles={true}
+            onComplete={handleComplete}
+            onError={handleError}
+            processActionName="Merge Selected PDFs"
+          />
+        );
+      case 'Rotate PDF':
+        return (
           <>
             <PDFProcessorWithErrorBoundary
               toolId={activeTool.id}
               activeTool={activeTool}
-              allowMultipleFiles={true}
+              allowMultipleFiles={false}
               onComplete={handleComplete}
               onError={handleError}
-              processActionName="Merge Selected PDFs"
+              processActionName="Rotate PDF"
+              rotateOptions={rotateSettings || undefined}
+            />
+            <RotatePDFControls
+              onSettingsChange={setRotateSettings}
+              currentOptions={rotateSettings}
             />
           </>
+        );
+      case 'Extract Pages':
+        return (
+          <>
+            <PDFProcessorWithErrorBoundary
+              toolId={activeTool.id}
+              activeTool={activeTool}
+              allowMultipleFiles={false}
+              onComplete={handleComplete}
+              onError={handleError}
+              processActionName="Extract Pages"
+              extractOptions={extractSettings || undefined}
+            />
+            <ExtractPagesControls
+              onSettingsChange={setExtractSettings}
+              currentOptions={extractSettings}
+            />
+          </>
+        );
+      case 'Compress PDF': // Phase 1: Auto structural compression
+        return (
+          <PDFProcessorWithErrorBoundary
+            toolId={activeTool.id}
+            activeTool={activeTool}
+            allowMultipleFiles={false}
+            onComplete={handleComplete}
+            onError={handleError}
+            processActionName="Compress PDF"
+          />
         );
       default:
         return <p className="text-gray-400">Tool UI for '{activeTool.name}' not implemented yet.</p>;
@@ -117,18 +164,21 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="fixed inset-0 z-30 flex items-center justify-center p-4 backdrop-blur-sm bg-black bg-opacity-30"
+          className="fixed inset-0 z-[45] flex items-center justify-center p-4 backdrop-blur-sm bg-black bg-opacity-30"
           aria-modal="true"
           role="dialog"
         >
           <div className="absolute inset-0" onClick={onClose} aria-hidden="true" />
+
+          {/* Main Panel Container */}
           <motion.div
-            className="relative bg-gray-800 text-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden"
+            className="relative bg-gray-800 text-white rounded-xl shadow-2xl w-full max-w-7xl h-[90vh] flex flex-col overflow-hidden pointer-events-auto origin-center"
+            style={{ scale: 0.9 }}
           >
             <header className="flex flex-col md:flex-row items-center justify-between p-4 md:p-6 border-b border-white/10 bg-slate-900/50 backdrop-blur-md">
               <button
                 onClick={onClose}
-                className="group flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-white transition-all px-4 py-2 rounded-full hover:bg-white/10 self-start md:self-center"
+                className="group relative z-50 cursor-pointer flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-white transition-all px-4 py-2 rounded-full hover:bg-white/10 self-start md:self-center"
                 aria-label="Back to all tools"
               >
                 <ArrowUturnLeftIcon className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
@@ -181,6 +231,6 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence >
   );
 }

@@ -23,9 +23,29 @@ export function useMergePDFs() {
         const arrayBuffer = await file.arrayBuffer();
         const pdfToMerge = await PDFDocument.load(arrayBuffer);
         const pages = await newPdfDoc.copyPages(pdfToMerge, pdfToMerge.getPageIndices());
-        pages.forEach(page => newPdfDoc.addPage(page));
 
-        onProgress( (i + 1) / totalFiles, i + 1, totalFiles);
+        pages.forEach((page, pageIndex) => {
+          // Context-Aware Sizing:
+          // If this is the VERY first page of the new document, set the standard.
+          // If it's a subsequent page, check if it matches the standard.
+          if (newPdfDoc.getPageCount() === 0 && pageIndex === 0) {
+            // This page sets the standard.
+            // No action needed, it defines the size.
+          } else if (newPdfDoc.getPageCount() > 0) {
+            const firstPage = newPdfDoc.getPages()[0];
+            const { width: targetWidth, height: targetHeight } = firstPage.getSize();
+            const { width: currentWidth, height: currentHeight } = page.getSize();
+
+            // Tolerance for floating point differences
+            if (Math.abs(currentWidth - targetWidth) > 1 || Math.abs(currentHeight - targetHeight) > 1) {
+              // Scale the page content to fit the target
+              page.scale(targetWidth / currentWidth, targetHeight / currentHeight);
+            }
+          }
+          newPdfDoc.addPage(page);
+        });
+
+        onProgress((i + 1) / totalFiles, i + 1, totalFiles);
         await new Promise(resolve => setTimeout(resolve, 50));
 
       } catch (error) {

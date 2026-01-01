@@ -1,20 +1,24 @@
 import { useState, useEffect, useRef } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { motion } from 'framer-motion'; // AnimatePresence removed
+import { motion } from 'framer-motion';
 import { useProcessPDF, ProcessOptions } from '../hooks/useProcessPDF';
 import { XCircleIcon, DocumentPlusIcon, ArrowUpOnSquareIcon } from '@heroicons/react/24/outline';
 import { DarkModeOptions } from '@/hooks/useDarkMode';
 import { SplitOptions } from '@/hooks/useSplitPDF';
+import { RotateOptions } from '@/hooks/useRotatePDF'; // Added
+import { ExtractOptions } from '@/hooks/useExtractPages'; // Added
 import type { Tool } from '../types';
 
-export interface PDFProcessorProps { // Added export
+export interface PDFProcessorProps {
   onComplete: (result: any) => void;
   onError: (error: Error) => void;
   allowMultipleFiles: boolean;
   toolId: string | number;
   processActionName?: string;
   darkModePreviewOptions?: DarkModeOptions;
-  splitPdfOptions?: SplitOptions; // Add this prop
+  splitPdfOptions?: SplitOptions;
+  rotateOptions?: RotateOptions; // Added
+  extractOptions?: ExtractOptions; // Added
   activeTool?: Tool | null;
 }
 
@@ -26,7 +30,9 @@ function PDFProcessor({
   activeTool,
   processActionName = "Process PDF",
   darkModePreviewOptions,
-  splitPdfOptions // Destructure here
+  splitPdfOptions,
+  rotateOptions, // Destructured
+  extractOptions // Destructured
 }: PDFProcessorProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [progress, setProgress] = useState(0);
@@ -81,7 +87,9 @@ function PDFProcessor({
       const processOptions: ProcessOptions = {
         activeToolName: activeTool?.name,
         darkModeOptions: activeTool?.name === 'Dark Mode' ? darkModePreviewOptions : undefined,
-        splitPdfOptions: activeTool?.name === 'Split PDF' ? splitPdfOptions : undefined, // Pass split options
+        splitPdfOptions: activeTool?.name === 'Split PDF' ? splitPdfOptions : undefined,
+        rotateOptions: activeTool?.name === 'Rotate PDF' ? rotateOptions : undefined, // Passed options
+        extractOptions: activeTool?.name === 'Extract Pages' ? extractOptions : undefined, // Passed options
       };
 
       let result;
@@ -90,7 +98,7 @@ function PDFProcessor({
           setProgress(Math.round(p * 100));
           console.log(`Progress: ${p * 100}%, Message: ${msg}`);
         }, processOptions);
-      } else if (selectedFiles.length > 0) { // For single file tools like Dark Mode, Split PDF
+      } else if (selectedFiles.length > 0) { // For single file tools
         const fileToProcess = selectedFiles[0];
         result = await processDocument(fileToProcess, (p, msg) => {
           setProgress(Math.round(p * 100));
@@ -129,6 +137,14 @@ function PDFProcessor({
     handleFilesSelected(event.dataTransfer.files);
   };
 
+  // Validation logic for button disabling
+  const isProcessDisabled = () => {
+    if (isProcessing) return true;
+    if (activeTool?.name === 'Split PDF' && !splitPdfOptions) return true;
+    if (activeTool?.name === 'Rotate PDF' && !rotateOptions) return true; // Validate rotate
+    if (activeTool?.name === 'Extract Pages' && !extractOptions) return true; // Validate extract
+    return false;
+  };
 
   return (
     <div role="region" aria-label="PDF processing area" className="space-y-6 p-4 bg-gray-700 rounded-lg">
@@ -175,8 +191,8 @@ function PDFProcessor({
       {selectedFiles.length > 0 && !isProcessing && (
         <button
           onClick={handleProcessClick}
-          disabled={isProcessing || (activeTool?.name === 'Split PDF' && !splitPdfOptions)} // Disable if split options invalid
-          className="btn-primary w-full p-3 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50"
+          disabled={isProcessDisabled()}
+          className="btn-primary w-full p-3 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <ArrowUpOnSquareIcon className="w-5 h-5" />
           {isProcessing ? 'Processing...' : processActionName}

@@ -1,7 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useFrame, ThreeEvent } from '@react-three/fiber';
-import { Text, Html } from '@react-three/drei';
-import { Mesh } from 'three';
+import { Text, Html, Edges } from '@react-three/drei';
+import { Mesh, BoxGeometry } from 'three';
 import { animated, useSpring } from '@react-spring/three';
 import { Tool } from '../types';
 
@@ -27,23 +27,66 @@ export default function ToolCard({
   const [flipped, setFlipped] = useState(false);
   const flipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const { scale, color, rotationX, rotationY } = useSpring({
-    scale: hovered || isActive ? 1.15 : 1,
-    color: hovered ? '#3b82f6' : isActive ? '#2563eb' : '#1e293b', // Deep Electric Blue hover, Darker Blue active
-    rotationX: hovered && !isActive ? 0.2 : 0,
-    rotationY: flipped ? Math.PI : 0,
+  const [springs, api] = useSpring(() => ({
+    scale: 1,
+    position: [0, 0, 0],
+    rotation: [0, 0, 0],
+    color: '#1e293b',
     config: { mass: 1, tension: 170, friction: 26 }
-  });
+  }));
+
+  // Update springs based on state
+  useEffect(() => {
+    if (isActive) {
+      api.start({
+        scale: 1.15,
+        color: '#2563eb',
+        position: [0, 0, 0],
+        rotation: [0, flipped ? Math.PI : 0, 0],
+        config: { mass: 2, tension: 170, friction: 40 } // Lens extension feel
+      });
+    } else if (hovered) {
+      // Hover state is handled by onPointerMove for dynamic tilt
+      // We just set base properties here
+      api.start({
+        scale: 1.1,
+        color: '#3b82f6',
+        config: { mass: 1, tension: 350, friction: 35 } // Snappy magnetic feel
+      });
+    } else {
+      // Idle return
+      api.start({
+        scale: 1,
+        position: [0, 0, 0],
+        rotation: [0, 0, 0],
+        color: '#1e293b',
+        config: { mass: 1, tension: 170, friction: 26 }
+      });
+    }
+  }, [isActive, hovered, flipped, api]);
 
   useFrame(() => {
-    if (meshRef.current) {
-      if (flipped) {
-        meshRef.current.rotation.z = 0;
-      } else {
-        meshRef.current.rotation.z = 0;
-      }
-    }
+    // ... frame logic if needed
   });
+
+  const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
+    if (isActive) return;
+    event.stopPropagation();
+
+    // Calculate normalized mouse position (-1 to 1) relative to card center
+    // event.uv gives 0 to 1 mapping on the face
+    if (event.uv) {
+      const x = (event.uv.x - 0.5) * 2; // -1 to 1
+      const y = (event.uv.y - 0.5) * 2; // -1 to 1
+
+      // Magnetic Tilt & Lift
+      api.start({
+        rotation: [-y * 0.4, x * 0.4, 0], // Tilt towards cursor
+        position: [0, 0, 0.2], // Lift towards camera
+        config: { mass: 0.5, tension: 400, friction: 30 } // Very snappy tracking
+      });
+    }
+  };
 
   const handlePointerOver = (event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
@@ -52,9 +95,12 @@ export default function ToolCard({
     if (!isActive) {
       flipTimeoutRef.current = setTimeout(() => {
         if (hovered && !isActive) {
+          // We typically don't want to auto-flip in this premium mode, 
+          // but keeping consistent with previous logic for now.
+          // Maybe increase delay
           setFlipped(true);
         }
-      }, 300);
+      }, 800); // Increased delay to enjoy the glass effect
     }
   };
 
@@ -64,6 +110,12 @@ export default function ToolCard({
     if (flipTimeoutRef.current) clearTimeout(flipTimeoutRef.current);
     if (!isActive) {
       setFlipped(false);
+      // Reset tilt on exit
+      api.start({
+        rotation: [0, 0, 0],
+        position: [0, 0, 0],
+        config: { mass: 1, tension: 170, friction: 26 }
+      });
     }
   };
 
@@ -80,121 +132,112 @@ export default function ToolCard({
           onClick();
         }}
         onPointerOver={handlePointerOver}
+        onPointerMove={handlePointerMove}
         onPointerOut={handlePointerOut}
-        scale={scale}
-        rotation-x={rotationX}
-        rotation-y={rotationY}
+        scale={springs.scale}
+        position={springs.position as any}
+        rotation={springs.rotation as any}
       >
-        <boxGeometry args={[2, 3, 0.2]} />
-        {/* Glassmorphic Material with Glow */}
-        <animated.meshPhysicalMaterial
-          color={color}
-          metalness={0.2}
-          roughness={0.2} // Increased roughness for less clear see-through
-          transmission={0.2} // Reduced transmission to hide backside cards
-          thickness={2.5}
-          clearcoat={1}
-          clearcoatRoughness={0.1}
-          emissive={color}
-          emissiveIntensity={hovered || isActive ? 2.0 : 0.6}
-          opacity={opacity}
+        {/* Card Body - Visible Slate-800 Surface */}
+        <boxGeometry args={[2.2, 3.2, 0.1]} />
+        <meshStandardMaterial
+          color="#1e293b" // Slate-800 - Visible against bg
+          roughness={0.2}
+          metalness={0.8}
           transparent={true}
+          opacity={opacity}
         />
 
+        {/* Subtle Border Glow (using slightly larger plane behind or just Edge) */}
+        <Edges
+          scale={1.0}
+          threshold={15}
+          color={hovered || isActive ? "#60a5fa" : "#334155"} // Blue glow or Slate border
+        >
+          <meshBasicMaterial transparent opacity={0.5} />
+        </Edges>
+
         {!flipped && (
-          <>
+          <group>
+            {/* Floating Title */}
             <Text
-              position={[0, 0.9, 0.11]} // Moved UP
-              fontSize={0.28}
-              color={hovered || isActive ? '#1e293b' : '#ffffff'}
+              position={[0, 1.2, 0.15]}
+              fontSize={0.2}
+              color={hovered || isActive ? '#93c5fd' : '#f8fafc'}
               anchorX="center"
               anchorY="middle"
               maxWidth={1.8}
+              font="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hjp-Ek-_EeA.woff"
             >
               {tool.name}
             </Text>
-            {/* Icon Rendered via HTML Overlay for SVG Support */}
-            <Html transform center position={[0, -0.2, 0.11]} style={{ pointerEvents: 'none' }}>
+
+            {/* Floating Icon - REMOVING WHITE BOX */}
+            <Html
+              transform
+              center
+              position={[0, 0.1, 0.3]} // Lower z, central position
+              style={{ pointerEvents: 'none' }}
+              distanceFactor={6}
+            >
               <div
-                className={`transition-all duration-300 p-3 rounded-full flex items-center justify-center pointer-events-none ${hovered || isActive
-                  ? 'bg-slate-900/10 text-slate-900 scale-110'
-                  : 'bg-white/10 text-white'
+                className={`transition-all duration-300 p-4 rounded-xl flex items-center justify-center ${hovered || isActive
+                  ? 'bg-blue-600/20 text-blue-400 scale-110 border border-blue-500/50 shadow-[0_0_30px_rgba(59,130,246,0.3)]'
+                  : 'bg-slate-700/50 text-slate-400 border border-slate-600/50'
                   }`}
+                style={{ width: '90px', height: '90px', backdropFilter: 'blur(4px)' }}
               >
                 {tool.icon}
               </div>
             </Html>
+
+            {/* Description */}
             {tool.description && (
               <Text
-                position={[0, -1.2, 0.11]} // Moved DOWN
-                fontSize={0.15}
-                color={hovered || isActive ? '#334155' : '#cbd5e1'}
+                position={[0, -0.9, 0.15]}
+                fontSize={0.11}
+                color="#cbd5e1"
                 anchorX="center"
                 anchorY="middle"
-                maxWidth={1.6}
+                maxWidth={1.8}
                 textAlign="center"
+                lineHeight={1.4}
               >
                 {tool.description}
               </Text>
             )}
-            {!isActive && !flipped && (
-              <Text
-                position={[0.8, -1.3, 0.115]}
-                fontSize={0.25}
-                color={hovered ? '#1e293b' : '#FFFFFF'}
-                anchorX="center"
-                anchorY="middle"
-              >
-                {'>'}
-              </Text>
-            )}
-          </>
-        )}
-        {flipped && (
-          <>
-            <Text
-              position={[0, 0.8, -0.11]}
-              fontSize={0.25}
-              color="#ffffff"
-              anchorX="center"
-              anchorY="middle"
-              rotation-y={Math.PI}
-            >
-              File Upload
-            </Text>
-            <Text
-              position={[0, 0, -0.11]}
-              fontSize={0.25}
-              color="#ffffff"
-              anchorX="center"
-              anchorY="middle"
-              rotation-y={Math.PI}
-            >
-              Setting: Default
-            </Text>
-            <mesh
-              position={[0, -0.9, -0.105]}
-              onClick={(event) => {
-                event.stopPropagation();
-                onClick();
-              }}
-              onPointerOver={(event) => { event.stopPropagation(); }}
-              onPointerOut={(event) => { event.stopPropagation(); }}
-            >
-              <planeGeometry args={[0.8, 0.4]} />
-              <meshStandardMaterial color="#00dd00" metalness={0.6} roughness={0.4} />
+
+            {/* CTA Button */}
+            <group position={[0, -1.35, 0.2]}>
+              <mesh onClick={(e) => { e.stopPropagation(); onClick(); }}>
+                <planeGeometry args={[1.2, 0.3]} />
+                <meshBasicMaterial color={hovered ? "#3b82f6" : "#0f172a"} />
+              </mesh>
+              {/* Button Border */}
+              <lineSegments>
+                <edgesGeometry args={[new BoxGeometry(1.2, 0.3, 0)]} />
+                <lineBasicMaterial color={hovered ? "#60a5fa" : "#334155"} />
+              </lineSegments>
               <Text
                 position={[0, 0, 0.01]}
-                fontSize={0.25}
-                color="#000000"
+                fontSize={0.12}
+                color={hovered ? "white" : "#94a3b8"}
                 anchorX="center"
                 anchorY="middle"
-                rotation-y={Math.PI}
               >
-                Go
+                {isActive ? "Active" : "Try Now →"}
               </Text>
-            </mesh>
-          </>
+            </group>
+          </group>
+        )}
+
+        {flipped && (
+          <group>
+            {/* Backside content similarly lifted */}
+            <Text position={[0, 0, 0.2]} fontSize={0.2} color="white">
+              Settings
+            </Text>
+          </group>
         )}
       </animated.mesh>
     </group>

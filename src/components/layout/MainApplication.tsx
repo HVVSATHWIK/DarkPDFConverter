@@ -13,7 +13,9 @@ import {
   ScissorsIcon,
   ArrowPathIcon,
   ArchiveBoxIcon,
-  DocumentDuplicateIcon
+  DocumentDuplicateIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon
 } from '@heroicons/react/24/outline';
 
 const tools: Tool[] = [
@@ -80,15 +82,26 @@ export function MainApplication() {
     }
   }, []);
 
-  const handleCloseWorkspace = () => {
+  const handleCloseWorkspace = useCallback(() => {
     handleToolSelect(null);
-    // Failsafe: Ensure active tool is cleared even if animation callback hangs
+    // FORCE RESET: Ensure state clears even if animation callback fails
+    // This prevents the "stuck" state where arrows don't reappear
     setTimeout(() => {
-      if (activeToolRef.current) {
-        setActiveToolState(null);
+      setActiveToolState(null);
+      setIsCardCentered(false);
+      setPendingTool(null);
+    }, 800);
+  }, [handleToolSelect]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleCloseWorkspace();
       }
-    }, 1000);
-  };
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleCloseWorkspace]);
 
   // Fix: Use state directly instead of refs to ensure re-render updates this value immediately
   const isAnyToolProcessActive = !!(activeTool || pendingTool);
@@ -97,10 +110,11 @@ export function MainApplication() {
     <div className="w-full h-full relative">
       <div className="fixed inset-0">
         <Canvas
-          camera={{ position: [0, 0, 10], fov: 50 }}
-          gl={{ antialias: true, alpha: true }}
-          dpr={[1, 2]}
-          performance={{ min: 0.5 }}
+          camera={{ position: [0, 0, 16], fov: 45 }}
+          gl={{ antialias: false, alpha: true, powerPreference: "low-power" }} // Force low power, no AA
+          dpr={1} // Strict 1x resolution to prevent overheating on high-DPI screens
+          performance={{ min: 0.1 }}
+          shadows={false} // Disable shadows entirely
         >
           <Suspense fallback={<LoadingSpinner />}>
             <CarouselScene
@@ -111,22 +125,74 @@ export function MainApplication() {
               onCardReturnedToRing={onCardReturnedToRing}
               isCardActuallyCentered={isCardCentered}
               isAnyToolProcessActive={isAnyToolProcessActive}
+              pendingTool={pendingTool}
             />
             <OrbitControls
-              enableZoom={false}
+              enableZoom={true}
               enablePan={false}
+              enableRotate={false}
+              minDistance={12}
+              maxDistance={22}
               enabled={!isAnyToolProcessActive}
-              minPolarAngle={Math.PI / 3}
-              maxPolarAngle={Math.PI / 1.5}
             />
-            {/* Super Bright Energetic Lighting Setup to make cards glow */}
-            <ambientLight intensity={1.5} color="#06b6d4" />
-            <spotLight position={[10, 10, 10]} angle={0.4} penumbra={1} intensity={5} color="#3b82f6" castShadow />
-            <pointLight position={[-10, 0, -5]} intensity={3} color="#8b5cf6" />
-            <pointLight position={[5, 5, 5]} intensity={2} color="#ffffff" />
+            {/* Optimized Lighting - No Shadows, calculation cheapter */}
+            <ambientLight intensity={0.4} color="#0f172a" />
+
+            {/* Key Light */}
+            <spotLight
+              position={[10, 10, 10]}
+              angle={0.5}
+              penumbra={1}
+              intensity={2}
+              color="#3b82f6"
+              castShadow={false}
+            />
+
+            {/* Rim Light 1 */}
+            <spotLight
+              position={[-10, 5, -10]}
+              angle={0.5}
+              penumbra={0.5}
+              intensity={3} // Reduced intensity
+              color="#00F0FF"
+            />
+
+            {/* Rim Light 2 (Electric Purple) - From behind-right */}
+            <spotLight
+              position={[10, 0, -10]}
+              angle={0.5}
+              penumbra={0.5}
+              intensity={4}
+              color="#8b5cf6"
+            />
+
+            {/* Fill Light (Soft White) */}
+            <pointLight position={[0, 0, 5]} intensity={0.5} color="#ffffff" />
           </Suspense>
         </Canvas>
       </div>
+
+      {/* Visual Navigation Controls */}
+      {
+        !isAnyToolProcessActive && !activeTool && (
+          <>
+            <button
+              className="fixed left-4 top-1/2 -translate-y-1/2 z-20 p-4 rounded-full bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all backdrop-blur-sm border border-white/10 hover:border-white/30"
+              onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }))}
+              aria-label="Rotate Left"
+            >
+              <ChevronLeftIcon className="w-8 h-8" />
+            </button>
+            <button
+              className="fixed right-4 top-1/2 -translate-y-1/2 z-20 p-4 rounded-full bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all backdrop-blur-sm border border-white/10 hover:border-white/30"
+              onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }))}
+              aria-label="Rotate Right"
+            >
+              <ChevronRightIcon className="w-8 h-8" />
+            </button>
+          </>
+        )
+      }
 
       {/* Replaced old LitasDark header with empty container if needed for spacing, else removed */}
 
@@ -137,13 +203,15 @@ export function MainApplication() {
         onClose={handleCloseWorkspace}
       />
 
-      {activeTool && isCardCentered && (
-        <MiniCarousel
-          tools={tools}
-          activeTool={activeTool}
-          onToolSelect={handleToolSelect}
-        />
-      )}
-    </div>
+      {
+        activeTool && isCardCentered && (
+          <MiniCarousel
+            tools={tools}
+            activeTool={activeTool}
+            onToolSelect={handleToolSelect}
+          />
+        )
+      }
+    </div >
   );
 }

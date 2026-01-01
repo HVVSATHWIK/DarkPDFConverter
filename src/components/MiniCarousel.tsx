@@ -66,7 +66,7 @@ export default function MiniCarousel({ tools, activeTool, onToolSelect }: MiniCa
       initial={{ opacity: 0, y: 60 }} // Initial state: transparent and off-screen (bottom).
       animate={{ opacity: 1, y: 0, transition: { delay: 0.3, type: 'spring', stiffness: 80 } }} // Animate to visible and on-screen.
       exit={{ opacity: 0, y: 60, transition: { duration: 0.2 } }} // Animate out when unmounted.
-      className="fixed bottom-0 left-0 right-0 z-30 flex justify-center p-3 bg-gray-900 bg-opacity-70 backdrop-blur-md shadow-top-lg"
+      className="fixed bottom-0 left-0 right-0 z-50 flex justify-center p-3 bg-gray-900 bg-opacity-70 backdrop-blur-md shadow-top-lg"
     // `shadow-top-lg` is a custom utility class for a shadow on the top edge.
     >
       {/* Left scroll button */}
@@ -90,7 +90,8 @@ export default function MiniCarousel({ tools, activeTool, onToolSelect }: MiniCa
           return (
             <motion.button
               key={tool.id}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 // Allow selection only if this tool is not already the active one.
                 if (!isCurrentToolActive) {
                   onToolSelect(tool); // Calls App.tsx's handleToolSelect to switch tools.
