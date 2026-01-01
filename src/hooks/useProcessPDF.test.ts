@@ -1,11 +1,37 @@
 /// <reference types="vitest/globals" />
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { PDFDocument } from 'pdf-lib'; // StandardFonts, rgb removed
-import { useProcessPDF, ProcessOptions, ProcessResult } from './useProcessPDF';
+import { PDFDocument } from 'pdf-lib';
+import { useProcessPDF, ProcessOptions } from './useProcessPDF';
 import { useDarkMode } from './useDarkMode';
 import { useMergePDFs } from './useMergePDFs';
 import { useSplitPDF, SplitOptions } from './useSplitPDF';
+
+vi.mock('pdf-lib', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('pdf-lib')>();
+  const mockPageMethods = {};
+  const mockPdfDocInstance = {
+    addPage: vi.fn(),
+    copyPages: vi.fn().mockImplementation(async (_, pageIndices) => {
+      return pageIndices.map(() => mockPageMethods);
+    }),
+    getPageIndices: vi.fn().mockReturnValue([0]),
+    save: vi.fn().mockResolvedValue(new Uint8Array([1, 2, 3, 4, 5])),
+    getPages: vi.fn().mockReturnValue([{ getWidth: () => 600, getHeight: () => 800 }]),
+    getPageCount: vi.fn().mockReturnValue(1),
+    getTitle: vi.fn().mockReturnValue('Mock PDF Title'),
+    getAuthor: vi.fn().mockReturnValue('Mock Author'),
+    embedFont: vi.fn().mockResolvedValue('mock-font'),
+  };
+
+  return {
+    ...actual,
+    PDFDocument: {
+      create: vi.fn().mockResolvedValue(mockPdfDocInstance),
+      load: vi.fn().mockResolvedValue(mockPdfDocInstance), // Default load mock
+    },
+  };
+});
 
 vi.mock('./useDarkMode', () => ({
   useDarkMode: vi.fn(() => ({
@@ -53,18 +79,18 @@ describe('useProcessPDF', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    (useDarkMode as vi.Mock).mockReturnValue({
+    (useDarkMode as Mock).mockReturnValue({
         applyDarkMode: vi.fn(async (pdfDoc) => pdfDoc), // Returns PDFDocument
     });
 
-    (PDFDocument.load as vi.Mock).mockImplementation(async (bytes: ArrayBuffer | Uint8Array | string) => {
+    (PDFDocument.load as Mock).mockImplementation(async (bytes: ArrayBuffer | Uint8Array | string) => {
         // Type guard for byteLength
         if (typeof bytes !== 'string') {
             if (bytes && bytes.byteLength === 3 && (bytes as Uint8Array)[0] === 10) { // Merged PDF check
-                 return { getPageCount: vi.fn().mockReturnValue(5) };
+                 return { ...mockPdfDocInstanceDefaults, getPageCount: vi.fn().mockReturnValue(5) };
             }
             if (bytes && bytes.byteLength === 3 && (bytes as Uint8Array)[0] === 5) { // Split PDF check
-                return { getPageCount: vi.fn().mockReturnValue(2) };
+                return { ...mockPdfDocInstanceDefaults, getPageCount: vi.fn().mockReturnValue(2) };
             }
         }
         // Default mock for original PDF loading in single file processing
@@ -72,25 +98,26 @@ describe('useProcessPDF', () => {
     });
 
     // Ensure mergePdfs and splitPdf mocks are reset and return values that allow ProcessResult construction
-    (useMergePDFs as vi.Mock).mockReturnValue({
+    (useMergePDFs as Mock).mockReturnValue({
         mergePdfs: vi.fn().mockResolvedValue(new Uint8Array([10,20,30]))
     });
-    (useSplitPDF as vi.Mock).mockReturnValue({
+    (useSplitPDF as Mock).mockReturnValue({
         splitPdf: vi.fn().mockResolvedValue(new Uint8Array([5,15,25]))
     });
   });
 
   it('should process a document without dark mode if not specified', async () => {
     const { result } = renderHook(() => useProcessPDF());
-    let processResult: ProcessResult | null = null; // Typed processResult
+    let processResult: any = null; // Use any to bypass TS analysis issues in test
     await act(async () => {
       processResult = await result.current.processDocument(mockFile, mockOnProgress);
     });
 
     expect(PDFDocument.load).toHaveBeenCalled();
     // Check properties on processResult safely
-    expect(processResult?.processedPdf).toBeInstanceOf(Uint8Array);
-    expect(processResult?.title).toBe('Mock PDF Title'); // From mockPdfDocInstanceDefaults
+    expect(processResult).not.toBeNull();
+    expect(processResult.processedPdf).toBeInstanceOf(Uint8Array);
+    expect(processResult.title).toBe('Mock PDF Title'); // From mockPdfDocInstanceDefaults
     expect(mockOnProgress).toHaveBeenCalled();
   });
 
@@ -100,7 +127,7 @@ describe('useProcessPDF', () => {
       activeToolName: 'Dark Mode',
       darkModeOptions: { theme: 'dark' },
     };
-    let processResult: ProcessResult | null = null; // Typed processResult
+    let processResult: any = null;
 
     await act(async () => {
       processResult = await result.current.processDocument(mockFile, mockOnProgress, options);
@@ -109,7 +136,8 @@ describe('useProcessPDF', () => {
     expect(PDFDocument.load).toHaveBeenCalled();
     const { applyDarkMode } = useDarkMode();
     expect(applyDarkMode).toHaveBeenCalled();
-    expect(processResult?.processedPdf).toBeInstanceOf(Uint8Array);
+    expect(processResult).not.toBeNull();
+    expect(processResult.processedPdf).toBeInstanceOf(Uint8Array);
     expect(mockOnProgress).toHaveBeenCalledWith(1, 'Processing complete!');
   });
 
@@ -130,7 +158,7 @@ describe('useProcessPDF', () => {
     const { result } = renderHook(() => useProcessPDF());
     const filesToMerge = [mockFile1, mockFile2];
     const options: ProcessOptions = { activeToolName: 'Merge PDFs' };
-    let processResult: ProcessResult | null = null; // Typed processResult
+    let processResult: any = null;
 
     await act(async () => {
       processResult = await result.current.processDocument(filesToMerge, mockOnProgress, options);
@@ -139,10 +167,12 @@ describe('useProcessPDF', () => {
     const { mergePdfs } = useMergePDFs();
     expect(mergePdfs).toHaveBeenCalledWith(filesToMerge, expect.any(Function));
     expect(PDFDocument.load).toHaveBeenCalledWith(new Uint8Array([10,20,30]));
-    expect(processResult?.isMerged).toBe(true);
-    expect(processResult?.pageCount).toBe(5);
-    expect(processResult?.title).toContain('Merged Document');
-    expect(processResult?.processedPdf).toBeInstanceOf(Uint8Array);
+
+    expect(processResult).not.toBeNull();
+    expect(processResult.isMerged).toBe(true);
+    expect(processResult.pageCount).toBe(5);
+    expect(processResult.title).toContain('Merged Document');
+    expect(processResult.processedPdf).toBeInstanceOf(Uint8Array);
     expect(mockOnProgress).toHaveBeenCalledWith(1, 'Merge complete!');
   });
 
@@ -160,7 +190,7 @@ describe('useProcessPDF', () => {
     const { result } = renderHook(() => useProcessPDF());
     const splitOptions: SplitOptions = { startPage: 1, endPage: 2 }; // Defined variable
     const options: ProcessOptions = { activeToolName: 'Split PDF', splitPdfOptions: splitOptions }; // Used variable
-    let processResult: ProcessResult | null = null; // Typed processResult
+    let processResult: any = null;
 
     await act(async () => {
       processResult = await result.current.processDocument(mockFile, mockOnProgress, options);
@@ -169,10 +199,12 @@ describe('useProcessPDF', () => {
     const { splitPdf } = useSplitPDF();
     expect(splitPdf).toHaveBeenCalledWith(mockFile, splitOptions, expect.any(Function));
     expect(PDFDocument.load).toHaveBeenCalledWith(new Uint8Array([5,15,25]));
-    expect(processResult?.isSplit).toBe(true);
-    expect(processResult?.pageCount).toBe(2);
-    expect(processResult?.title).toContain(`(pages ${splitOptions.startPage}-${splitOptions.endPage})`);
-    expect(processResult?.processedPdf).toBeInstanceOf(Uint8Array);
+
+    expect(processResult).not.toBeNull();
+    expect(processResult.isSplit).toBe(true);
+    expect(processResult.pageCount).toBe(2);
+    expect(processResult.title).toContain(`(pages ${splitOptions.startPage}-${splitOptions.endPage})`);
+    expect(processResult.processedPdf).toBeInstanceOf(Uint8Array);
     expect(mockOnProgress).toHaveBeenCalledWith(1, 'Split complete!');
   });
 
