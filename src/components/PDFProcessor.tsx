@@ -18,10 +18,10 @@ export interface PDFProcessorProps { // Added export
   activeTool?: Tool | null;
 }
 
-function PDFProcessor({ 
-  onComplete, 
-  onError, 
-  allowMultipleFiles, 
+function PDFProcessor({
+  onComplete,
+  onError,
+  allowMultipleFiles,
   toolId,
   activeTool,
   processActionName = "Process PDF",
@@ -60,7 +60,7 @@ function PDFProcessor({
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     handleFilesSelected(event.target.files);
-    if(event.target) event.target.value = ''; 
+    if (event.target) event.target.value = '';
   };
 
   const removeFile = (fileName: string) => {
@@ -88,13 +88,13 @@ function PDFProcessor({
       if (activeTool?.name === 'Merge PDFs' && allowMultipleFiles) {
         result = await processDocument(selectedFiles, (p, msg) => {
           setProgress(Math.round(p * 100));
-          console.log(`Progress: ${p*100}%, Message: ${msg}`);
+          console.log(`Progress: ${p * 100}%, Message: ${msg}`);
         }, processOptions);
       } else if (selectedFiles.length > 0) { // For single file tools like Dark Mode, Split PDF
         const fileToProcess = selectedFiles[0];
         result = await processDocument(fileToProcess, (p, msg) => {
           setProgress(Math.round(p * 100));
-          console.log(`Progress: ${p*100}%, Message: ${msg}`);
+          console.log(`Progress: ${p * 100}%, Message: ${msg}`);
         }, processOptions);
       } else {
         onError(new Error("No file selected or invalid state for processing."));
@@ -102,7 +102,7 @@ function PDFProcessor({
       }
 
       if (result && result.processedPdf) {
-        const blob = new Blob([result.processedPdf], { type: 'application/pdf' });
+        const blob = new Blob([result.processedPdf as any], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
         setDownloadUrl(url);
       }
@@ -114,7 +114,7 @@ function PDFProcessor({
       onError(error as Error);
     }
   };
-  
+
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setIsDragging(true);
@@ -171,11 +171,11 @@ function PDFProcessor({
           </ul>
         </div>
       )}
-      
+
       {selectedFiles.length > 0 && !isProcessing && (
         <button
           onClick={handleProcessClick}
-          disabled={isProcessing || (activeTool?.name === 'Split PDF' && !splitPdfOptions) } // Disable if split options invalid
+          disabled={isProcessing || (activeTool?.name === 'Split PDF' && !splitPdfOptions)} // Disable if split options invalid
           className="btn-primary w-full p-3 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50"
         >
           <ArrowUpOnSquareIcon className="w-5 h-5" />
@@ -185,23 +185,23 @@ function PDFProcessor({
 
       {isProcessing && (
         <div className="space-y-2">
-            <p className="text-sm text-gray-300 text-center">Processing: {progress}%</p>
+          <p className="text-sm text-gray-300 text-center">Processing: {progress}%</p>
+          <motion.div
+            className="w-full h-2 bg-gray-500 rounded-full"
+            aria-label={`Processing progress: ${progress}%`}
+          >
             <motion.div
-              className="w-full h-2 bg-gray-500 rounded-full"
-              aria-label={`Processing progress: ${progress}%`}
-            >
-              <motion.div
-                className="h-full bg-blue-500 rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${progress}%` }}
-                transition={{ type: 'spring', stiffness: 100, damping: 20 }}
-              />
-            </motion.div>
+              className="h-full bg-blue-500 rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+            />
+          </motion.div>
         </div>
       )}
 
       {downloadUrl && !isProcessing && (
-         <a
+        <a
           href={downloadUrl}
           download={`processed-${activeTool?.name || 'file'}.pdf`}
           className="btn-success block w-full text-center p-3 rounded-lg"
@@ -230,7 +230,7 @@ function ErrorFallback({ error, resetErrorBoundary }: any) {
 
 export default function PDFProcessorWithErrorBoundary(props: PDFProcessorProps) {
   return (
-    <ErrorBoundary FallbackComponent={ErrorFallback} 
+    <ErrorBoundary FallbackComponent={ErrorFallback}
       onReset={() => { /* Consider if any specific reset logic is needed here */ }}
       resetKeys={[props.activeTool?.id || props.toolId, props.splitPdfOptions?.startPage, props.splitPdfOptions?.endPage]}
     >
