@@ -7,13 +7,22 @@ import WorkspacePanel from '../WorkspacePanel';
 import MiniCarousel from '../MiniCarousel';
 import type { Tool } from '../../types';
 
+import {
+  MoonIcon,
+  Square2StackIcon,
+  ScissorsIcon,
+  ArrowPathIcon,
+  ArchiveBoxIcon,
+  DocumentDuplicateIcon
+} from '@heroicons/react/24/outline';
+
 const tools: Tool[] = [
-  { id: 1, name: 'Dark Mode', icon: '🌙', description: 'Convert PDFs to dark mode' },
-  { id: 2, name: 'Merge PDFs', icon: '🔄', description: 'Combine multiple PDFs' },
-  { id: 3, name: 'Split PDF', icon: '✂️', description: 'Split PDF into multiple files' },
-  { id: 4, name: 'Rotate PDF', icon: '🔄', description: 'Rotate PDF pages' },
-  { id: 5, name: 'Compress PDF', icon: '📦', description: 'Reduce PDF file size' },
-  { id: 6, name: 'Extract Pages', icon: '📄', description: 'Extract specific pages' },
+  { id: 1, name: 'Dark Mode', icon: <MoonIcon className="w-8 h-8" />, description: 'Convert PDFs to dark mode' },
+  { id: 2, name: 'Merge PDFs', icon: <Square2StackIcon className="w-8 h-8" />, description: 'Combine multiple PDFs' },
+  { id: 3, name: 'Split PDF', icon: <ScissorsIcon className="w-8 h-8" />, description: 'Split PDF into multiple files' },
+  { id: 4, name: 'Rotate PDF', icon: <ArrowPathIcon className="w-8 h-8" />, description: 'Rotate PDF pages' },
+  { id: 5, name: 'Compress PDF', icon: <ArchiveBoxIcon className="w-8 h-8" />, description: 'Reduce PDF file size' },
+  { id: 6, name: 'Extract Pages', icon: <DocumentDuplicateIcon className="w-8 h-8" />, description: 'Extract specific pages' },
 ];
 
 export function MainApplication() {
@@ -54,7 +63,7 @@ export function MainApplication() {
 
   const onCardReachedCenter = useCallback(() => {
     if (activeToolRef.current) {
-      if(!isCardCenteredRef.current) setIsCardCentered(true);
+      if (!isCardCenteredRef.current) setIsCardCentered(true);
     }
   }, []);
 
@@ -73,9 +82,16 @@ export function MainApplication() {
 
   const handleCloseWorkspace = () => {
     handleToolSelect(null);
+    // Failsafe: Ensure active tool is cleared even if animation callback hangs
+    setTimeout(() => {
+      if (activeToolRef.current) {
+        setActiveToolState(null);
+      }
+    }, 1000);
   };
 
-  const isAnyToolProcessActive = !!(activeToolRef.current || pendingToolRef.current);
+  // Fix: Use state directly instead of refs to ensure re-render updates this value immediately
+  const isAnyToolProcessActive = !!(activeTool || pendingTool);
 
   return (
     <div className="w-full h-full relative">
@@ -86,7 +102,7 @@ export function MainApplication() {
           dpr={[1, 2]}
           performance={{ min: 0.5 }}
         >
-          <Suspense fallback={null}>
+          <Suspense fallback={<LoadingSpinner />}>
             <CarouselScene
               tools={tools}
               activeTool={activeTool}
@@ -103,23 +119,17 @@ export function MainApplication() {
               minPolarAngle={Math.PI / 3}
               maxPolarAngle={Math.PI / 1.5}
             />
-            <ambientLight intensity={0.5} />
-            <pointLight position={[10, 10, 10]} intensity={1} />
-            <pointLight position={[-10, -10, -10]} intensity={0.5} />
+            {/* Super Bright Energetic Lighting Setup to make cards glow */}
+            <ambientLight intensity={1.5} color="#06b6d4" />
+            <spotLight position={[10, 10, 10]} angle={0.4} penumbra={1} intensity={5} color="#3b82f6" castShadow />
+            <pointLight position={[-10, 0, -5]} intensity={3} color="#8b5cf6" />
+            <pointLight position={[5, 5, 5]} intensity={2} color="#ffffff" />
           </Suspense>
         </Canvas>
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-8 pointer-events-none">
-        <header className="text-center mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
-            LitasDark: PDF Tools Hub
-          </h1>
-          <p className="text-gray-300 text-sm sm:text-base">
-            Your all-in-one PDF manipulation toolkit
-          </p>
-        </header>
-      </div>
+      {/* Replaced old LitasDark header with empty container if needed for spacing, else removed */}
+
 
       <WorkspacePanel
         activeTool={activeTool}
@@ -134,7 +144,6 @@ export function MainApplication() {
           onToolSelect={handleToolSelect}
         />
       )}
-      <LoadingSpinner />
     </div>
   );
 }

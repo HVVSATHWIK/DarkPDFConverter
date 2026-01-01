@@ -54,7 +54,7 @@ export function useDarkMode() {
         width,
         height,
         color: currentColors.pageBackground,
-        // Ensure this is drawn first so it's in the background
+        opacity: 0.1, // Changed to transparent overlay to avoid blocking content
       });
 
       // 2. Add a watermark style text

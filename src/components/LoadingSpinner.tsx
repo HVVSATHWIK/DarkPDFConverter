@@ -1,7 +1,11 @@
+import { Html } from '@react-three/drei';
+
 export default function LoadingSpinner() {
   return (
-    <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
-      <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary"></div>
-    </div>
+    <Html center>
+      <div className="flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.5)]"></div>
+      </div>
+    </Html>
   );
 }

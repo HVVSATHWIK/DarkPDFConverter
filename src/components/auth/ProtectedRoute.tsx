@@ -6,6 +6,8 @@ const ProtectedRoute: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
+  console.log('ProtectedRoute Check:', { isAuthenticated, isLoading, path: location.pathname });
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -18,6 +20,7 @@ const ProtectedRoute: React.FC = () => {
   }
 
   if (!isAuthenticated) {
+    console.warn('Redirecting to login from:', location.pathname);
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

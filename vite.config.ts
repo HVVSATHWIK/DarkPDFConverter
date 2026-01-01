@@ -20,8 +20,8 @@ export default defineConfig({
     hmr: {
       timeout: 5000,
       overlay: true,
-      clientPort: 5173,
-      // host: true, // This line is removed
-    }
+      // clientPort: 5173, 
+    },
+    port: 5174,
   }
 });

@@ -3,28 +3,78 @@
 @tailwind utilities;
 
 :root {
-  --background-color: #121212;
-  --text-color: #FFFFFF;
-  --accent-color: #6200ea;
-  --input-bg-color: #333;
-  --input-text-color: #fff;
-  --button-hover-bg-color: #3700b3;
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: dark;
+  --bg-color: #0b1120;
+  --energy-primary: #06b6d4;
+  /* Cyan */
+  --energy-secondary: #3b82f6;
+  /* Blue */
+  --energy-accent: #8b5cf6;
+  /* Violet */
+  --text-primary: #f1f5f9;
+  --glass-bg: rgba(15, 23, 42, 0.7);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  @apply bg-dark text-white m-0 min-h-screen;
-  font-family: system-ui, -apple-system, sans-serif;
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  /* Radiant Energy Gradient */
+  background: radial-gradient(circle at 50% 10%, #1e293b 0%, #020617 100%);
+  color: var(--text-primary);
+  overflow: hidden;
 }
 
 .card {
-  @apply bg-darker rounded-xl shadow-lg p-6 transition-all duration-300;
+  @apply rounded-xl backdrop-blur-md bg-opacity-40 bg-slate-900 border border-slate-700 shadow-xl transition-all duration-300;
 }
 
 .card-hover {
-  @apply hover:scale-105 hover:shadow-xl cursor-pointer;
+  @apply hover:scale-105 hover:shadow-cyan-500/20 cursor-pointer;
 }
 
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* UI Utilities - Using Standard Tailwind Classes to avoid syntax fragility */
 .btn-primary {
-  @apply bg-primary text-white px-4 py-2 rounded-lg transition-all duration-300
-         hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50;
+  @apply bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold px-6 py-2 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-cyan-400/50 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-secondary {
+  @apply bg-slate-700 text-gray-200 px-4 py-2 rounded-lg hover:bg-slate-600 transition-colors;
+}
+
+.btn-success {
+  @apply bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold px-6 py-3 rounded-lg shadow-lg hover:shadow-lg hover:shadow-emerald-400/50 hover:-translate-y-0.5 transition-all;
+}
+
+.input-field {
+  @apply bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all;
 }

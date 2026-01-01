@@ -10,7 +10,7 @@ interface MiniCarouselProps {
   tools: Tool[]; // Array of all available tools.
   activeTool: Tool | null; // The currently active tool, used to highlight it in the carousel.
   onToolSelect: (tool: Tool) => void; // Callback function when a tool icon is clicked.
-                                     // This triggers the tool switching logic in App.tsx.
+  // This triggers the tool switching logic in App.tsx.
 }
 
 /**
@@ -58,7 +58,7 @@ export default function MiniCarousel({ tools, activeTool, onToolSelect }: MiniCa
 
   // This component should not be rendered if `activeTool` is null.
   // Visibility is typically controlled by `App.tsx` based on `activeTool && isCardCentered`.
-  if (!activeTool) return null; 
+  if (!activeTool) return null;
 
   return (
     // Main container for the MiniCarousel, animated with Framer Motion.
@@ -67,11 +67,11 @@ export default function MiniCarousel({ tools, activeTool, onToolSelect }: MiniCa
       animate={{ opacity: 1, y: 0, transition: { delay: 0.3, type: 'spring', stiffness: 80 } }} // Animate to visible and on-screen.
       exit={{ opacity: 0, y: 60, transition: { duration: 0.2 } }} // Animate out when unmounted.
       className="fixed bottom-0 left-0 right-0 z-30 flex justify-center p-3 bg-gray-900 bg-opacity-70 backdrop-blur-md shadow-top-lg"
-      // `shadow-top-lg` is a custom utility class for a shadow on the top edge.
+    // `shadow-top-lg` is a custom utility class for a shadow on the top edge.
     >
       {/* Left scroll button */}
-      <button 
-        onClick={() => scroll('left')} 
+      <button
+        onClick={() => scroll('left')}
         className="p-2 m-1 rounded-full bg-gray-700 hover:bg-gray-600 text-white self-center disabled:opacity-50"
         aria-label="Scroll left"
       >
@@ -79,7 +79,7 @@ export default function MiniCarousel({ tools, activeTool, onToolSelect }: MiniCa
       </button>
 
       {/* Scrollable container for tool icons */}
-      <div 
+      <div
         ref={scrollContainerRef}
         className="flex items-center gap-3 overflow-x-auto no-scrollbar px-2" // `no-scrollbar` hides the browser's default scrollbar.
         style={{ maxWidth: 'calc(100vw - 120px)' }} // Limits width to prevent overflow, leaving space for scroll buttons.
@@ -92,16 +92,15 @@ export default function MiniCarousel({ tools, activeTool, onToolSelect }: MiniCa
               key={tool.id}
               onClick={() => {
                 // Allow selection only if this tool is not already the active one.
-                if (!isCurrentToolActive) { 
+                if (!isCurrentToolActive) {
                   onToolSelect(tool); // Calls App.tsx's handleToolSelect to switch tools.
                 }
               }}
               // Dynamic classes for styling based on whether the tool is active.
-              className={`flex flex-col items-center justify-center p-3 rounded-lg min-w-[70px] h-[70px] transition-all duration-200 ease-in-out
-                ${
-                  isCurrentToolActive
-                    ? 'bg-blue-600 text-white shadow-blue-500/50 shadow-lg scale-105 ring-2 ring-blue-400' // Highlighted style for active tool.
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white hover:shadow-md' // Default style for other tools.
+              className={`flex flex-col items-center justify-center p-3 rounded-lg min-w-[85px] h-[85px] transition-all duration-200 ease-in-out
+                ${isCurrentToolActive
+                  ? 'bg-blue-600 text-white shadow-blue-500/50 shadow-lg scale-105 ring-2 ring-blue-400' // Highlighted style for active tool.
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white hover:shadow-md' // Default style for other tools.
                 }
                 ${isCurrentToolActive ? '' : 'hover:scale-105'} // Hover scale effect for non-active tools.
               `}
@@ -112,16 +111,16 @@ export default function MiniCarousel({ tools, activeTool, onToolSelect }: MiniCa
               aria-pressed={isCurrentToolActive} // ARIA attribute for accessibility.
               title={tool.name} // Tooltip for tool name.
             >
-              <span className="text-2xl">{tool.icon}</span> {/* Tool icon */}
-              <span className="text-xs mt-1 truncate">{tool.name}</span> {/* Tool name (truncated if too long) */}
+              <div className="w-6 h-6 shrink-0 text-current">{tool.icon}</div> {/* Tool icon - SVG safe wrapper */}
+              <span className="text-xs mt-2 w-full text-center truncate px-1">{tool.name}</span> {/* Tool name */}
             </motion.button>
           );
         })}
       </div>
 
       {/* Right scroll button */}
-      <button 
-        onClick={() => scroll('right')} 
+      <button
+        onClick={() => scroll('right')}
         className="p-2 m-1 rounded-full bg-gray-700 hover:bg-gray-600 text-white self-center disabled:opacity-50"
         aria-label="Scroll right"
       >

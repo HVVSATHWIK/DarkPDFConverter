@@ -1,7 +1,8 @@
+import { ReactNode } from 'react';
+
 export interface Tool {
   id: number;
   name: string;
-  icon: string;
+  icon: ReactNode;
   description?: string;
-  // subTools?: Tool[]; // Optional: For nested sub-tools feature. Each sub-tool would also be of type Tool.
 }

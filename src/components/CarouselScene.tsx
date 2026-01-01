@@ -47,7 +47,7 @@ function AnimatedToolCardWrapper({
             scale: [1.3, 1.3, 1.3],
             rotation: [0, Math.PI, 0],
             opacity: 1,
-            config: springConfig.gentle,
+            config: springConfig.molasses,
             onRest: onCenterComplete,
           });
         } else {
@@ -56,7 +56,7 @@ function AnimatedToolCardWrapper({
             scale: [1, 1, 1],
             rotation: originalRotation,
             opacity: 1,
-            config: springConfig.gentle,
+            config: springConfig.gentle, // Faster, reliable completion
             onRest: () => onReturnComplete(tool.id),
           });
         }
@@ -75,11 +75,15 @@ function AnimatedToolCardWrapper({
             rotation: originalRotation,
             opacity: 1,
             config: springConfig.gentle,
+            onRest: () => {
+              // Ensure we notify the parent that the card has visually returned
+              if (onReturnComplete) onReturnComplete(tool.id);
+            }
           });
         }
       }
     },
-    from: { position: originalPosition, scale: [1,1,1], rotation: originalRotation, opacity: 1 },
+    from: { position: originalPosition, scale: [1, 1, 1], rotation: originalRotation, opacity: 1 },
     reset: isWrapperActive || isActuallyCenteredInApp || isAnyToolProcessActiveInApp,
   }));
 
@@ -113,14 +117,9 @@ export default function CarouselScene({
 }: CarouselSceneProps) {
   const groupRef = useRef<Group>(null);
   const isCarouselRotatingEnabled = useRef(true);
-  const carouselRotationSpeed = useRef(0.05);
   const lastElapsedTime = useRef(0);
 
-  const [groupSpring, groupApi] = useSpring(() => ({
-    rotationY: 0,
-    scale: 1,
-    config: springConfig.gentle
-  }));
+  /* Removed unused spring logic */
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -138,19 +137,33 @@ export default function CarouselScene({
       if (!isAnyToolProcessActive) {
         if (isCarouselRotatingEnabled.current) {
           const elapsedTimeDelta = clock.elapsedTime - lastElapsedTime.current;
-          const newRotationY = groupSpring.rotationY.get() + carouselRotationSpeed.current * elapsedTimeDelta * 60;
-          groupApi.start({ rotationY: newRotationY, immediate: true });
+          // FLUID ROTATION: Continuous, non-springy but smooth base rotation
+          // We add a sine wave to the speed to make it "breathe" or ebb and flow
+          const baseSpeed = 0.2; // Slower, more majestic
+          const speedVariation = Math.sin(clock.elapsedTime * 0.5) * 0.1;
+          const rotationStep = (baseSpeed + speedVariation) * elapsedTimeDelta;
+
+          groupRef.current.rotation.y += rotationStep;
         }
-        
-        const breathAmplitude = 0.02;
-        const breathSpeed = 0.7;
+
+        // MESMERIZING FLOAT: Vertical sine wave for the whole ring
+        const floatAmplitude = 0.1; // Gentle float
+        const floatSpeed = 0.8;
+        groupRef.current.position.y = Math.sin(clock.elapsedTime * floatSpeed) * floatAmplitude;
+
+
+        const breathAmplitude = 0.05; // More subtle
+        const breathSpeed = 0.5;
         const currentBreathScale = 1 + Math.sin(clock.elapsedTime * breathSpeed) * breathAmplitude;
-        groupApi.start({ scale: currentBreathScale });
+
+        // Direct scale assignment
+        groupRef.current.scale.setScalar(currentBreathScale);
+
       } else {
-        groupApi.start({ scale: 1 });
+        // When tool is active, stop rotation and float
+        groupRef.current.scale.setScalar(1);
+        // Ideally we smoothly dampen rotation to stop, but for now strict stop is safer for layout
       }
-      groupRef.current.rotation.y = groupSpring.rotationY.get();
-      groupRef.current.scale.set(groupSpring.scale.get(), groupSpring.scale.get(), groupSpring.scale.get());
     }
     lastElapsedTime.current = clock.elapsedTime;
   });
@@ -176,7 +189,7 @@ export default function CarouselScene({
   }
 
   return (
-    <animated.group ref={groupRef} rotation-y={groupSpring.rotationY} scale={groupSpring.scale}>
+    <animated.group ref={groupRef}>
       {cardTransforms.map(({ tool, originalPosition, originalRotation }) => {
         if (!tool?.id || !tool?.name || !tool?.icon) {
           return null;

@@ -1,0 +1,96 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- REALISTIC MATERIAL SHADOW -->
+    <filter id="materialShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="12"/>
+      <feOffset dx="0" dy="16" result="offsetblur"/>
+      <feFlood flood-color="#1e293b" flood-opacity="0.2"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- SUBTLE PAPER GRADIENT -->
+    <linearGradient id="paperWhite" x1="0" y1="0" x2="1" y2="1">
+       <stop offset="0%" stop-color="#ffffff"/>
+       <stop offset="100%" stop-color="#f8fafc"/>
+    </linearGradient>
+
+    <!-- VIBRANT BLUE GRADIENT (Modern App Style) -->
+    <linearGradient id="appBlue" x1="0" y1="0" x2="1" y2="1">
+       <stop offset="0%" stop-color="#38bdf8"/> <!-- Sky 400 -->
+       <stop offset="50%" stop-color="#2563eb"/> <!-- Blue 600 -->
+       <stop offset="100%" stop-color="#1d4ed8"/> <!-- Blue 700 -->
+    </linearGradient>
+
+    <!-- TEXT GRADIENT (Soft Slate) -->
+    <linearGradient id="slateText" x1="0" y1="0" x2="1" y2="1">
+       <stop offset="0%" stop-color="#94a3b8"/>
+       <stop offset="100%" stop-color="#64748b"/>
+    </linearGradient>
+    
+    <!-- ACCENT BAR GRADIENT -->
+    <linearGradient id="accentBar" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#22d3ee"/>
+        <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+
+  </defs>
+
+  <!-- BACKGROUND: ORGANIC FLUID SHAPE (Subtle) -->
+  <g transform="translate(256, 256)">
+      <!-- Main Fluid Shape (Deep Navy/Blue) -->
+      <path d="M 0 -240 C 160 -240 240 -150 240 0 C 240 150 150 240 0 240 C -150 240 -240 150 -240 0 C -240 -150 -160 -240 0 -240 Z" 
+            fill="#0f172a" 
+            opacity="1"/>
+            
+      <!-- Accent Swirl (Vibrant) -->
+      <path d="M -200 0 Q -200 -200 0 -200 Q 200 -200 200 0 C 200 120 100 200 0 200 C -120 200 -200 100 -200 0 Z" 
+            fill="url(#appBlue)" 
+            opacity="0.8" 
+            transform="rotate(25) scale(0.9)"/>
+  </g>
+
+  <!-- CENTER DOCUMENT: MODERN WHITE PAPER -->
+  <g transform="translate(136, 86)" filter="url(#materialShadow)">
+      
+      <!-- Main Paper Body -->
+      <path d="M 0 40 A 40 40 0 0 1 40 0 L 160 0 L 240 80 L 240 300 A 40 40 0 0 1 200 340 L 40 340 A 40 40 0 0 1 0 300 Z" 
+            fill="url(#paperWhite)"/>
+            
+      <!-- Folded Corner (Subtle Shadow backing) -->
+      <path d="M 160 0 L 160 60 A 20 20 0 0 0 180 80 L 240 80" 
+            fill="#e2e8f0"/>
+      <path d="M 160 0 L 240 80 L 160 80 Z" fill="#f1f5f9" opacity="0.5"/>
+
+      <!-- Inner Layout (Clean & Minimal) -->
+      <g transform="translate(40, 50)">
+         
+         <!-- Top Badge: Simple Gradient Circle -->
+         <circle cx="24" cy="24" r="24" fill="url(#appBlue)"/>
+         <!-- White icon inside -->
+         <path d="M 24 16 L 32 28 L 16 28 Z" fill="white" rx="2"/>
+
+         <!-- Header Bars -->
+         <rect x="64" y="10" width="100" height="10" rx="5" fill="#94a3b8"/>
+         <rect x="64" y="28" width="60" height="10" rx="5" fill="#cbd5e1"/>
+         
+         <!-- Content Lines (Clean Slate) -->
+         <g transform="translate(0, 80)">
+             <rect x="0" y="0" width="160" height="10" rx="5" fill="url(#slateText)" opacity="0.6"/>
+             <rect x="0" y="25" width="160" height="10" rx="5" fill="url(#slateText)" opacity="0.6"/>
+             <rect x="0" y="50" width="160" height="10" rx="5" fill="url(#slateText)" opacity="0.6"/>
+             <rect x="0" y="75" width="160" height="10" rx="5" fill="url(#slateText)" opacity="0.6"/>
+             <rect x="0" y="100" width="120" height="10" rx="5" fill="url(#slateText)" opacity="0.6"/>
+         </g>
+         
+         <!-- Bottom Call-to-Action / Active Bar -->
+         <g transform="translate(0, 150)">
+             <rect x="0" y="0" width="160" height="12" rx="6" fill="url(#accentBar)"/>
+         </g>
+      </g>
+  </g>
+
+</svg>

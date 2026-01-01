@@ -102,7 +102,7 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
         return <p className="text-gray-400">Tool UI for '{activeTool.name}' not implemented yet.</p>;
     }
   };
-  
+
   const panelVariants = {
     hidden: { opacity: 0, y: 50, scale: 0.95 },
     visible: { opacity: 1, y: 0, scale: 1 },
@@ -125,27 +125,32 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
           <motion.div
             className="relative bg-gray-800 text-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden"
           >
-            <header className="flex flex-col md:flex-row items-center justify-between p-4 md:p-6 border-b border-gray-700 gap-3 md:gap-0">
+            <header className="flex flex-col md:flex-row items-center justify-between p-4 md:p-6 border-b border-white/10 bg-slate-900/50 backdrop-blur-md">
               <button
                 onClick={onClose}
-                className="flex items-center gap-2 text-sm text-gray-300 hover:text-white transition-colors p-2 rounded-md hover:bg-gray-700 self-start md:self-center"
+                className="group flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-white transition-all px-4 py-2 rounded-full hover:bg-white/10 self-start md:self-center"
                 aria-label="Back to all tools"
               >
-                <ArrowUturnLeftIcon className="w-5 h-5" />
-                <span>Back to All Tools</span>
+                <ArrowUturnLeftIcon className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                <span>Back</span>
               </button>
-              
-              <div className="flex-grow text-center md:ml-4">
-                <h2 className="text-lg sm:text-xl md:text-2xl font-semibold">
-                  {activeTool.icon} {activeTool.name}
-                </h2>
+
+              <div className="flex-grow flex flex-col items-center justify-center md:-ml-20 mt-4 md:mt-0">
+                <div className="flex items-center gap-3">
+                  <span className="text-cyan-400 p-2 bg-cyan-400/10 rounded-xl">
+                    {activeTool.icon}
+                  </span>
+                  <h2 className="text-2xl font-bold text-white tracking-tight">
+                    {activeTool.name}
+                  </h2>
+                </div>
                 {activeTool.description && (
-                  <p className="text-xs sm:text-sm text-gray-400 mt-1 hidden md:block">
+                  <p className="text-sm text-slate-400 mt-1 hidden md:block">
                     {activeTool.description}
                   </p>
                 )}
               </div>
-              <div className="hidden md:flex md:w-[150px] lg:w-[180px] flex-shrink-0"></div>
+              <div className="hidden md:block w-20"></div> {/* Spacer for visual centering */}
             </header>
 
             <div className="flex-grow p-4 md:p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6">
