@@ -44,7 +44,7 @@ describe('PDFProcessor', () => {
       onError: mockOnError,
       allowMultipleFiles: false,
       toolId: 'test-tool',
-      activeTool: { id: 'test', name: 'Test Tool', description: 'A test tool', icon: 'T' },
+      activeTool: { id: 99, name: 'Test Tool', description: 'A test tool', icon: 'T' },
       processActionName: 'Process Test File',
     };
 
@@ -193,7 +193,7 @@ describe('PDFProcessor', () => {
     vi.mocked(useProcessPDF).mockReturnValue({ processDocument: mockProcessDocumentGlobal, isProcessing: false });
 
 
-    const mergeTool: Tool = { id: 'merge', name: 'Merge PDFs', description: 'Merge multiple PDFs', icon: ' M ' };
+    const mergeTool: Tool = { id: 2, name: 'Merge PDFs', description: 'Merge multiple PDFs', icon: ' M ' };
     const { container } = render(
       <PDFProcessorWithErrorBoundary {...defaultProps} activeTool={mergeTool} allowMultipleFiles={true} processActionName="Apply Merge PDFs" toolId={mergeTool.id} />
     );
@@ -228,7 +228,7 @@ describe('PDFProcessor', () => {
     vi.mocked(useProcessPDF).mockReturnValue({ processDocument: mockProcessDocumentGlobal, isProcessing: false });
 
 
-    const splitTool: Tool = { id: 'split', name: 'Split PDF', description: 'Split a PDF', icon: 'S' };
+    const splitTool: Tool = { id: 3, name: 'Split PDF', description: 'Split a PDF', icon: 'S' };
     const { container } = render( // Capture container
         <PDFProcessorWithErrorBoundary
             {...defaultProps}
