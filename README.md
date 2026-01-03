@@ -1,92 +1,131 @@
-# LitasDark: PDF Dark Mode Converter
+# Litas: Next-Gen PDF Dark Mode Engine
 
-![LitasDark Logo](pdfdark.jpg)
+<div align="center">
+  <img src="public/logo.png" alt="Litas Logo" width="180" />
+  <br />
+  <br />
+  
+  [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+  [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+  [![Rust](https://img.shields.io/badge/Rust-000000?style=for-the-badge&logo=rust&logoColor=white)](https://www.rust-lang.org/)
+  [![WebAssembly](https://img.shields.io/badge/WebAssembly-654FF0?style=for-the-badge&logo=webassembly&logoColor=white)](https://webassembly.org/)
+  [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 
-LitasDark is a user-friendly web application designed to convert your PDF files to dark mode. It provides a simple interface to upload PDF files, preview them, and convert them with customizable dark mode settings.
+  <p align="center">
+    <b>Privacy-First. High-Performance. Liquid Glass UI.</b>
+    <br />
+    A modern PDF tool that processes everything locally using Rust & WebAssembly.
+  </p>
+</div>
 
-## Features
+---
 
-- **PDF Upload**: Easily upload PDF files for conversion.
-- **Dark Mode Themes**: Choose from three dark mode themes - Dark, Darker, and Darkest.
-- **Brightness and Contrast Adjustment**: Fine-tune the brightness and contrast of the converted PDF.
-- **Real-time Preview**: Generate a preview of the PDF in dark mode before conversion.
-- **Download Converted PDF**: Download the converted PDF file with a single click.
-- **Split PDF**: Split your PDF into multiple parts by specifying the start and end pages.
-- **Merge PDFs**: Merge multiple PDF files into one.
-- **Rotate PDF Pages**: Rotate specific pages within your PDF file.
+## 🚀 Overview
 
-## Getting Started
+**Litas** (formerly DarkPDFConverter) is a cutting-edge web application designed for processing PDF documents entirely within the browser. By leveraging **Rust** compiled to **WebAssembly (WASM)**, it delivers near-native performance for complex operations like merging, splitting, and rendering, without ever sending a single byte of your data to a server.
 
-Follow these instructions to set up the project locally.
+The user interface is built with a modern **Liquid Glass** aesthetic, featuring 3D interactions and a responsive design that feels alive.
+
+## ✨ Key Features
+
+### 🛡️ Privacy & Performance
+-   **Zero-Server Processing**: All PDF manipulations happen on your device via WASM.
+-   **Rust Core**: Critical operations (merge, split, rotate) are powered by a custom Rust engine for speed and safety.
+-   **SharedArrayBuffer**: Optimized zero-copy data transfer between the UI and worker threads.
+
+### 🎨 Next-Gen UI/UX
+-   **Liquid Glass Methodology**: A premium design system using multilayered blur, saturation, and noise.
+-   **3D Tool Carousel**: Interactive 3D menu using `react-three-fiber` and physics-based springs.
+-   **Aurora Background**: Dynamic, 4D animated background that responds to user presence.
+-   **Virtualized Previews**: Handle large PDFs effortlessly with `react-window`.
+
+### 🛠️ PDF Tools
+-   **Dark Mode Conversion**: Intelligent color inversion for comfortable reading.
+-   **Merge & Split**: Combine multiple files or extract specific pages.
+-   **Rotate & Organize**: Fix orientation issues instantly.
+-   **Dark/Light Theming**: Fully responsive system themes.
+
+## 🏗️ Architecture
+
+Litas uses a hybrid architecture where React handles the UI and a dedicated Web Worker (powered by Rust/WASM) handles the heavy lifting.
+
+```mermaid
+graph TD
+    UI[React UI\n(Main Thread)] -->|Command| Worker[Web Worker]
+    Worker -->|WASM Call| Rust[Rust / WASM Core]
+    Rust -->|Processed Data| Worker
+    Worker -->|Zero-Copy| UI
+    
+    subgraph "Visual Layer"
+    UI --> ThreeJS[3D Carousel\n(Canvas)]
+    UI --> HTML[Liquid Glass Components]
+    end
+    
+    subgraph "Engine Layer"
+    Worker -.-> PDFLib[PDF.js / PDF-Lib]
+    Rust -.-> P[pdf (crate)]
+    end
+```
+
+## 🛠️ Installation
 
 ### Prerequisites
+-   Node.js (v18+)
+-   npm or pnpm
 
-- Web browser (Chrome, Firefox, Safari, etc.)
-
-### Installation
-
-1. **Clone the repository:**
+### Setup
+1.  **Clone the repository**
     ```bash
-    git clone https://github.com/HVVSATHWIK/DARKPDFConverter.git
-    ```
-2. **Navigate to the project directory:**
-    ```bash
-    cd DARKPDFConverter
-    ```
-3. **Open `index.html` in your web browser:**
-    ```bash
-    open index.html
+    git clone https://github.com/HVVSATHWIK/DarkPDFConverter.git
+    cd DarkPDFConverter
     ```
 
-## Usage
+2.  **Install Dependencies**
+    ```bash
+    npm install
+    ```
 
-1. **Upload a PDF File:**
-    - Click on the "Upload PDF" input and select a PDF file from your computer.
+3.  **Run Development Server**
+    ```bash
+    npm run dev
+    ```
+    Open `http://localhost:5173` to view the app.
 
-2. **Choose Theme:**
-    - Select one of the dark mode themes from the dropdown menu: Dark, Darker, or Darkest.
+## 📦 Building for Production
 
-3. **Adjust Brightness and Contrast:**
-    - Use the sliders to adjust the brightness and contrast settings to your preference.
+### Standard Build
+The project is configured to automatically handle the WASM artifacts for Vercel/Netlify.
+```bash
+npm run build
+```
+This produces a `dist` folder ready for deployment.
 
-4. **Generate Preview:**
-    - Click on the "Generate Preview" button to see a preview of the PDF in dark mode.
+### Developing the Rust Core (Optional)
+If you want to modify the functionality in `src-wasm`:
+1.  Install [Rust and Cargo](https://rustup.rs/).
+2.  Install wasm-pack: `cargo install wasm-pack`.
+3.  Run the build command:
+    ```bash
+    npm run build:wasm
+    ```
 
-5. **Convert to Dark Mode:**
-    - Once satisfied with the preview, click the "Convert to Dark Mode" button to apply the changes to the entire PDF.
+## 🤝 Contributing
 
-6. **Download Converted PDF:**
-    - Click on the "Download Converted PDF" link to download the modified PDF file.
+Contributions are welcome! Please check the `Implementation Plan` artifacts in the `.gemini` folder for current roadmap status.
 
-7. **Split PDF:**
-    - Specify the start and end pages, then click the "Split PDF" button to split the PDF. Download the split PDF by clicking the "Download Split PDF" link.
+1.  Fork the Project
+2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the Branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
 
-8. **Merge PDFs:**
-    - Upload multiple PDF files, then click the "Merge PDFs" button. Download the merged PDF by clicking the "Download Merged PDF" link.
+## 📄 License
 
-9. **Rotate PDF Pages:**
-    - Specify the page number and the rotation angle, then click the "Rotate Page" button. Download the rotated PDF by clicking the "Download Rotated PDF" link.
+Distributed under the MIT License. See `LICENSE` for more information.
 
-## Built With
+---
 
-- **HTML5**
-- **CSS3**
-- **JavaScript**
-- **PDF.js** - For rendering PDFs in the browser
-- **PDF-Lib** - For manipulating PDF files
-
-## Contributing
-
-Contributions are welcome! Please fork the repository and submit a pull request for any enhancements or bug fixes.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgements
-
-- Thanks to the creators of [PDF.js](https://mozilla.github.io/pdf.js/) and [PDF-Lib](https://pdf-lib.js.org/) for their amazing libraries.
-
-## Contact
-
-For any inquiries or feedback, please contact [hvvsathwik27@gmail.com](mailto:hvvsathwik@gmail.com).
+<p align="center">
+  Built with ❤️ by Veerendranath
+</p>
