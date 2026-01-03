@@ -7,11 +7,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#6200ea',
-        secondary: '#3700b3',
-        dark: '#121212',
-        darker: '#0a0a0a',
-        darkest: '#050505',
+        primary: '#6366f1', // Indigo 500
+        secondary: '#a855f7', // Purple 500
+        accent: '#f43f5e', // Rose 500
+        'modern-bg': '#f8fafc', // Slate 50
+        'glass-border': 'rgba(255, 255, 255, 0.5)',
       },
     },
   },

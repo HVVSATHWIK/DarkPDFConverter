@@ -1,10 +1,12 @@
-import { PDFDocument } from 'pdf-lib';
+import { usePDFEngine } from './usePDFEngine';
 
 export interface ExtractOptions {
     pageNumbers: number[]; // 1-based page numbers
 }
 
 export function useExtractPages() {
+    const { extractPages: workerExtract } = usePDFEngine();
+
     const extractPages = async (
         file: File,
         options: ExtractOptions,
@@ -14,29 +16,20 @@ export function useExtractPages() {
         if (!file) throw new Error("No file provided.");
         if (!options.pageNumbers || options.pageNumbers.length === 0) throw new Error("No pages selected.");
 
-        onProgress?.(0.1, "Loading PDF...");
+        // ... inside function
+        onProgress?.(0.1, "Secure Processing...");
         const arrayBuffer = await file.arrayBuffer();
-        const pdfDoc = await PDFDocument.load(arrayBuffer);
-        const totalPages = pdfDoc.getPageCount();
 
-        // Validate pages
-        const validPages = options.pageNumbers
-            .map(p => p - 1) // Convert to 0-based
-            .filter(p => p >= 0 && p < totalPages);
-
-        if (validPages.length === 0) throw new Error("No valid pages to extract.");
-
-        onProgress?.(0.3, `Extracting ${validPages.length} pages...`);
-        const newPdfDoc = await PDFDocument.create();
-        const copiedPages = await newPdfDoc.copyPages(pdfDoc, validPages);
-
-        copiedPages.forEach(page => newPdfDoc.addPage(page));
-
-        onProgress?.(0.8, "Saving extracted PDF...");
-        const newPdfBytes = await newPdfDoc.save();
-
-        onProgress?.(1, "Done!");
-        return newPdfBytes;
+        try {
+            // 0-based index for backend?
+            const indices = options.pageNumbers.map(p => p - 1);
+            const result = await workerExtract(new Uint8Array(arrayBuffer), indices);
+            onProgress?.(1, "Done!");
+            return result;
+        } catch (e) {
+            console.error(e);
+            throw new Error("Engine Extraction Failed");
+        }
     };
 
     return { extractPages };

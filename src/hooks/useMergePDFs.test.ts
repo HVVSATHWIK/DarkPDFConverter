@@ -1,36 +1,17 @@
 /// <reference types="vitest/globals" />
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
-import { PDFDocument } from 'pdf-lib';
+import { renderHook, act } from '@testing-library/react';
+
 import { useMergePDFs } from './useMergePDFs';
+import { usePDFEngine } from './usePDFEngine';
 
-vi.mock('pdf-lib', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('pdf-lib')>();
-  const mockPageMethods = {};
-  const mockPdfDocInstance = {
-    addPage: vi.fn(),
-    copyPages: vi.fn().mockImplementation(async (_, pageIndices) => { // Changed sourceDoc to _
-      return pageIndices.map(() => mockPageMethods);
-    }),
-    getPageIndices: vi.fn().mockReturnValue([0]),
-    save: vi.fn().mockResolvedValue(new Uint8Array([1, 2, 3, 4, 5])),
-  };
-
-  return {
-    ...actual,
-    PDFDocument: {
-      create: vi.fn().mockResolvedValue(mockPdfDocInstance),
-      load: vi.fn().mockResolvedValue({
-        ...mockPdfDocInstance,
-        getPageCount: vi.fn().mockReturnValue(1),
-      }),
-    },
-  };
-});
+vi.mock('./usePDFEngine', () => ({
+  usePDFEngine: vi.fn(),
+}));
 
 const createMockFile = (name: string, content: string = 'dummy content') => {
   const blob = new Blob([content], { type: 'application/pdf' });
   const file = new File([blob], name, { type: 'application/pdf' });
-  // Corrected: Assign mock to instance, not spyOn non-existent method
   (file as any).arrayBuffer = vi.fn().mockResolvedValue(new ArrayBuffer(content.length));
   return file;
 };
@@ -40,96 +21,60 @@ describe('useMergePDFs', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (PDFDocument.create as Mock).mockClear().mockResolvedValue({
-        addPage: vi.fn(),
-        copyPages: vi.fn().mockImplementation(async (_, pageIndices) => pageIndices.map(() => ({}))), // Changed sourceDoc to _
-        getPageIndices: vi.fn().mockReturnValue([0]),
-        save: vi.fn().mockResolvedValue(new Uint8Array([1,2,3,4,5])),
-    });
-    (PDFDocument.load as Mock).mockClear().mockResolvedValue({
-        addPage: vi.fn(),
-        copyPages: vi.fn().mockImplementation(async (_, pageIndices) => pageIndices.map(() => ({}))), // Changed sourceDoc to _
-        getPageIndices: vi.fn().mockReturnValue([0]),
-        save: vi.fn(),
-        getPageCount: vi.fn().mockReturnValue(1),
+    (usePDFEngine as Mock).mockReturnValue({
+      isReady: true,
+      mergePDFs: vi.fn().mockResolvedValue(new Uint8Array([1, 2, 3])),
     });
   });
 
-  it('should return null if no files are provided', async () => {
-    const { mergePdfs } = useMergePDFs();
-    const result = await mergePdfs([], mockOnProgress);
-    expect(result).toBeNull();
+  it('returns null if no files are provided', async () => {
+    const { result } = renderHook(() => useMergePDFs());
+
+    let merged: Uint8Array | null = null;
+    await act(async () => {
+      merged = await result.current.mergePdfs([], mockOnProgress);
+    });
+
+    expect(merged).toBeNull();
     expect(mockOnProgress).not.toHaveBeenCalled();
   });
 
-  it('should return a Uint8Array of a single file if only one file is provided', async () => {
-    const { mergePdfs } = useMergePDFs();
-    const mockFile1 = createMockFile('file1.pdf');
-    const expectedArrayBuffer = await mockFile1.arrayBuffer(); // Get the ArrayBuffer
-    const result = await mergePdfs([mockFile1], mockOnProgress);
+  it('merges files via the engine and reports progress', async () => {
+    const { result } = renderHook(() => useMergePDFs());
+    const file1 = createMockFile('file1.pdf', 'pdf1');
+    const file2 = createMockFile('file2.pdf', 'pdf2');
 
-    expect(result).toBeInstanceOf(Uint8Array); // Check if it's Uint8Array
-    expect(result).toEqual(new Uint8Array(expectedArrayBuffer)); // Compare content
-    expect(mockFile1.arrayBuffer).toHaveBeenCalled();
-    expect(PDFDocument.create).not.toHaveBeenCalled();
-    expect(mockOnProgress).not.toHaveBeenCalled();
-  });
+    const engine = (usePDFEngine as Mock).mock.results[0]!.value;
 
-  it('should merge multiple PDF files successfully', async () => {
-    const { mergePdfs } = useMergePDFs();
-    const mockFile1 = createMockFile('file1.pdf', 'pdf1 content');
-    const mockFile2 = createMockFile('file2.pdf', 'pdf2 content');
+    let merged: Uint8Array | null = null;
+    await act(async () => {
+      merged = await result.current.mergePdfs([file1, file2], mockOnProgress);
+    });
 
-    const mockPdfDocInstance1 = {
-        getPageIndices: vi.fn().mockReturnValue([0, 1]),
-    };
-    const mockPdfDocInstance2 = {
-        getPageIndices: vi.fn().mockReturnValue([0]),
-    };
-    (PDFDocument.load as Mock)
-        .mockResolvedValueOnce(mockPdfDocInstance1)
-        .mockResolvedValueOnce(mockPdfDocInstance2);
+    expect(file1.arrayBuffer).toHaveBeenCalled();
+    expect(file2.arrayBuffer).toHaveBeenCalled();
+    expect(engine.mergePDFs).toHaveBeenCalledTimes(1);
+    expect(engine.mergePDFs).toHaveBeenCalledWith([
+      expect.any(Uint8Array),
+      expect.any(Uint8Array),
+    ]);
 
-    const createdDocMock = {
-        addPage: vi.fn(),
-        copyPages: vi.fn().mockImplementation(async (_, pageIndices) => pageIndices.map(() => ({}))), // Changed sourceDoc to _
-        save: vi.fn().mockResolvedValue(new Uint8Array([1,2,3,4,5])),
-    };
-    (PDFDocument.create as Mock).mockResolvedValue(createdDocMock);
-
-    await mergePdfs([mockFile1, mockFile2], mockOnProgress);
-
-    expect(PDFDocument.create).toHaveBeenCalledTimes(1);
-    expect(PDFDocument.load).toHaveBeenCalledTimes(2);
-    expect(PDFDocument.load).toHaveBeenCalledWith(await mockFile1.arrayBuffer());
-    expect(PDFDocument.load).toHaveBeenCalledWith(await mockFile2.arrayBuffer());
-
-    expect(createdDocMock.copyPages).toHaveBeenCalledTimes(2);
-    expect(createdDocMock.copyPages).toHaveBeenCalledWith(mockPdfDocInstance1, [0, 1]);
-    expect(createdDocMock.copyPages).toHaveBeenCalledWith(mockPdfDocInstance2, [0]);
-    expect(createdDocMock.addPage).toHaveBeenCalledTimes(3);
-    expect(createdDocMock.save).toHaveBeenCalledTimes(1);
-
-    expect(mockOnProgress).toHaveBeenCalledTimes(3);
-    expect(mockOnProgress).toHaveBeenCalledWith(0.5, 1, 2);
-    expect(mockOnProgress).toHaveBeenCalledWith(1, 2, 2);
+    expect(merged).toBeInstanceOf(Uint8Array);
+    expect(mockOnProgress).toHaveBeenCalled();
     expect(mockOnProgress).toHaveBeenLastCalledWith(1, 2, 2);
   });
 
-  it('should throw an error if PDFDocument.load fails for a file', async () => {
-    const { mergePdfs } = useMergePDFs();
-    const mockFile1 = createMockFile('valid.pdf');
-    const mockFile2 = createMockFile('invalid.pdf');
+  it('throws a friendly error if the engine fails', async () => {
+    (usePDFEngine as Mock).mockReturnValueOnce({
+      isReady: true,
+      mergePDFs: vi.fn().mockRejectedValue(new Error('engine failed')),
+    });
 
-    (PDFDocument.load as Mock)
-      .mockResolvedValueOnce({ getPageIndices: vi.fn().mockReturnValue([0]) })
-      .mockRejectedValueOnce(new Error('Failed to load invalid.pdf'));
+    const { result } = renderHook(() => useMergePDFs());
+    const file1 = createMockFile('file1.pdf');
 
-    await expect(mergePdfs([mockFile1, mockFile2], mockOnProgress))
+    await expect(result.current.mergePdfs([file1], mockOnProgress))
       .rejects
-      .toThrow('Failed to merge invalid.pdf. Please ensure all files are valid PDFs.');
-
-    expect(mockOnProgress).toHaveBeenCalledOnce();
-    expect(mockOnProgress).toHaveBeenCalledWith(0.5, 1, 2);
+      .toThrow('Failed to merge files. High-Performance engine reported error.');
   });
 });

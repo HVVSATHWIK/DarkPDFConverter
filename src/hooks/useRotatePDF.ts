@@ -1,4 +1,4 @@
-import { PDFDocument, degrees } from 'pdf-lib';
+import { usePDFEngine } from './usePDFEngine';
 
 export interface RotateOptions {
     degrees: 90 | 180 | 270 | 0;
@@ -6,31 +6,26 @@ export interface RotateOptions {
 }
 
 export function useRotatePDF() {
+    const { rotatePDF: workerRotate } = usePDFEngine();
+
     const rotatePdf = async (
         file: File,
         options: RotateOptions,
         onProgress?: (progress: number, message: string) => void
     ): Promise<Uint8Array | null> => {
-
         if (!file) throw new Error("No file provided.");
 
-        onProgress?.(0.1, "Loading PDF...");
+        onProgress?.(0.1, "Offloading to Secure Engine...");
         const arrayBuffer = await file.arrayBuffer();
-        const pdfDoc = await PDFDocument.load(arrayBuffer);
-        const pages = pdfDoc.getPages();
 
-        onProgress?.(0.3, `Rotating ${pages.length} pages...`);
-
-        pages.forEach((page) => {
-            const currentRotation = page.getRotation().angle;
-            page.setRotation(degrees(currentRotation + options.degrees));
-        });
-
-        onProgress?.(0.8, "Saving...");
-        const rotatedPdfBytes = await pdfDoc.save();
-
-        onProgress?.(1, "Done!");
-        return rotatedPdfBytes;
+        try {
+            const result = await workerRotate(new Uint8Array(arrayBuffer), options.degrees);
+            onProgress?.(1, "Done!");
+            return result;
+        } catch (e) {
+            console.error(e);
+            throw new Error("Engine Rotation Failed");
+        }
     };
 
     return { rotatePdf };

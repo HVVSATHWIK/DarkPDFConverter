@@ -210,7 +210,7 @@ function PDFProcessor({
               className="h-full bg-blue-500 rounded-full"
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
-              transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+              transition={{ type: 'tween', duration: 0.18, ease: 'easeOut' }}
             />
           </motion.div>
         </div>

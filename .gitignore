@@ -5,6 +5,9 @@ node_modules/
 dist/
 build/
 
+# Rust/WASM build artifacts
+src-wasm/target/
+
 # Log files
 npm-debug.log*
 yarn-debug.log*

@@ -11,6 +11,7 @@ import RotatePDFControls from './tools/RotatePDFControls';
 import { RotateOptions } from '@/hooks/useRotatePDF';
 import ExtractPagesControls from './tools/ExtractPagesControls';
 import { ExtractOptions } from '@/hooks/useExtractPages';
+import PDFPreview from './common/PDFPreview';
 // ...
 
 interface WorkspacePanelProps {
@@ -39,6 +40,16 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
 
   const handleComplete = (result: any) => {
     console.log(`Processing complete for ${activeTool?.name}:`, result);
+
+    // Deep clone the buffer to prevent "ArrayBuffer detached" errors if 
+    // downstream components (like react-pdf workers) transfer/consume it.
+    // Use Blob Wrapper Pattern (Architecture Strategy A)
+    // Convert ArrayBuffer/Uint8Array to Blob to prevent detachment errors and improve memory efficiency.
+    // Blobs are immutable and act as stable file references for react-pdf.
+    if (result.processedPdf && !(result.processedPdf instanceof Blob)) {
+      result.processedPdf = new Blob([result.processedPdf], { type: 'application/pdf' });
+    }
+
     setProcessedData(result);
   };
 
@@ -151,20 +162,31 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
   };
 
   const panelVariants = {
-    hidden: { opacity: 0, y: 50, scale: 0.95 },
-    visible: { opacity: 1, y: 0, scale: 1 },
-    exit: { opacity: 0, y: 30, scale: 0.98, transition: { duration: 0.2 } }
+    hidden: { opacity: 0, y: 16, scale: 0.98 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { type: 'tween', duration: 0.18, ease: 'easeOut' }
+    },
+    exit: {
+      opacity: 0,
+      y: 8,
+      scale: 0.99,
+      transition: { type: 'tween', duration: 0.12, ease: 'easeIn' }
+    }
   };
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait" initial={false}>
       {isVisible && activeTool && (
         <motion.div
+          key={activeTool.id}
           variants={panelVariants}
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="fixed inset-0 z-[45] flex items-center justify-center p-4 backdrop-blur-sm bg-black bg-opacity-30"
+          className="fixed inset-0 z-[45] flex items-center justify-center p-4 backdrop-blur-md bg-black/40"
           aria-modal="true"
           role="dialog"
         >
@@ -172,8 +194,7 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
 
           {/* Main Panel Container */}
           <motion.div
-            className="relative bg-gray-800 text-white rounded-xl shadow-2xl w-full max-w-7xl h-[90vh] flex flex-col overflow-hidden pointer-events-auto origin-center"
-            style={{ scale: 0.9 }}
+            className="relative bg-slate-900/70 text-white rounded-2xl shadow-2xl w-full max-w-7xl h-[90vh] flex flex-col overflow-hidden pointer-events-auto origin-center border border-white/10"
           >
             <header className="flex flex-col md:flex-row items-center justify-between p-4 md:p-6 border-b border-white/10 bg-slate-900/50 backdrop-blur-md">
               <button
@@ -187,7 +208,7 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
 
               <div className="flex-grow flex flex-col items-center justify-center md:-ml-20 mt-4 md:mt-0">
                 <div className="flex items-center gap-3">
-                  <span className="text-cyan-400 p-2 bg-cyan-400/10 rounded-xl">
+                  <span className="text-cyan-300 p-2 bg-cyan-400/10 rounded-xl ring-1 ring-cyan-400/20">
                     {activeTool.icon}
                   </span>
                   <h2 className="text-2xl font-bold text-white tracking-tight">
@@ -209,18 +230,25 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
               </section>
 
               <section className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-200 border-b border-gray-700 pb-2">Preview / Output</h3>
-                <div className="w-full min-h-[200px] md:min-h-[300px] h-full bg-gray-900 rounded-lg flex flex-col items-center justify-center text-gray-500 p-4 shadow-inner">
+                <h3 className="text-lg font-semibold text-slate-200 border-b border-white/10 pb-2">Preview / Output</h3>
+                <div className="w-full min-h-[200px] md:min-h-[300px] h-full bg-black/30 rounded-xl flex flex-col items-center justify-center text-slate-300 p-4 shadow-inner border border-white/10">
                   {processedData ? (
-                    <div className="text-sm text-left w-full">
-                      {processedData.error && <p className="text-red-400">Error: {processedData.error}</p>}
-                      {processedData.title && <p><strong>Title:</strong> {processedData.title}</p>}
-                      {processedData.pageCount && <p><strong>Pages:</strong> {processedData.pageCount}</p>}
-                      {processedData.isMerged && <p className="text-green-400">Successfully merged {processedData.title.match(/\((\d+) files\)/)?.[1] || 'multiple'} files.</p>}
-                      {processedData.message && !processedData.isMerged && <p>{processedData.message}</p>}
-                      {!processedData.error && !processedData.title && !processedData.pageCount && !processedData.message && (
-                        <p>Processing completed. Result details will appear here.</p>
+                    <div className="w-full flex flex-col items-center gap-4">
+                      {/* Try rendering preview if we have PDF data */}
+                      {(processedData.processedPdf || processedData instanceof Uint8Array || processedData instanceof Blob) && (
+                        <PDFPreview file={processedData.processedPdf || processedData} />
                       )}
+
+                      <div className="text-sm text-left w-full">
+                        {processedData.error && <p className="text-red-400">Error: {processedData.error}</p>}
+                        {processedData.title && <p><strong>Title:</strong> {processedData.title}</p>}
+                        {processedData.pageCount && <p><strong>Pages:</strong> {processedData.pageCount}</p>}
+                        {processedData.isMerged && <p className="text-green-400">Successfully merged {processedData.title?.match(/\((\d+) files\)/)?.[1] || 'multiple'} files.</p>}
+                        {processedData.message && !processedData.isMerged && <p>{processedData.message}</p>}
+                        {!processedData.error && !processedData.title && !processedData.pageCount && !processedData.message && !processedData.processedPdf && (
+                          <p>Processing completed. Details unavailable.</p>
+                        )}
+                      </div>
                     </div>
                   ) : (
                     <p>PDF preview or processing results will appear here.</p>

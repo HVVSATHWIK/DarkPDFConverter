@@ -31,6 +31,7 @@ export function MainApplication() {
   const [activeTool, setActiveToolState] = useState<Tool | null>(null);
   const [isCardCentered, setIsCardCentered] = useState<boolean>(false);
   const [pendingTool, setPendingTool] = useState<Tool | null>(null);
+  const [isWorkspaceVisible, setIsWorkspaceVisible] = useState<boolean>(false);
 
   const activeToolRef = useRef(activeTool);
   const pendingToolRef = useRef(pendingTool);
@@ -49,15 +50,18 @@ export function MainApplication() {
     if (tool === null) {
       if (currentActiveTool) {
         setPendingTool(null);
+        setIsWorkspaceVisible(false);
         setIsCardCentered(false);
       }
     } else {
       if (currentActiveTool && currentIsCardCentered && tool.id !== currentActiveTool.id) {
         setPendingTool(tool);
+        setIsWorkspaceVisible(false);
         setIsCardCentered(false);
       } else if (tool.id !== currentActiveTool?.id || !currentIsCardCentered) {
         setPendingTool(null);
         setActiveToolState(tool);
+        setIsWorkspaceVisible(false);
         setIsCardCentered(true);
       }
     }
@@ -66,6 +70,7 @@ export function MainApplication() {
   const onCardReachedCenter = useCallback(() => {
     if (activeToolRef.current) {
       if (!isCardCenteredRef.current) setIsCardCentered(true);
+      setIsWorkspaceVisible(true);
     }
   }, []);
 
@@ -76,13 +81,16 @@ export function MainApplication() {
     if (currentPendingTool && currentActiveTool && returnedToolId === currentActiveTool.id) {
       setActiveToolState(currentPendingTool);
       setPendingTool(null);
+      setIsWorkspaceVisible(false);
       setIsCardCentered(true);
     } else if (!currentPendingTool && currentActiveTool && returnedToolId === currentActiveTool.id) {
       setActiveToolState(null);
+      setIsWorkspaceVisible(false);
     }
   }, []);
 
   const handleCloseWorkspace = useCallback(() => {
+    setIsWorkspaceVisible(false);
     handleToolSelect(null);
     // FORCE RESET: Ensure state clears even if animation callback fails
     // This prevents the "stuck" state where arrows don't reappear
@@ -90,6 +98,7 @@ export function MainApplication() {
       setActiveToolState(null);
       setIsCardCentered(false);
       setPendingTool(null);
+      setIsWorkspaceVisible(false);
     }, 800);
   }, [handleToolSelect]);
 
@@ -170,6 +179,9 @@ export function MainApplication() {
             <pointLight position={[0, 0, 5]} intensity={0.5} color="#ffffff" />
           </Suspense>
         </Canvas>
+
+        {/* 2D "4D" aurora overlay (CSS-only, low-cost) */}
+        <div className="bg-aurora" aria-hidden="true" />
       </div>
 
       {/* Visual Navigation Controls */}
@@ -199,12 +211,12 @@ export function MainApplication() {
 
       <WorkspacePanel
         activeTool={activeTool}
-        isVisible={isCardCentered && !!activeTool}
+        isVisible={isWorkspaceVisible && !!activeTool}
         onClose={handleCloseWorkspace}
       />
 
       {
-        activeTool && isCardCentered && (
+        activeTool && isWorkspaceVisible && (
           <MiniCarousel
             tools={tools}
             activeTool={activeTool}

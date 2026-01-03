@@ -1,5 +1,5 @@
 import { useRef, useEffect, useMemo } from 'react';
-import { Sparkles } from '@react-three/drei';
+// NOTE: Keep the scene calm and stable; avoid busy particle effects.
 import { useFrame } from '@react-three/fiber';
 import { Group } from 'three';
 import { useSpring, animated } from '@react-spring/three';
@@ -50,7 +50,8 @@ function AnimatedToolCardWrapper({
   // 1 = In Center (World Locked)
   const [{ phase }, api] = useSpring(() => ({
     phase: 0,
-    config: { mass: 3.5, tension: 140, friction: 65 },
+    // Calmer, more "glide" feel with minimal overshoot
+    config: { mass: 1.6, tension: 220, friction: 44 },
   }));
 
   // Track opacity separately as it's simple
@@ -67,7 +68,7 @@ function AnimatedToolCardWrapper({
         // Fix: Animate 'phase' to 0 (Slot) instead of using legacy position props
         api.start({
           phase: 0,
-          config: { mass: 3.5, tension: 140, friction: 65 },
+          config: { mass: 1.6, tension: 220, friction: 44 },
           onRest: () => onReturnComplete(tool.id),
         });
         opacityApi.start({ opacity: 1 });
@@ -159,17 +160,7 @@ function AnimatedToolCardWrapper({
     // If phase is close to 0, logic is "Slot".
     // If shrink is needed, we can multiply scale.
 
-    let currentScale = startScale + (endScale - startScale) * currentPhase;
-
-    // Shrink logic hack over top
-    if (!isWrapperActive && isAnyToolProcessActiveInApp) {
-      // We can't easily animate this inside useFrame without another spring value.
-      // Let's assume opacity handles visibility enough? 
-      // Or read explicit opacity to scale?
-      const op = opacity.get();
-      if (op < 1) currentScale *= 0.3 + (0.7 * op);
-    }
-
+    const currentScale = startScale + (endScale - startScale) * currentPhase;
     cardGroupRef.current.scale.setScalar(currentScale);
 
   });
@@ -216,7 +207,9 @@ export default function CarouselScene({
   // Sync rotation when activeTool OR pendingTool changes
   // We prioritize pendingTool to start visual rotation IMMEDIATELY upon selection
   useEffect(() => {
-    const targetTool = pendingTool || activeTool;
+    // Keep background stable while a tool is open,
+    // but when switching (pendingTool) bring the target card to the front.
+    const targetTool = pendingTool || (!isAnyToolProcessActive ? activeTool : null);
 
     if (targetTool) {
       const targetIndex = tools.findIndex(t => t.id === targetTool.id);
@@ -226,10 +219,14 @@ export default function CarouselScene({
 
         const angleStep = (2 * Math.PI) / tools.length;
         // Apply offset to center the card (move from X axis to Z axis)
-        rotationApi.start({ rotationY: currentRotationIndex.current * angleStep + Math.PI / 2 });
+        rotationApi.start({
+          rotationY: currentRotationIndex.current * angleStep + Math.PI / 2,
+          // If we're switching tools, snap so the new card doesn't fly in from the back.
+          immediate: !!pendingTool,
+        });
       }
     }
-  }, [activeTool, pendingTool, tools, rotationApi]);
+  }, [activeTool, pendingTool, tools, rotationApi, isAnyToolProcessActive]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -250,27 +247,17 @@ export default function CarouselScene({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [tools.length, isAnyToolProcessActive, rotationApi]);
 
-  useFrame((state) => {
-    const { clock } = state;
+  useFrame(() => {
     if (groupRef.current) {
-      // Apply spring rotation
-      const currentY = rotationSpring.rotationY.get();
-      groupRef.current.rotation.y = currentY;
-
-      if (!isAnyToolProcessActive) {
-        // Mesmerizing Float
-        const floatAmplitude = 0.1;
-        const floatSpeed = 0.5;
-        groupRef.current.position.y = Math.sin(clock.elapsedTime * floatSpeed) * floatAmplitude;
-
-        // Breathing Scale
-        const currentBreathScale = 1 + Math.sin(clock.elapsedTime * 0.5) * 0.02; // Reduced amplitude
-        groupRef.current.scale.setScalar(currentBreathScale);
-      } else {
-        // Lock position when active
-        groupRef.current.position.y = 0;
-        groupRef.current.scale.setScalar(1);
+      // Apply spring rotation only when idle (keeps background stable while a tool is open)
+      if (!isAnyToolProcessActive || !!pendingTool) {
+        const currentY = rotationSpring.rotationY.get();
+        groupRef.current.rotation.y = currentY;
       }
+
+      // Always keep the ring stable (no float/breathe). Motion comes from explicit user actions.
+      groupRef.current.position.y = 0;
+      groupRef.current.scale.setScalar(1);
     }
   });
 
@@ -323,37 +310,35 @@ export default function CarouselScene({
         );
       })}
 
-      {/* Atmospheric Particles (Energy Motes) */}
-      <Sparkles
-        count={50} // Ultra-low count for iGPU
-        scale={12}
-        size={4}
-        speed={0.4}
-        opacity={0.5}
-        color="#F0FF8E" // Electric Yellow/Green energy
-      />
-
       {/* Handheld Camera Rig */}
-      <CameraRig />
+      <CameraRig isAnyToolProcessActive={isAnyToolProcessActive} />
     </animated.group>
 
   );
 }
 
-function CameraRig() {
+function CameraRig({ isAnyToolProcessActive }: { isAnyToolProcessActive: boolean }) {
   useFrame((state) => {
-    // Subtle breathing/sway
-    const t = state.clock.elapsedTime;
-    state.camera.position.y = Math.sin(t * 0.5) * 0.1; // Breathe Y
-    state.camera.rotation.z = Math.sin(t * 0.2) * 0.01; // Tilt Z
+    // Keep camera stable while a tool is open/switching.
+    if (isAnyToolProcessActive) {
+      state.camera.position.x += (0 - state.camera.position.x) * 0.05;
+      state.camera.position.y += (0 - state.camera.position.y) * 0.05;
+      state.camera.rotation.z += (0 - state.camera.rotation.z) * 0.05;
+      state.camera.lookAt(0, 0, 0);
+      return;
+    }
 
-    // Mouse parallax (very subtle)
-    // We access pointer directly to avoid re-renders
+    // Subtle breathing/sway (idle only)
+    const t = state.clock.elapsedTime;
+    state.camera.position.y = Math.sin(t * 0.5) * 0.03;
+    state.camera.rotation.z = Math.sin(t * 0.2) * 0.003;
+
+    // Mouse parallax (idle only)
     const { x, y } = state.pointer;
-    state.camera.position.x += (x * 0.1 - state.camera.position.x) * 0.02; // Reduced from 0.5
-    state.camera.position.y += (y * 0.1 - state.camera.position.y) * 0.02; // Reduced from 0.5
+    state.camera.position.x += (x * 0.04 - state.camera.position.x) * 0.015;
+    state.camera.position.y += (y * 0.04 - state.camera.position.y) * 0.015;
 
     state.camera.lookAt(0, 0, 0);
-  })
+  });
   return null;
 }

@@ -3,20 +3,16 @@
 @tailwind utilities;
 
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   line-height: 1.5;
-  font-weight: 400;
+  font-weight: 500;
+  /* Boose base weight for glass legibility */
 
   color-scheme: dark;
-  --bg-color: #0b1120;
-  --energy-primary: #06b6d4;
-  /* Cyan */
-  --energy-secondary: #3b82f6;
-  /* Blue */
-  --energy-accent: #8b5cf6;
-  /* Violet */
-  --text-primary: #f1f5f9;
-  --glass-bg: rgba(15, 23, 42, 0.7);
+  --text-primary: #1e293b;
+  /* Slate 800 */
+  --text-secondary: #64748b;
+  /* Slate 500 */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -30,51 +26,200 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  /* Radiant Energy Gradient */
-  background: radial-gradient(circle at 50% 10%, #1e293b 0%, #020617 100%);
+  /* Deep mesh gradient (logo-matching: navy + cyan/blue) */
+  background-color: #0f172a;
+  background-image:
+    radial-gradient(at 20% 10%, rgba(59, 130, 246, 0.35) 0px, transparent 55%),
+    radial-gradient(at 85% 15%, rgba(0, 240, 255, 0.22) 0px, transparent 60%),
+    radial-gradient(at 50% 90%, rgba(139, 92, 246, 0.18) 0px, transparent 55%);
+
   color: var(--text-primary);
   overflow: hidden;
 }
 
-.card {
-  @apply rounded-xl backdrop-blur-md bg-opacity-40 bg-slate-900 border border-slate-700 shadow-xl transition-all duration-300;
+/* Lightweight "4D" background (2D time-based aurora overlay)
+   - CSS-only (no JS), low opacity
+   - Disabled for users who prefer reduced motion */
+.bg-aurora {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.28;
+  mix-blend-mode: screen;
+  filter: blur(14px) saturate(170%) contrast(120%);
+  background:
+    radial-gradient(60% 40% at 20% 20%, rgba(59, 130, 246, 0.55) 0%, transparent 62%),
+    radial-gradient(50% 45% at 80% 30%, rgba(0, 240, 255, 0.30) 0%, transparent 64%),
+    radial-gradient(55% 50% at 55% 85%, rgba(139, 92, 246, 0.28) 0%, transparent 66%);
+  transform: translate3d(0, 0, 0);
+  will-change: transform, opacity;
+  animation: aurora-drift 14s ease-in-out infinite alternate;
 }
 
-.card-hover {
-  @apply hover:scale-105 hover:shadow-cyan-500/20 cursor-pointer;
+.bg-aurora::before {
+  content: '';
+  position: absolute;
+  inset: -18%;
+  pointer-events: none;
+  opacity: 0.65;
+  mix-blend-mode: screen;
+  filter: blur(22px) saturate(160%);
+  background:
+    radial-gradient(55% 45% at 15% 65%, rgba(0, 240, 255, 0.28) 0%, transparent 60%),
+    radial-gradient(50% 40% at 75% 55%, rgba(59, 130, 246, 0.32) 0%, transparent 62%),
+    radial-gradient(60% 50% at 55% 15%, rgba(139, 92, 246, 0.22) 0%, transparent 64%);
+  transform: translate3d(0, 0, 0);
+  will-change: transform, opacity;
+  animation: aurora-drift-2 10s ease-in-out infinite alternate;
 }
 
-/* Custom Scrollbar */
+.bg-aurora::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.10;
+  mix-blend-mode: overlay;
+  filter: blur(0.4px) contrast(110%);
+  background-image:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.10) 0px, rgba(255, 255, 255, 0.10) 1px, transparent 1px, transparent 7px),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.08) 0px, rgba(255, 255, 255, 0.08) 1px, transparent 1px, transparent 11px);
+  background-size: auto;
+  mask-image: radial-gradient(circle at 50% 40%, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 72%);
+  transform: translate3d(0, 0, 0);
+  will-change: transform, opacity;
+  animation: aurora-texture-drift 8s linear infinite;
+}
+
+@keyframes aurora-drift {
+  0% {
+    transform: translate3d(-6%, -4%, 0) scale(1.06) rotate(-0.8deg);
+    opacity: 0.20;
+  }
+  100% {
+    transform: translate3d(6%, 4%, 0) scale(1.12) rotate(0.8deg);
+    opacity: 0.36;
+  }
+}
+
+@keyframes aurora-drift-2 {
+  0% {
+    transform: translate3d(4%, -5%, 0) scale(1.03) rotate(0.6deg);
+    opacity: 0.45;
+  }
+  100% {
+    transform: translate3d(-5%, 4%, 0) scale(1.10) rotate(-0.6deg);
+    opacity: 0.70;
+  }
+}
+
+@keyframes aurora-texture-drift {
+  0% {
+    transform: translate3d(-10px, -8px, 0);
+    opacity: 0.08;
+  }
+  100% {
+    transform: translate3d(10px, 8px, 0);
+    opacity: 0.12;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-aurora {
+    animation: none;
+    opacity: 0.14;
+  }
+  .bg-aurora::before,
+  .bg-aurora::after {
+    animation: none;
+  }
+}
+
+/* 2025 Liquid Glass Architecture */
+.card-liquid-glass {
+  /* 1. The Surface: High opacity 'Milk Glass' for light mode contrast */
+  background: linear-gradient(145deg,
+      rgba(255, 255, 255, 0.85) 0%,
+      /* Top-Left: More opaque */
+      rgba(255, 255, 255, 0.60) 100%
+      /* Bottom-Right: More transparent */
+    );
+
+  /* 2. The Lens: Saturation boost for 'Vibrancy' separation */
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+
+  /* 3. The Rim: Gradient border for light-source simulation */
+  border: 1px solid rgba(255, 255, 255, 0.4);
+
+  /* 4. The Levitation: Ambient Indigo Shadow */
+  box-shadow:
+    0 8px 32px 0 rgba(31, 38, 135, 0.15),
+    /* Deep Indigo Ambient */
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  /* Inner Polish/Glow */
+
+  /* 5. Geometry */
+  border-radius: 24px;
+  /* Squircle aesthetic */
+  transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.card-liquid-glass:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 40px 0 rgba(31, 38, 135, 0.25),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+/* Typography Weight Inflation for Glass */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  @apply font-semibold;
+  /* Was Regular/Medium */
+  color: #1E1B4B;
+  /* Deep Indigo */
+}
+
+/* Custom Scrollbar - Minimalist */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 4px;
+  background: #cbd5e1;
+  /* Slate 300 */
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #94a3b8;
+  /* Slate 400 */
 }
 
-/* UI Utilities - Using Standard Tailwind Classes to avoid syntax fragility */
+/* UI Utilities */
 .btn-primary {
-  @apply bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold px-6 py-2 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-cyan-400/50 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-medium px-6 py-2.5 rounded-full shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
 .btn-secondary {
-  @apply bg-slate-700 text-gray-200 px-4 py-2 rounded-lg hover:bg-slate-600 transition-colors;
+  @apply bg-white text-slate-700 border border-slate-200 font-medium px-5 py-2.5 rounded-full hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm;
 }
 
 .btn-success {
-  @apply bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold px-6 py-3 rounded-lg shadow-lg hover:shadow-lg hover:shadow-emerald-400/50 hover:-translate-y-0.5 transition-all;
+  @apply bg-gradient-to-r from-emerald-400 to-teal-500 text-white font-semibold px-6 py-3 rounded-full shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 hover:-translate-y-0.5 transition-all;
 }
 
 .input-field {
-  @apply bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all;
+  @apply bg-white/80 border border-slate-200 rounded-lg px-4 py-2 text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 outline-none transition-all shadow-sm;
 }

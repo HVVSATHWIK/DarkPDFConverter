@@ -64,15 +64,15 @@ export default function MiniCarousel({ tools, activeTool, onToolSelect }: MiniCa
     // Main container for the MiniCarousel, animated with Framer Motion.
     <motion.div
       initial={{ opacity: 0, y: 60 }} // Initial state: transparent and off-screen (bottom).
-      animate={{ opacity: 1, y: 0, transition: { delay: 0.3, type: 'spring', stiffness: 80 } }} // Animate to visible and on-screen.
-      exit={{ opacity: 0, y: 60, transition: { duration: 0.2 } }} // Animate out when unmounted.
-      className="fixed bottom-0 left-0 right-0 z-50 flex justify-center p-3 bg-gray-900 bg-opacity-70 backdrop-blur-md shadow-top-lg"
+      animate={{ opacity: 1, y: 0, transition: { type: 'tween', duration: 0.18, ease: 'easeOut' } }} // Animate to visible and on-screen.
+      exit={{ opacity: 0, y: 60, transition: { type: 'tween', duration: 0.12, ease: 'easeIn' } }} // Animate out when unmounted.
+      className="fixed bottom-0 left-0 right-0 z-50 flex justify-center p-3 bg-slate-950/50 backdrop-blur-md shadow-top-lg ring-1 ring-white/10"
     // `shadow-top-lg` is a custom utility class for a shadow on the top edge.
     >
       {/* Left scroll button */}
       <button
         onClick={() => scroll('left')}
-        className="p-2 m-1 rounded-full bg-gray-700 hover:bg-gray-600 text-white self-center disabled:opacity-50"
+        className="p-2 m-1 rounded-full bg-white/5 hover:bg-white/10 text-slate-100 self-center disabled:opacity-50 ring-1 ring-white/10"
         aria-label="Scroll left"
       >
         <ChevronLeftIcon className="h-6 w-6" />
@@ -100,8 +100,8 @@ export default function MiniCarousel({ tools, activeTool, onToolSelect }: MiniCa
               // Dynamic classes for styling based on whether the tool is active.
               className={`flex flex-col items-center justify-center p-3 rounded-lg min-w-[85px] h-[85px] transition-all duration-200 ease-in-out
                 ${isCurrentToolActive
-                  ? 'bg-blue-600 text-white shadow-blue-500/50 shadow-lg scale-105 ring-2 ring-blue-400' // Highlighted style for active tool.
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white hover:shadow-md' // Default style for other tools.
+                  ? 'bg-cyan-400/15 text-cyan-100 shadow-cyan-500/20 shadow-lg scale-105 ring-2 ring-cyan-400/25' // Highlighted style for active tool.
+                  : 'bg-white/5 text-slate-200 hover:bg-white/10 hover:text-white hover:shadow-md ring-1 ring-white/10' // Default style for other tools.
                 }
                 ${isCurrentToolActive ? '' : 'hover:scale-105'} // Hover scale effect for non-active tools.
               `}
@@ -122,7 +122,7 @@ export default function MiniCarousel({ tools, activeTool, onToolSelect }: MiniCa
       {/* Right scroll button */}
       <button
         onClick={() => scroll('right')}
-        className="p-2 m-1 rounded-full bg-gray-700 hover:bg-gray-600 text-white self-center disabled:opacity-50"
+        className="p-2 m-1 rounded-full bg-white/5 hover:bg-white/10 text-slate-100 self-center disabled:opacity-50 ring-1 ring-white/10"
         aria-label="Scroll right"
       >
         <ChevronRightIcon className="h-6 w-6" />

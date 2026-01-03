@@ -54,6 +54,24 @@ vi.mock('./useSplitPDF', () => ({
   })),
 }));
 
+vi.mock('./useRotatePDF', () => ({
+  useRotatePDF: vi.fn(() => ({
+    rotatePdf: vi.fn().mockResolvedValue(new Uint8Array([7, 17, 27])),
+  })),
+}));
+
+vi.mock('./useCompressPDF', () => ({
+  useCompressPDF: vi.fn(() => ({
+    compressPdf: vi.fn().mockResolvedValue(new Uint8Array([9, 19, 29])),
+  })),
+}));
+
+vi.mock('./useExtractPages', () => ({
+  useExtractPages: vi.fn(() => ({
+    extractPages: vi.fn().mockResolvedValue(new Uint8Array([11, 21, 31])),
+  })),
+}));
+
 // Define a more complete mock for PDFDocument instance, especially for single file processing
 const mockPdfDocInstanceDefaults = {
     getPages: vi.fn().mockReturnValue([ { getWidth: () => 600, getHeight: () => 800 } ]),
@@ -117,7 +135,7 @@ describe('useProcessPDF', () => {
     // Check properties on processResult safely
     expect(processResult).not.toBeNull();
     expect(processResult.processedPdf).toBeInstanceOf(Uint8Array);
-    expect(processResult.title).toBe('Mock PDF Title'); // From mockPdfDocInstanceDefaults
+    expect(processResult.title).toBe('Processed - test.pdf');
     expect(mockOnProgress).toHaveBeenCalled();
   });
 
@@ -138,6 +156,7 @@ describe('useProcessPDF', () => {
     expect(applyDarkMode).toHaveBeenCalled();
     expect(processResult).not.toBeNull();
     expect(processResult.processedPdf).toBeInstanceOf(Uint8Array);
+    expect(processResult.title).toBe('Dark Mode - test.pdf');
     expect(mockOnProgress).toHaveBeenCalledWith(1, 'Processing complete!');
   });
 
@@ -182,7 +201,7 @@ describe('useProcessPDF', () => {
 
     await act(async () => {
         await expect(result.current.processDocument(mockFile, mockOnProgress, options))
-            .rejects.toThrow("No files provided for merging or input is not an array.");
+            .rejects.toThrow("No files provided for merging.");
     });
   });
 
@@ -203,7 +222,7 @@ describe('useProcessPDF', () => {
     expect(processResult).not.toBeNull();
     expect(processResult.isSplit).toBe(true);
     expect(processResult.pageCount).toBe(2);
-    expect(processResult.title).toContain(`(pages ${splitOptions.startPage}-${splitOptions.endPage})`);
+    expect(processResult.title).toBe('test.pdf (Split)');
     expect(processResult.processedPdf).toBeInstanceOf(Uint8Array);
     expect(mockOnProgress).toHaveBeenCalledWith(1, 'Split complete!');
   });

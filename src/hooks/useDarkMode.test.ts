@@ -75,13 +75,14 @@ describe('useDarkMode', () => {
 
     expect(mockPdfDoc.getPages).toHaveBeenCalled();
     expect(mockPage.drawRectangle).toHaveBeenCalledWith(expect.objectContaining({
-      color: { red: 0.08, green: 0.08, blue: 0.08, type: 'RGB' },
+      color: { red: 1, green: 1, blue: 1, type: 'RGB' },
+      blendMode: 'Difference',
     }));
     expect(mockPage.drawText).toHaveBeenCalledWith(
       'LitasDark Preview',
       expect.objectContaining({
         size: 10,
-        color: { red: 0.5, green: 0.5, blue: 0.5, type: 'RGB' },
+        color: { red: 0.8, green: 0.8, blue: 0.8, type: 'RGB' },
       })
     );
     expect(mockPdfDoc.embedFont).toHaveBeenCalledWith(StandardFonts.Helvetica);
