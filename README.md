@@ -1,7 +1,7 @@
 # Litas: Next-Gen PDF Dark Mode Engine
 
 <div align="center">
-  <img src="public/favicon.png" alt="Litas Logo" width="120" />
+  <img src="public/favicon.ico" alt="Litas Logo" width="120" />
   <br />
   <br />
   
