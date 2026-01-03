@@ -1,7 +1,22 @@
 {
   "name": "litasdark-react",
   "private": true,
-  "version": "0.0.0",
+  "description": "Privacy-first PDF editor powered by Rust & WebAssembly. Process files locally with a stunning Liquid Glass UI.",
+  "keywords": [
+    "pdf",
+    "rust",
+    "wasm",
+    "webassembly",
+    "react",
+    "privacy",
+    "dark-mode"
+  ],
+  "homepage": "https://litasdark-git-main-veerendranath-venkata-sathwiks-projects.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HVVSATHWIK/DarkPDFConverter.git"
+  },
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
