@@ -24,7 +24,6 @@ export default defineConfig({
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-3d': ['three', '@react-three/fiber', '@react-three/drei'],
           'vendor-pdf': ['pdfjs-dist', 'react-pdf'],
-          'vendor-utils': ['framer-motion', 'clsx', 'tailwind-merge'],
         },
       },
     },
