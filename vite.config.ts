@@ -18,6 +18,17 @@ export default defineConfig({
   build: {
     minify: 'esbuild',
     sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-3d': ['three', '@react-three/fiber', '@react-three/drei'],
+          'vendor-pdf': ['pdfjs-dist', 'react-pdf'],
+          'vendor-utils': ['framer-motion', 'clsx', 'tailwind-merge'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
   },
   optimizeDeps: {
     include: ['pdfjs-dist']
