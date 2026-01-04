@@ -1,4 +1,4 @@
-# Litas: Next-Gen PDF Dark Mode Engine
+# Litas: Next‑Gen PDF Dark Mode Engine
 
 <div align="center">
   <img src="public/favicon.ico" alt="Litas Logo" width="120" />
@@ -48,25 +48,11 @@ The user interface is built with a modern **Liquid Glass** aesthetic, featuring 
 
 ## 🏗️ Architecture
 
-Litas uses a hybrid architecture where React handles the UI and a dedicated Web Worker (powered by Rust/WASM) handles the heavy lifting.
+Litas uses a hybrid architecture where React runs the UI on the main thread and a dedicated Web Worker (powered by Rust/WASM) performs CPU‑heavy PDF operations.
 
-```mermaid
-graph TD
-    UI[React UI\n(Main Thread)] -->|Command| Worker[Web Worker]
-    Worker -->|WASM Call| Rust[Rust / WASM Core]
-    Rust -->|Processed Data| Worker
-    Worker -->|Zero-Copy| UI
-    
-    subgraph "Visual Layer"
-    UI --> ThreeJS[3D Carousel\n(Canvas)]
-    UI --> HTML[Liquid Glass Components]
-    end
-    
-    subgraph "Engine Layer"
-    Worker -.-> PDFLib[PDF.js / PDF-Lib]
-    Rust -.-> P[pdf (crate)]
-    end
-```
+<p align="center">
+  <img src="docs/diagrams/architecture.svg" alt="Litas architecture diagram" width="900" />
+</p>
 
 ## 🛠️ Installation
 
@@ -90,7 +76,7 @@ graph TD
     ```bash
     npm run dev
     ```
-    Open `http://localhost:5173` to view the app.
+  Open the URL shown in the terminal (Vite may choose a different port if 5173 is in use).
 
 ## 📦 Building for Production
 
@@ -127,5 +113,5 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ---
 
 <p align="center">
-  Built with ❤️ by Veerendranath
+  Built by Veerendranath
 </p>
