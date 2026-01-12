@@ -8,7 +8,7 @@ import './index.css';
 function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-grow">
           <AppRoutes />

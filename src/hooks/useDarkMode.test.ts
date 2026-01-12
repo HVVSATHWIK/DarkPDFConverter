@@ -74,9 +74,16 @@ describe('useDarkMode', () => {
     await applyDarkMode(mockPdfDoc);
 
     expect(mockPdfDoc.getPages).toHaveBeenCalled();
+    // Default is image-preserving mode:
+    // - a Multiply darken pass
+    // - then a partial Difference pass
+    expect(mockPage.drawRectangle).toHaveBeenCalledWith(expect.objectContaining({
+      blendMode: 'Multiply',
+    }));
     expect(mockPage.drawRectangle).toHaveBeenCalledWith(expect.objectContaining({
       color: { red: 1, green: 1, blue: 1, type: 'RGB' },
       blendMode: 'Difference',
+      opacity: expect.any(Number),
     }));
     expect(mockPage.drawText).toHaveBeenCalledWith(
       'LitasDark Preview',

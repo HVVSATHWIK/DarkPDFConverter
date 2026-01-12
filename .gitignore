@@ -5,6 +5,9 @@ node_modules/
 dist/
 build/
 
+# Test coverage output
+coverage/
+
 # Rust/WASM build artifacts
 src-wasm/target/
 

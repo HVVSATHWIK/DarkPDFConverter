@@ -72,7 +72,7 @@ export default function MiniCarousel({ tools, activeTool, onToolSelect }: MiniCa
       {/* Left scroll button */}
       <button
         onClick={() => scroll('left')}
-        className="p-2 m-1 rounded-full bg-white/5 hover:bg-white/10 text-slate-100 self-center disabled:opacity-50 ring-1 ring-white/10"
+        className="p-2 m-1 rounded-full bg-white/5 hover:bg-white/10 text-slate-100 self-center disabled:opacity-50 ring-1 ring-white/10 transition-colors"
         aria-label="Scroll left"
       >
         <ChevronLeftIcon className="h-6 w-6" />
@@ -100,14 +100,14 @@ export default function MiniCarousel({ tools, activeTool, onToolSelect }: MiniCa
               // Dynamic classes for styling based on whether the tool is active.
               className={`flex flex-col items-center justify-center p-3 rounded-lg min-w-[85px] h-[85px] transition-all duration-200 ease-in-out
                 ${isCurrentToolActive
-                  ? 'bg-cyan-400/15 text-cyan-100 shadow-cyan-500/20 shadow-lg scale-105 ring-2 ring-cyan-400/25' // Highlighted style for active tool.
+                  ? 'bg-white/10 text-white shadow-black/20 shadow-lg scale-[1.02] ring-1 ring-white/20' // Active: subtle emphasis.
                   : 'bg-white/5 text-slate-200 hover:bg-white/10 hover:text-white hover:shadow-md ring-1 ring-white/10' // Default style for other tools.
                 }
-                ${isCurrentToolActive ? '' : 'hover:scale-105'} // Hover scale effect for non-active tools.
+                ${isCurrentToolActive ? '' : 'hover:scale-[1.03]'} // Subtle hover scale.
               `}
               // Framer Motion animation props for hover and tap effects.
-              whileHover={{ scale: isCurrentToolActive ? 1.05 : 1.1 }} // Active tool scales less on hover.
-              whileTap={{ scale: isCurrentToolActive ? 1.05 : 0.95 }}  // Tap effect.
+              whileHover={{ scale: isCurrentToolActive ? 1.02 : 1.04 }}
+              whileTap={{ scale: isCurrentToolActive ? 1.02 : 0.98 }}
               disabled={isCurrentToolActive} // Disable button if it's the currently active tool.
               aria-pressed={isCurrentToolActive} // ARIA attribute for accessibility.
               title={tool.name} // Tooltip for tool name.
@@ -122,7 +122,7 @@ export default function MiniCarousel({ tools, activeTool, onToolSelect }: MiniCa
       {/* Right scroll button */}
       <button
         onClick={() => scroll('right')}
-        className="p-2 m-1 rounded-full bg-white/5 hover:bg-white/10 text-slate-100 self-center disabled:opacity-50 ring-1 ring-white/10"
+        className="p-2 m-1 rounded-full bg-white/5 hover:bg-white/10 text-slate-100 self-center disabled:opacity-50 ring-1 ring-white/10 transition-colors"
         aria-label="Scroll right"
       >
         <ChevronRightIcon className="h-6 w-6" />

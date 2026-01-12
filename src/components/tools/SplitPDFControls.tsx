@@ -52,7 +52,7 @@ const SplitPDFControls: React.FC<SplitPDFControlsProps> = ({ onSettingsChange, c
 
 
   return (
-    <div className="p-4 space-y-4 bg-gray-800 rounded-md shadow">
+    <div className="p-4 space-y-4 bg-white/5 rounded-xl border border-white/10">
       <h3 className="text-lg font-semibold text-white">Split PDF Settings</h3>
 
       <div className="grid grid-cols-2 gap-4">
@@ -68,7 +68,7 @@ const SplitPDFControls: React.FC<SplitPDFControlsProps> = ({ onSettingsChange, c
             value={startPage}
             onChange={(e) => setStartPage(e.target.value)}
             // onBlur={handleInputChange} // Validate on blur or instantly via useEffect
-            className="mt-1 block w-full pl-3 pr-3 py-2 border-gray-600 bg-gray-700 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+            className="mt-1 block w-full pl-3 pr-3 py-2 border border-white/10 bg-black/20 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400/50 focus:border-indigo-400/40 sm:text-sm rounded-lg"
             placeholder="e.g., 1"
           />
         </div>
@@ -84,13 +84,13 @@ const SplitPDFControls: React.FC<SplitPDFControlsProps> = ({ onSettingsChange, c
             value={endPage}
             onChange={(e) => setEndPage(e.target.value)}
             // onBlur={handleInputChange}
-            className="mt-1 block w-full pl-3 pr-3 py-2 border-gray-600 bg-gray-700 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+            className="mt-1 block w-full pl-3 pr-3 py-2 border border-white/10 bg-black/20 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400/50 focus:border-indigo-400/40 sm:text-sm rounded-lg"
             placeholder="e.g., 5"
           />
         </div>
       </div>
-      {error && <p className="text-sm text-red-400">{error}</p>}
-      <p className="text-xs text-gray-400 mt-2">
+      {error && <p className="text-sm text-rose-300">{error}</p>}
+      <p className="text-xs text-slate-300/70 mt-2">
         Specify the page range (inclusive) to extract into a new PDF.
       </p>
     </div>

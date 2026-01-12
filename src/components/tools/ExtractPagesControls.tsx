@@ -45,9 +45,9 @@ export default function ExtractPagesControls({ onSettingsChange, currentOptions 
     };
 
     return (
-        <div className="bg-gray-800 p-4 rounded-lg border border-gray-700 space-y-4">
-            <h3 className="text-gray-200 font-medium flex items-center gap-2">
-                <DocumentDuplicateIcon className="w-5 h-5 text-green-400" />
+        <div className="bg-white/5 p-4 rounded-xl border border-white/10 space-y-4">
+            <h3 className="text-slate-200 font-semibold flex items-center gap-2">
+                <DocumentDuplicateIcon className="w-5 h-5 text-indigo-300" />
                 Extract Pages
             </h3>
 
@@ -58,7 +58,7 @@ export default function ExtractPagesControls({ onSettingsChange, currentOptions 
                     placeholder="e.g. 1, 3-5, 8"
                     value={inputStr}
                     onChange={handleInputChange}
-                    className="w-full bg-gray-900 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400/50 focus:border-indigo-400/40"
                 />
                 <p className="text-xs text-slate-500">
                     Enter exact page numbers separated by commas, or ranges with a hyphen.

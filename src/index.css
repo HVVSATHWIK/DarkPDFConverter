@@ -6,13 +6,11 @@
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 500;
-  /* Boose base weight for glass legibility */
 
   color-scheme: dark;
-  --text-primary: #1e293b;
-  /* Slate 800 */
-  --text-secondary: #64748b;
-  /* Slate 500 */
+  /* App is visually dark; default text must be light for contrast. */
+  --text-primary: #f8fafc; /* Slate 50 */
+  --text-secondary: #cbd5e1; /* Slate 300 */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -20,10 +18,21 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
+  display: block;
   min-width: 320px;
   min-height: 100vh;
   /* Deep mesh gradient (logo-matching: navy + cyan/blue) */
@@ -45,16 +54,16 @@ body {
   inset: 0;
   pointer-events: none;
   z-index: 2;
-  opacity: 0.28;
+  opacity: 0.18;
   mix-blend-mode: screen;
-  filter: blur(14px) saturate(170%) contrast(120%);
+  filter: blur(16px) saturate(145%) contrast(112%);
   background:
     radial-gradient(60% 40% at 20% 20%, rgba(59, 130, 246, 0.55) 0%, transparent 62%),
     radial-gradient(50% 45% at 80% 30%, rgba(0, 240, 255, 0.30) 0%, transparent 64%),
     radial-gradient(55% 50% at 55% 85%, rgba(139, 92, 246, 0.28) 0%, transparent 66%);
   transform: translate3d(0, 0, 0);
   will-change: transform, opacity;
-  animation: aurora-drift 14s ease-in-out infinite alternate;
+  animation: aurora-drift 18s ease-in-out infinite alternate;
 }
 
 .bg-aurora::before {
@@ -62,16 +71,16 @@ body {
   position: absolute;
   inset: -18%;
   pointer-events: none;
-  opacity: 0.65;
+  opacity: 0.55;
   mix-blend-mode: screen;
-  filter: blur(22px) saturate(160%);
+  filter: blur(24px) saturate(140%);
   background:
     radial-gradient(55% 45% at 15% 65%, rgba(0, 240, 255, 0.28) 0%, transparent 60%),
     radial-gradient(50% 40% at 75% 55%, rgba(59, 130, 246, 0.32) 0%, transparent 62%),
     radial-gradient(60% 50% at 55% 15%, rgba(139, 92, 246, 0.22) 0%, transparent 64%);
   transform: translate3d(0, 0, 0);
   will-change: transform, opacity;
-  animation: aurora-drift-2 10s ease-in-out infinite alternate;
+  animation: aurora-drift-2 14s ease-in-out infinite alternate;
 }
 
 .bg-aurora::after {
@@ -79,7 +88,7 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.10;
+  opacity: 0.07;
   mix-blend-mode: overlay;
   filter: blur(0.4px) contrast(110%);
   background-image:
@@ -89,7 +98,7 @@ body {
   mask-image: radial-gradient(circle at 50% 40%, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 72%);
   transform: translate3d(0, 0, 0);
   will-change: transform, opacity;
-  animation: aurora-texture-drift 8s linear infinite;
+  animation: aurora-texture-drift 12s linear infinite;
 }
 
 @keyframes aurora-drift {
@@ -128,7 +137,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .bg-aurora {
     animation: none;
-    opacity: 0.14;
+    opacity: 0.10;
   }
   .bg-aurora::before,
   .bg-aurora::after {
@@ -209,7 +218,7 @@ h6 {
 
 /* UI Utilities */
 .btn-primary {
-  @apply bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-medium px-6 py-2.5 rounded-full shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold px-6 py-2.5 rounded-full shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/35 active:scale-[0.99] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950;
 }
 
 .btn-secondary {
@@ -217,9 +226,23 @@ h6 {
 }
 
 .btn-success {
-  @apply bg-gradient-to-r from-emerald-400 to-teal-500 text-white font-semibold px-6 py-3 rounded-full shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 hover:-translate-y-0.5 transition-all;
+  @apply bg-gradient-to-r from-emerald-400 to-teal-500 text-white font-semibold px-6 py-3 rounded-full shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 active:scale-[0.99] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950;
 }
 
 .input-field {
   @apply bg-white/80 border border-slate-200 rounded-lg px-4 py-2 text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 outline-none transition-all shadow-sm;
+}
+
+/* Utilities used across components */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.shadow-top-lg {
+  box-shadow: 0 -10px 15px -3px rgba(0, 0, 0, 0.22), 0 -4px 6px -2px rgba(0, 0, 0, 0.18);
 }

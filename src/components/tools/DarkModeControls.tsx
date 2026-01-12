@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { DarkModeOptions, ThemeName } from '@/hooks/useDarkMode'; // Assuming ThemeName is exported
+import React, { useEffect, useRef, useState } from 'react';
+import { DarkModeOptions, DarkModeRenderMode, ThemeName } from '@/hooks/useDarkMode';
 
 interface DarkModeControlsProps {
   onSettingsChange: (options: DarkModeOptions) => void;
@@ -8,16 +8,52 @@ interface DarkModeControlsProps {
 }
 
 const themes: ThemeName[] = ['dark', 'darker', 'darkest'];
+const modes: { value: DarkModeRenderMode; label: string; hint: string }[] = [
+  {
+    value: 'preserve-images',
+    label: 'Preserve images (recommended)',
+    hint: 'Keeps photos closer to original colors (less inversion).'
+  },
+  {
+    value: 'invert',
+    label: 'Invert everything (classic)',
+    hint: 'Best for pure text PDFs, but photos may invert colors.'
+  },
+];
 
 const DarkModeControls: React.FC<DarkModeControlsProps> = ({ onSettingsChange, currentOptions }) => {
   const [selectedTheme, setSelectedTheme] = useState<ThemeName>(currentOptions.theme || 'dark');
+  const [selectedMode, setSelectedMode] = useState<DarkModeRenderMode>(currentOptions.mode || 'preserve-images');
+  const didEmitDefaultsRef = useRef(false);
   // const [brightness, setBrightness] = useState(currentOptions.brightness || 1);
   // const [contrast, setContrast] = useState(currentOptions.contrast || 1);
+
+  // Keep local state in sync with parent updates (e.g., tool switching resets).
+  useEffect(() => {
+    const effectiveTheme: ThemeName = currentOptions.theme || 'dark';
+    const effectiveMode: DarkModeRenderMode = currentOptions.mode || 'preserve-images';
+
+    setSelectedTheme(effectiveTheme);
+    setSelectedMode(effectiveMode);
+
+    // If parent didn't provide keys, emit effective defaults once.
+    // This prevents UI and processing options from drifting.
+    if (!didEmitDefaultsRef.current && (!currentOptions.theme || !currentOptions.mode)) {
+      didEmitDefaultsRef.current = true;
+      onSettingsChange({ theme: effectiveTheme, mode: effectiveMode });
+    }
+  }, [currentOptions.mode, currentOptions.theme, onSettingsChange]);
 
   const handleThemeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newTheme = event.target.value as ThemeName;
     setSelectedTheme(newTheme);
-    onSettingsChange({ theme: newTheme /*, brightness, contrast */ });
+    onSettingsChange({ theme: newTheme, mode: selectedMode /*, brightness, contrast */ });
+  };
+
+  const handleModeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newMode = event.target.value as DarkModeRenderMode;
+    setSelectedMode(newMode);
+    onSettingsChange({ theme: selectedTheme, mode: newMode });
   };
 
   // Add handlers for brightness/contrast if/when sliders are implemented
@@ -25,8 +61,30 @@ const DarkModeControls: React.FC<DarkModeControlsProps> = ({ onSettingsChange, c
   // const handleContrastChange = (event: React.ChangeEvent<HTMLInputElement>) => { ... };
 
   return (
-    <div className="p-4 space-y-4 bg-gray-800 rounded-md shadow">
+    <div className="p-4 space-y-4 bg-white/5 rounded-xl border border-white/10">
       <h3 className="text-lg font-semibold text-white">Dark Mode Settings</h3>
+
+      <div>
+        <label htmlFor="mode-select" className="block text-sm font-medium text-gray-300 mb-1">
+          Mode
+        </label>
+        <select
+          id="mode-select"
+          name="mode"
+          value={selectedMode}
+          onChange={handleModeChange}
+          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-white/10 bg-black/20 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400/50 focus:border-indigo-400/40 sm:text-sm rounded-lg"
+        >
+          {modes.map(m => (
+            <option key={m.value} value={m.value}>
+              {m.label}
+            </option>
+          ))}
+        </select>
+        <p className="text-xs text-slate-300/70 mt-2">
+          {modes.find(m => m.value === selectedMode)?.hint}
+        </p>
+      </div>
 
       <div>
         <label htmlFor="theme-select" className="block text-sm font-medium text-gray-300 mb-1">
@@ -37,7 +95,7 @@ const DarkModeControls: React.FC<DarkModeControlsProps> = ({ onSettingsChange, c
           name="theme"
           value={selectedTheme}
           onChange={handleThemeChange}
-          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 bg-gray-700 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-white/10 bg-black/20 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400/50 focus:border-indigo-400/40 sm:text-sm rounded-lg"
         >
           {themes.map(themeName => (
             <option key={themeName} value={themeName}>
@@ -62,7 +120,7 @@ const DarkModeControls: React.FC<DarkModeControlsProps> = ({ onSettingsChange, c
       {/* The main "Process" button is in PDFProcessor.tsx.
           This component now only manages settings.
       */}
-       <p className="text-xs text-gray-400 mt-2">
+       <p className="text-xs text-slate-300/70 mt-2">
         Select a theme. The changes will be applied when you process the PDF.
       </p>
     </div>

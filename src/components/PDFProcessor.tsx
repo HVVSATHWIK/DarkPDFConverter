@@ -2,12 +2,17 @@ import { useState, useEffect, useRef } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { motion } from 'framer-motion';
 import { useProcessPDF, ProcessOptions } from '../hooks/useProcessPDF';
-import { XCircleIcon, DocumentPlusIcon, ArrowUpOnSquareIcon } from '@heroicons/react/24/outline';
+import { XCircleIcon, DocumentPlusIcon, ArrowUpOnSquareIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { DarkModeOptions } from '@/hooks/useDarkMode';
 import { SplitOptions } from '@/hooks/useSplitPDF';
 import { RotateOptions } from '@/hooks/useRotatePDF'; // Added
 import { ExtractOptions } from '@/hooks/useExtractPages'; // Added
 import type { Tool } from '../types';
+
+type SelectedFileItem = {
+  id: string;
+  file: File;
+};
 
 export interface PDFProcessorProps {
   onComplete: (result: any) => void;
@@ -34,12 +39,13 @@ function PDFProcessor({
   rotateOptions, // Destructured
   extractOptions // Destructured
 }: PDFProcessorProps) {
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<SelectedFileItem[]>([]);
   const [progress, setProgress] = useState(0);
   const { processDocument, isProcessing } = useProcessPDF();
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const idCounterRef = useRef(0);
 
   useEffect(() => {
     setSelectedFiles([]);
@@ -52,7 +58,13 @@ function PDFProcessor({
 
   const handleFilesSelected = (files: FileList | null) => {
     if (files) {
-      const newFiles = Array.from(files);
+      const newFiles = Array.from(files).map((file) => {
+        // Stable-enough per session, and unique even when names collide.
+        // (We avoid relying only on `file.name` because duplicates are common.)
+        const nextCounter = idCounterRef.current++;
+        const id = `${file.name}:${file.lastModified}:${file.size}:${nextCounter}`;
+        return { id, file };
+      });
       if (allowMultipleFiles) {
         setSelectedFiles(prev => [...prev, ...newFiles]);
       } else {
@@ -69,8 +81,27 @@ function PDFProcessor({
     if (event.target) event.target.value = '';
   };
 
-  const removeFile = (fileName: string) => {
-    setSelectedFiles(prev => prev.filter(file => file.name !== fileName));
+  const clearAllFiles = () => {
+    setSelectedFiles([]);
+    setProgress(0);
+    if (downloadUrl) URL.revokeObjectURL(downloadUrl);
+    setDownloadUrl(null);
+  };
+
+  const moveFile = (index: number, direction: -1 | 1) => {
+    setSelectedFiles((prev) => {
+      const nextIndex = index + direction;
+      if (nextIndex < 0 || nextIndex >= prev.length) return prev;
+      const next = [...prev];
+      const tmp = next[index];
+      next[index] = next[nextIndex];
+      next[nextIndex] = tmp;
+      return next;
+    });
+  };
+
+  const removeFile = (id: string) => {
+    setSelectedFiles(prev => prev.filter(item => item.id !== id));
   };
 
   const handleProcessClick = async () => {
@@ -94,12 +125,12 @@ function PDFProcessor({
 
       let result;
       if (activeTool?.name === 'Merge PDFs' && allowMultipleFiles) {
-        result = await processDocument(selectedFiles, (p, msg) => {
+        result = await processDocument(selectedFiles.map((s) => s.file), (p, msg) => {
           setProgress(Math.round(p * 100));
           console.log(`Progress: ${p * 100}%, Message: ${msg}`);
         }, processOptions);
       } else if (selectedFiles.length > 0) { // For single file tools
-        const fileToProcess = selectedFiles[0];
+        const fileToProcess = selectedFiles[0].file;
         result = await processDocument(fileToProcess, (p, msg) => {
           setProgress(Math.round(p * 100));
           console.log(`Progress: ${p * 100}%, Message: ${msg}`);
@@ -146,15 +177,24 @@ function PDFProcessor({
     return false;
   };
 
+  const totalSizeKb = selectedFiles.reduce((acc, item) => acc + item.file.size, 0) / 1024;
+  const showMergeReorder = allowMultipleFiles && activeTool?.name === 'Merge PDFs' && selectedFiles.length > 1;
+
   return (
-    <div role="region" aria-label="PDF processing area" className="space-y-6 p-4 bg-gray-700 rounded-lg">
+    <div
+      role="region"
+      aria-label="PDF processing area"
+      className="space-y-6 p-4 rounded-xl border border-white/10 bg-white/5"
+    >
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
-        className={`flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg cursor-pointer
-                    ${isDragging ? 'border-blue-500 bg-gray-600' : 'border-gray-500 hover:border-blue-400'}
+        className={`flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-xl cursor-pointer
+                    ${isDragging
+            ? 'border-indigo-400/80 bg-indigo-500/10'
+            : 'border-white/15 hover:border-white/25 bg-black/10'}
                     transition-colors duration-200 ease-in-out`}
       >
         <input
@@ -166,22 +206,65 @@ function PDFProcessor({
           className="hidden"
           id={`pdf-upload-${toolId}`}
         />
-        <DocumentPlusIcon className="w-12 h-12 text-gray-400 mb-2" />
-        <p className="text-gray-300 text-center">
+        <DocumentPlusIcon className="w-12 h-12 text-slate-300 mb-2" />
+        <p className="text-slate-200 text-center">
           Drag & drop {allowMultipleFiles ? "PDFs" : "a PDF"} here, or click to select.
         </p>
       </div>
 
       {selectedFiles.length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-sm font-medium text-gray-200">Selected file(s):</h3>
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <h3 className="text-sm font-semibold text-slate-200">Selected file(s)</h3>
+              {allowMultipleFiles && (
+                <p className="text-xs text-slate-300/70">
+                  {selectedFiles.length} file{selectedFiles.length === 1 ? '' : 's'} • {totalSizeKb.toFixed(1)} KB total
+                </p>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={clearAllFiles}
+              className="shrink-0 text-xs font-semibold text-slate-200/90 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg px-3 py-2 transition-colors"
+            >
+              Clear all
+            </button>
+          </div>
           <ul className="space-y-1">
-            {selectedFiles.map(file => (
-              <li key={file.name} className="flex items-center justify-between p-2 bg-gray-600 rounded text-sm text-gray-50">
-                <span>{file.name} ({(file.size / 1024).toFixed(1)} KB)</span>
-                <button onClick={() => removeFile(file.name)} className="text-red-400 hover:text-red-300">
-                  <XCircleIcon className="w-5 h-5" />
-                </button>
+            {selectedFiles.map((item, index) => (
+              <li key={item.id} className="flex items-center justify-between gap-3 p-3 bg-black/20 rounded-lg text-sm text-slate-100 border border-white/10">
+                <span className="truncate">{item.file.name} ({(item.file.size / 1024).toFixed(1)} KB)</span>
+                <div className="flex items-center gap-2">
+                  {showMergeReorder && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => moveFile(index, -1)}
+                        className="p-1.5 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 transition-colors"
+                        aria-label={`Move ${item.file.name} up`}
+                      >
+                        <ChevronUpIcon className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveFile(index, 1)}
+                        className="p-1.5 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 transition-colors"
+                        aria-label={`Move ${item.file.name} down`}
+                      >
+                        <ChevronDownIcon className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeFile(item.id)}
+                    className="text-rose-300 hover:text-rose-200 transition-colors"
+                    aria-label={`Remove ${item.file.name}`}
+                  >
+                    <XCircleIcon className="w-5 h-5" />
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
@@ -201,13 +284,13 @@ function PDFProcessor({
 
       {isProcessing && (
         <div className="space-y-2">
-          <p className="text-sm text-gray-300 text-center">Processing: {progress}%</p>
+          <p className="text-sm text-slate-200 text-center">Processing: {progress}%</p>
           <motion.div
-            className="w-full h-2 bg-gray-500 rounded-full"
+            className="w-full h-2 bg-white/10 rounded-full overflow-hidden"
             aria-label={`Processing progress: ${progress}%`}
           >
             <motion.div
-              className="h-full bg-blue-500 rounded-full"
+              className="h-full bg-gradient-to-r from-indigo-400 to-violet-400 rounded-full"
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ type: 'tween', duration: 0.18, ease: 'easeOut' }}
@@ -231,12 +314,12 @@ function PDFProcessor({
 
 function ErrorFallback({ error, resetErrorBoundary }: any) {
   return (
-    <div role="alert" className="p-4 bg-red-700 text-white rounded-lg shadow-md">
+    <div role="alert" className="p-4 bg-rose-500/15 text-white rounded-xl shadow-md border border-rose-400/20">
       <h2 className="text-lg font-semibold mb-2">Oops! Something went wrong.</h2>
-      <pre className="mt-2 text-sm bg-red-600 p-2 rounded">{error.message}</pre>
+      <pre className="mt-2 text-sm bg-black/25 p-2 rounded-lg border border-white/10 overflow-auto">{error.message}</pre>
       <button
         onClick={resetErrorBoundary}
-        className="mt-4 px-4 py-2 bg-white text-red-700 rounded hover:bg-red-100 font-semibold"
+        className="mt-4 px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/15 font-semibold border border-white/10"
       >
         Try again
       </button>

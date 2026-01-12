@@ -186,7 +186,7 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="fixed inset-0 z-[45] flex items-center justify-center p-4 backdrop-blur-md bg-black/40"
+          className="fixed inset-0 z-[45] flex items-center justify-center p-4 backdrop-blur-md bg-black/45"
           aria-modal="true"
           role="dialog"
         >
@@ -194,12 +194,12 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
 
           {/* Main Panel Container */}
           <motion.div
-            className="relative bg-slate-900/70 text-white rounded-2xl shadow-2xl w-full max-w-7xl h-[90vh] flex flex-col overflow-hidden pointer-events-auto origin-center border border-white/10"
+            className="relative bg-slate-950/55 text-white rounded-2xl shadow-2xl w-full max-w-7xl h-[90vh] flex flex-col overflow-hidden pointer-events-auto origin-center border border-white/10"
           >
-            <header className="flex flex-col md:flex-row items-center justify-between p-4 md:p-6 border-b border-white/10 bg-slate-900/50 backdrop-blur-md">
+            <header className="flex flex-col md:flex-row items-center justify-between p-4 md:p-6 border-b border-white/10 bg-slate-950/40 backdrop-blur-md">
               <button
                 onClick={onClose}
-                className="group relative z-50 cursor-pointer flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-white transition-all px-4 py-2 rounded-full hover:bg-white/10 self-start md:self-center"
+                className="group relative z-50 cursor-pointer flex items-center gap-2 text-sm font-semibold text-slate-300 hover:text-white transition-colors px-4 py-2 rounded-full hover:bg-white/10 self-start md:self-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25"
                 aria-label="Back to all tools"
               >
                 <ArrowUturnLeftIcon className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
@@ -208,7 +208,7 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
 
               <div className="flex-grow flex flex-col items-center justify-center md:-ml-20 mt-4 md:mt-0">
                 <div className="flex items-center gap-3">
-                  <span className="text-cyan-300 p-2 bg-cyan-400/10 rounded-xl ring-1 ring-cyan-400/20">
+                  <span className="text-indigo-200 p-2 bg-white/5 rounded-xl ring-1 ring-white/10">
                     {activeTool.icon}
                   </span>
                   <h2 className="text-2xl font-bold text-white tracking-tight">
@@ -216,7 +216,7 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
                   </h2>
                 </div>
                 {activeTool.description && (
-                  <p className="text-sm text-slate-400 mt-1 hidden md:block">
+                  <p className="text-sm text-slate-300/80 mt-1 hidden md:block">
                     {activeTool.description}
                   </p>
                 )}
@@ -231,7 +231,7 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
 
               <section className="space-y-4">
                 <h3 className="text-lg font-semibold text-slate-200 border-b border-white/10 pb-2">Preview / Output</h3>
-                <div className="w-full min-h-[200px] md:min-h-[300px] h-full bg-black/30 rounded-xl flex flex-col items-center justify-center text-slate-300 p-4 shadow-inner border border-white/10">
+                <div className="w-full min-h-[200px] md:min-h-[300px] h-full bg-black/25 rounded-xl flex flex-col items-center justify-center text-slate-200/90 p-4 shadow-inner border border-white/10">
                   {processedData ? (
                     <div className="w-full flex flex-col items-center gap-4">
                       {/* Try rendering preview if we have PDF data */}
