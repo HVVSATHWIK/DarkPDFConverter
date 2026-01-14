@@ -3,6 +3,7 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 // import React from 'react'; // Removed duplicate import
 import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import WorkspacePanel from '../components/WorkspacePanel';
 import { Tool } from '@/types';
 // import { SplitOptions } from '@/hooks/useSplitPDF'; // Removed unused import
@@ -50,11 +51,9 @@ const mockToolSplit: Tool = {
 describe('WorkspacePanel', () => {
   it('renders title and description for the active tool', () => {
     render(
-      <WorkspacePanel
-        activeTool={mockToolDarkMode}
-        isVisible={true}
-        onClose={vi.fn()}
-      />
+      <MemoryRouter initialEntries={['/dark-mode']}>
+        <WorkspacePanel activeTool={mockToolDarkMode} />
+      </MemoryRouter>
     );
     expect(screen.getByRole('heading', { name: /Dark Mode/i })).toBeInTheDocument();
     expect(screen.getByText('Convert to dark mode')).toBeInTheDocument();
@@ -62,44 +61,36 @@ describe('WorkspacePanel', () => {
 
   it('renders DarkModeControls when Dark Mode tool is active and panel is visible', () => {
     render(
-      <WorkspacePanel
-        activeTool={mockToolDarkMode}
-        isVisible={true}
-        onClose={vi.fn()}
-      />
+      <MemoryRouter initialEntries={['/dark-mode']}>
+        <WorkspacePanel activeTool={mockToolDarkMode} />
+      </MemoryRouter>
     );
     expect(screen.getByTestId('mock-dark-mode-controls')).toBeInTheDocument();
   });
 
   it('does not render DarkModeControls when another tool is active', () => {
     render(
-      <WorkspacePanel
-        activeTool={mockToolMerge}
-        isVisible={true}
-        onClose={vi.fn()}
-      />
+      <MemoryRouter initialEntries={['/merge']}>
+        <WorkspacePanel activeTool={mockToolMerge} />
+      </MemoryRouter>
     );
     expect(screen.queryByTestId('mock-dark-mode-controls')).not.toBeInTheDocument();
   });
 
   it('renders SplitPDFControls when Split PDF tool is active', () => {
     render(
-      <WorkspacePanel
-        activeTool={mockToolSplit}
-        isVisible={true}
-        onClose={vi.fn()}
-      />
+      <MemoryRouter initialEntries={['/split']}>
+        <WorkspacePanel activeTool={mockToolSplit} />
+      </MemoryRouter>
     );
     expect(screen.getByTestId('mock-split-pdf-controls')).toBeInTheDocument();
   });
 
   it('does not render SplitPDFControls when another tool is active', () => {
     render(
-      <WorkspacePanel
-        activeTool={mockToolDarkMode}
-        isVisible={true}
-        onClose={vi.fn()}
-      />
+      <MemoryRouter initialEntries={['/dark-mode']}>
+        <WorkspacePanel activeTool={mockToolDarkMode} />
+      </MemoryRouter>
     );
     expect(screen.queryByTestId('mock-split-pdf-controls')).not.toBeInTheDocument();
   });
@@ -107,11 +98,9 @@ describe('WorkspacePanel', () => {
 
   it('renders PDFProcessor with correct props for Dark Mode', () => {
     render(
-      <WorkspacePanel
-        activeTool={mockToolDarkMode}
-        isVisible={true}
-        onClose={vi.fn()}
-      />
+      <MemoryRouter initialEntries={['/dark-mode']}>
+        <WorkspacePanel activeTool={mockToolDarkMode} />
+      </MemoryRouter>
     );
     const pdfProcessor = screen.getByTestId('mock-pdf-processor');
     expect(pdfProcessor).toBeInTheDocument();
@@ -126,11 +115,11 @@ describe('WorkspacePanel', () => {
       return <div data-testid="mock-split-pdf-controls">Mock Split PDF Controls Called</div>;
     });
 
-    render( <WorkspacePanel
-        activeTool={mockToolSplit}
-        isVisible={true}
-        onClose={vi.fn()}
-      />);
+    render(
+      <MemoryRouter initialEntries={['/split']}>
+        <WorkspacePanel activeTool={mockToolSplit} />
+      </MemoryRouter>
+    );
 
     const pdfProcessor = screen.getByTestId('mock-pdf-processor');
     await waitFor(() => {
@@ -139,14 +128,12 @@ describe('WorkspacePanel', () => {
     });
   });
 
-  it('does not render if isVisible is false', () => {
+  it('renders the trust line on tool pages', () => {
     render(
-      <WorkspacePanel
-        activeTool={mockToolDarkMode}
-        isVisible={false}
-        onClose={vi.fn()}
-      />
+      <MemoryRouter initialEntries={['/dark-mode']}>
+        <WorkspacePanel activeTool={mockToolDarkMode} />
+      </MemoryRouter>
     );
-    expect(screen.queryByText('Dark Mode')).not.toBeInTheDocument();
+    expect(screen.getByText(/Local processing\. Files never leave your device\./i)).toBeInTheDocument();
   });
 });

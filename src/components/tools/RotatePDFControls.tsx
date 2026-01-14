@@ -18,7 +18,7 @@ export default function RotatePDFControls({ onSettingsChange, currentOptions }: 
     const activeDegrees = currentOptions?.degrees;
 
     return (
-        <div className="bg-white/5 p-4 rounded-xl border border-white/10 space-y-4">
+        <div className="p-4 panel-surface space-y-4">
             <h3 className="text-slate-200 font-semibold flex items-center gap-2">
                 <ArrowPathIcon className="w-5 h-5 text-indigo-300" />
                 Rotation Settings

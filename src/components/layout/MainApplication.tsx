@@ -3,104 +3,47 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import CarouselScene from '../CarouselScene';
 import LoadingSpinner from '../LoadingSpinner';
-import WorkspacePanel from '../WorkspacePanel';
-import MiniCarousel from '../MiniCarousel';
+import { useNavigate } from 'react-router-dom';
 import type { Tool } from '../../types';
+import { TOOL_DEFINITIONS, type ToolDefinition } from '@/config/tools';
 
-import {
-  MoonIcon,
-  Square2StackIcon,
-  ScissorsIcon,
-  ArrowPathIcon,
-  ArchiveBoxIcon,
-  DocumentDuplicateIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon
-} from '@heroicons/react/24/outline';
-
-const tools: Tool[] = [
-  { id: 1, name: 'Dark Mode', icon: <MoonIcon className="w-8 h-8" />, description: 'Convert PDFs to dark mode' },
-  { id: 2, name: 'Merge PDFs', icon: <Square2StackIcon className="w-8 h-8" />, description: 'Combine multiple PDFs' },
-  { id: 3, name: 'Split PDF', icon: <ScissorsIcon className="w-8 h-8" />, description: 'Split PDF into multiple files' },
-  { id: 4, name: 'Rotate PDF', icon: <ArrowPathIcon className="w-8 h-8" />, description: 'Rotate PDF pages' },
-  { id: 5, name: 'Compress PDF', icon: <ArchiveBoxIcon className="w-8 h-8" />, description: 'Reduce PDF file size' },
-  { id: 6, name: 'Extract Pages', icon: <DocumentDuplicateIcon className="w-8 h-8" />, description: 'Extract specific pages' },
-];
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 export function MainApplication() {
+  const navigate = useNavigate();
+
   const [activeTool, setActiveToolState] = useState<Tool | null>(null);
   const [isCardCentered, setIsCardCentered] = useState<boolean>(false);
-  const [pendingTool, setPendingTool] = useState<Tool | null>(null);
-  const [isWorkspaceVisible, setIsWorkspaceVisible] = useState<boolean>(false);
 
   const activeToolRef = useRef(activeTool);
-  const pendingToolRef = useRef(pendingTool);
   const isCardCenteredRef = useRef(isCardCentered);
 
   useEffect(() => {
     activeToolRef.current = activeTool;
-    pendingToolRef.current = pendingTool;
     isCardCenteredRef.current = isCardCentered;
-  }, [activeTool, pendingTool, isCardCentered]);
+  }, [activeTool, isCardCentered]);
 
   const handleToolSelect = useCallback((tool: Tool | null) => {
-    const currentActiveTool = activeToolRef.current;
-    const currentIsCardCentered = isCardCenteredRef.current;
-
-    if (tool === null) {
-      if (currentActiveTool) {
-        setPendingTool(null);
-        setIsWorkspaceVisible(false);
-        setIsCardCentered(false);
-      }
-    } else {
-      if (currentActiveTool && currentIsCardCentered && tool.id !== currentActiveTool.id) {
-        setPendingTool(tool);
-        setIsWorkspaceVisible(false);
-        setIsCardCentered(false);
-      } else if (tool.id !== currentActiveTool?.id || !currentIsCardCentered) {
-        setPendingTool(null);
-        setActiveToolState(tool);
-        setIsWorkspaceVisible(false);
-        setIsCardCentered(true);
-      }
-    }
+    if (!tool) return;
+    setActiveToolState(tool);
+    setIsCardCentered(true);
   }, []);
 
   const onCardReachedCenter = useCallback(() => {
-    if (activeToolRef.current) {
-      if (!isCardCenteredRef.current) setIsCardCentered(true);
-      setIsWorkspaceVisible(true);
-    }
-  }, []);
+    const current = activeToolRef.current as ToolDefinition | null;
+    if (!current) return;
+    const match = TOOL_DEFINITIONS.find((t) => t.id === current.id);
+    if (match) navigate(match.path);
+  }, [navigate]);
 
-  const onCardReturnedToRing = useCallback((returnedToolId: number) => {
-    const currentActiveTool = activeToolRef.current;
-    const currentPendingTool = pendingToolRef.current;
-
-    if (currentPendingTool && currentActiveTool && returnedToolId === currentActiveTool.id) {
-      setActiveToolState(currentPendingTool);
-      setPendingTool(null);
-      setIsWorkspaceVisible(false);
-      setIsCardCentered(true);
-    } else if (!currentPendingTool && currentActiveTool && returnedToolId === currentActiveTool.id) {
-      setActiveToolState(null);
-      setIsWorkspaceVisible(false);
-    }
+  const onCardReturnedToRing = useCallback((_returnedToolId: number) => {
+    // No-op: explore view doesn't open an in-place workspace anymore.
   }, []);
 
   const handleCloseWorkspace = useCallback(() => {
-    setIsWorkspaceVisible(false);
-    handleToolSelect(null);
-    // FORCE RESET: Ensure state clears even if animation callback fails
-    // This prevents the "stuck" state where arrows don't reappear
-    setTimeout(() => {
-      setActiveToolState(null);
-      setIsCardCentered(false);
-      setPendingTool(null);
-      setIsWorkspaceVisible(false);
-    }, 800);
-  }, [handleToolSelect]);
+    setActiveToolState(null);
+    setIsCardCentered(false);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -112,8 +55,7 @@ export function MainApplication() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleCloseWorkspace]);
 
-  // Fix: Use state directly instead of refs to ensure re-render updates this value immediately
-  const isAnyToolProcessActive = !!(activeTool || pendingTool);
+  const isAnyToolProcessActive = !!activeTool;
 
   return (
     <div className="w-full h-full relative">
@@ -127,14 +69,13 @@ export function MainApplication() {
         >
           <Suspense fallback={<LoadingSpinner />}>
             <CarouselScene
-              tools={tools}
+              tools={TOOL_DEFINITIONS}
               activeTool={activeTool}
               onToolSelect={handleToolSelect}
               onCardReachedCenter={onCardReachedCenter}
               onCardReturnedToRing={onCardReturnedToRing}
               isCardActuallyCentered={isCardCentered}
               isAnyToolProcessActive={isAnyToolProcessActive}
-              pendingTool={pendingTool}
             />
             <OrbitControls
               enableZoom={true}
@@ -208,22 +149,7 @@ export function MainApplication() {
 
       {/* Replaced old LitasDark header with empty container if needed for spacing, else removed */}
 
-
-      <WorkspacePanel
-        activeTool={activeTool}
-        isVisible={isWorkspaceVisible && !!activeTool}
-        onClose={handleCloseWorkspace}
-      />
-
-      {
-        activeTool && isWorkspaceVisible && (
-          <MiniCarousel
-            tools={tools}
-            activeTool={activeTool}
-            onToolSelect={handleToolSelect}
-          />
-        )
-      }
+      {/* Explore view does not open the tool workspace in-place anymore. */}
     </div >
   );
 }

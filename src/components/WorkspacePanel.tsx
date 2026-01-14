@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 import { Tool } from '../types';
 import PDFProcessorWithErrorBoundary from './PDFProcessor';
@@ -14,13 +14,26 @@ import { ExtractOptions } from '@/hooks/useExtractPages';
 import PDFPreview from './common/PDFPreview';
 // ...
 
-interface WorkspacePanelProps {
-  activeTool: Tool | null;
-  isVisible: boolean;
-  onClose: () => void;
+interface ToolPageProps {
+  activeTool: Tool;
 }
 
-export default function WorkspacePanel({ activeTool, isVisible, onClose }: WorkspacePanelProps) {
+const RECENTS_KEY = 'litas.recentToolIds';
+
+function pushRecentToolId(id: number) {
+  try {
+    const raw = localStorage.getItem(RECENTS_KEY);
+    const current = raw ? (JSON.parse(raw) as unknown) : [];
+    const ids = Array.isArray(current) ? current.filter((v) => typeof v === 'number') : [];
+    const next = [id, ...ids.filter((x) => x !== id)].slice(0, 6);
+    localStorage.setItem(RECENTS_KEY, JSON.stringify(next));
+  } catch {
+    // ignore
+  }
+}
+
+export default function WorkspacePanel({ activeTool }: ToolPageProps) {
+  const location = useLocation();
   const [processedData, setProcessedData] = useState<any>(null);
   const [darkModeSettings, setDarkModeSettings] = useState<DarkModeOptions>({ theme: 'dark' });
   const [splitPdfSettings, setSplitPdfSettings] = useState<SplitOptions | null>(null);
@@ -28,15 +41,16 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
   const [extractSettings, setExtractSettings] = useState<ExtractOptions | null>(null);
 
   useEffect(() => {
-    if (!isVisible || !activeTool) {
-      setProcessedData(null);
-    }
-    // Cleanup settings when switching tools
-    if (!isVisible || (activeTool && activeTool.name !== 'Dark Mode')) setDarkModeSettings({ theme: 'dark' });
-    if (!isVisible || (activeTool && activeTool.name !== 'Split PDF')) setSplitPdfSettings(null);
-    if (!isVisible || (activeTool && activeTool.name !== 'Rotate PDF')) setRotateSettings(null);
-    if (!isVisible || (activeTool && activeTool.name !== 'Extract Pages')) setExtractSettings(null);
-  }, [activeTool, isVisible]);
+    setProcessedData(null);
+    if (activeTool.name !== 'Dark Mode') setDarkModeSettings({ theme: 'dark' });
+    if (activeTool.name !== 'Split PDF') setSplitPdfSettings(null);
+    if (activeTool.name !== 'Rotate PDF') setRotateSettings(null);
+    if (activeTool.name !== 'Extract Pages') setExtractSettings(null);
+  }, [activeTool.id, activeTool.name]);
+
+  useEffect(() => {
+    pushRecentToolId(activeTool.id);
+  }, [activeTool.id]);
 
   const handleComplete = (result: any) => {
     console.log(`Processing complete for ${activeTool?.name}:`, result);
@@ -59,8 +73,6 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
   };
 
   const renderToolSpecificUI = () => {
-    if (!activeTool) return null;
-
     switch (activeTool.name) {
       case 'Dark Mode':
         return (
@@ -145,7 +157,7 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
             />
           </>
         );
-      case 'Compress PDF': // Phase 1: Auto structural compression
+      case 'Optimize PDF': // Phase 1: structural optimization (honest naming)
         return (
           <PDFProcessorWithErrorBoundary
             toolId={activeTool.id}
@@ -153,7 +165,7 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
             allowMultipleFiles={false}
             onComplete={handleComplete}
             onError={handleError}
-            processActionName="Compress PDF"
+            processActionName="Optimize PDF"
           />
         );
       default:
@@ -161,104 +173,101 @@ export default function WorkspacePanel({ activeTool, isVisible, onClose }: Works
     }
   };
 
-  const panelVariants = {
-    hidden: { opacity: 0, y: 16, scale: 0.98 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: { type: 'tween', duration: 0.18, ease: 'easeOut' }
-    },
-    exit: {
-      opacity: 0,
-      y: 8,
-      scale: 0.99,
-      transition: { type: 'tween', duration: 0.12, ease: 'easeIn' }
-    }
-  };
+  const showTrustLine = location.pathname !== '/';
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      {isVisible && activeTool && (
-        <motion.div
-          key={activeTool.id}
-          variants={panelVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          className="fixed inset-0 z-[45] flex items-center justify-center p-4 backdrop-blur-md bg-black/45"
-          aria-modal="true"
-          role="dialog"
-        >
-          <div className="absolute inset-0" onClick={onClose} aria-hidden="true" />
+    <div className="w-full">
+      <div className="mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-8 space-y-6">
+        <header className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm text-slate-300/80">
+              <Link to="/" className="hover:text-white transition-colors">
+                Tools
+              </Link>
+              <span className="text-slate-500">/</span>
+              <span className="text-slate-200">{activeTool.name}</span>
+            </div>
 
-          {/* Main Panel Container */}
-          <motion.div
-            className="relative bg-slate-950/55 text-white rounded-2xl shadow-2xl w-full max-w-7xl h-[90vh] flex flex-col overflow-hidden pointer-events-auto origin-center border border-white/10"
-          >
-            <header className="flex flex-col md:flex-row items-center justify-between p-4 md:p-6 border-b border-white/10 bg-slate-950/40 backdrop-blur-md">
-              <button
-                onClick={onClose}
-                className="group relative z-50 cursor-pointer flex items-center gap-2 text-sm font-semibold text-slate-300 hover:text-white transition-colors px-4 py-2 rounded-full hover:bg-white/10 self-start md:self-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25"
-                aria-label="Back to all tools"
-              >
-                <ArrowUturnLeftIcon className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-                <span>Back</span>
-              </button>
+            <Link
+              to="/"
+              className="group cursor-pointer flex items-center gap-2 text-sm font-semibold text-slate-200/90 hover:text-white transition-colors px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25"
+              aria-label="Back to all tools"
+            >
+              <ArrowUturnLeftIcon className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+              <span>Back</span>
+            </Link>
+          </div>
 
-              <div className="flex-grow flex flex-col items-center justify-center md:-ml-20 mt-4 md:mt-0">
-                <div className="flex items-center gap-3">
-                  <span className="text-indigo-200 p-2 bg-white/5 rounded-xl ring-1 ring-white/10">
-                    {activeTool.icon}
-                  </span>
-                  <h2 className="text-2xl font-bold text-white tracking-tight">
-                    {activeTool.name}
-                  </h2>
-                </div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="text-indigo-200 p-2 bg-white/5 rounded-xl ring-1 ring-white/10">
+                {activeTool.icon}
+              </span>
+              <div className="min-w-0">
+                <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight truncate">
+                  {activeTool.name}
+                </h1>
                 {activeTool.description && (
-                  <p className="text-sm text-slate-300/80 mt-1 hidden md:block">
+                  <p className="text-sm text-slate-300/80 mt-1">
                     {activeTool.description}
                   </p>
                 )}
               </div>
-              <div className="hidden md:block w-20"></div> {/* Spacer for visual centering */}
-            </header>
-
-            <div className="flex-grow p-4 md:p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6">
-              <section className="space-y-6">
-                {renderToolSpecificUI()}
-              </section>
-
-              <section className="space-y-4">
-                <h3 className="text-lg font-semibold text-slate-200 border-b border-white/10 pb-2">Preview / Output</h3>
-                <div className="w-full min-h-[200px] md:min-h-[300px] h-full bg-black/25 rounded-xl flex flex-col items-center justify-center text-slate-200/90 p-4 shadow-inner border border-white/10">
-                  {processedData ? (
-                    <div className="w-full flex flex-col items-center gap-4">
-                      {/* Try rendering preview if we have PDF data */}
-                      {(processedData.processedPdf || processedData instanceof Uint8Array || processedData instanceof Blob) && (
-                        <PDFPreview file={processedData.processedPdf || processedData} />
-                      )}
-
-                      <div className="text-sm text-left w-full">
-                        {processedData.error && <p className="text-red-400">Error: {processedData.error}</p>}
-                        {processedData.title && <p><strong>Title:</strong> {processedData.title}</p>}
-                        {processedData.pageCount && <p><strong>Pages:</strong> {processedData.pageCount}</p>}
-                        {processedData.isMerged && <p className="text-green-400">Successfully merged {processedData.title?.match(/\((\d+) files\)/)?.[1] || 'multiple'} files.</p>}
-                        {processedData.message && !processedData.isMerged && <p>{processedData.message}</p>}
-                        {!processedData.error && !processedData.title && !processedData.pageCount && !processedData.message && !processedData.processedPdf && (
-                          <p>Processing completed. Details unavailable.</p>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <p>PDF preview or processing results will appear here.</p>
-                  )}
-                </div>
-              </section>
             </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence >
+
+            <Link
+              to="/#how-it-works"
+              className="text-sm font-semibold text-slate-200/90 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-4 py-2 transition-colors"
+            >
+              How it works
+            </Link>
+          </div>
+
+          {showTrustLine && (
+            <p className="text-sm text-slate-300/80">
+              Local processing. Files never leave your device.
+            </p>
+          )}
+        </header>
+
+        <div className="panel-surface-strong p-4 md:p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <section className="space-y-6 min-w-0 md:col-start-1 md:col-end-2">
+              {renderToolSpecificUI()}
+            </section>
+
+            <section className="space-y-4 min-w-0 md:col-start-2 md:col-end-3">
+              <h2 className="text-lg font-semibold text-slate-200 border-b border-white/10 pb-2">Preview / Output</h2>
+              <div className="w-full min-w-0 min-h-[200px] md:min-h-[300px] h-full bg-black/25 rounded-xl flex flex-col items-center justify-center text-slate-200/90 p-4 shadow-inner border border-white/10">
+                {processedData ? (
+                  <div className="w-full h-full flex-1 flex flex-col items-center gap-4 min-h-0">
+                    {(processedData.processedPdf || processedData instanceof Uint8Array || processedData instanceof Blob) && (
+                      <PDFPreview file={processedData.processedPdf || processedData} />
+                    )}
+
+                    <div className="text-sm text-left w-full">
+                      {processedData.error && <p className="text-red-400">Error: {processedData.error}</p>}
+                      {processedData.title && <p><strong>Title:</strong> {processedData.title}</p>}
+                      {processedData.pageCount && <p><strong>Pages:</strong> {processedData.pageCount}</p>}
+                      {processedData.isMerged && (
+                        <p className="text-green-400">
+                          Successfully merged {processedData.title?.match(/\((\d+) files\)/)?.[1] || 'multiple'} files.
+                        </p>
+                      )}
+                      {processedData.message && !processedData.isMerged && <p>{processedData.message}</p>}
+                      {!processedData.error && !processedData.title && !processedData.pageCount && !processedData.message && !processedData.processedPdf && (
+                        <p>Processing completed. Details unavailable.</p>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <p>PDF preview or processing results will appear here.</p>
+                )}
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

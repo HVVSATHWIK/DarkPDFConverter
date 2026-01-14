@@ -8,9 +8,9 @@ import './index.css';
 function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <div className="min-h-screen flex flex-col">
+      <div className="h-screen flex flex-col overflow-hidden">
         <Header />
-        <main className="flex-grow">
+        <main className="flex-grow min-h-0 overflow-y-auto">
           <AppRoutes />
         </main>
         {/* <p style={{ textAlign: 'center', padding: '10px', backgroundColor: 'lightblue' }}>Verification: v_final_check_01</p> */}

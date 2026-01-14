@@ -18,6 +18,10 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+  color-scheme: dark;
+}
+
 *,
 *::before,
 *::after {
@@ -28,6 +32,14 @@ html,
 body,
 #root {
   height: 100%;
+}
+
+html,
+body {
+  color-scheme: dark;
+  /* Firefox scrollbar theming */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.75) rgba(2, 6, 23, 0.35);
 }
 
 body {
@@ -43,7 +55,8 @@ body {
     radial-gradient(at 50% 90%, rgba(139, 92, 246, 0.18) 0px, transparent 55%);
 
   color: var(--text-primary);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 /* Lightweight "4D" background (2D time-based aurora overlay)
@@ -147,39 +160,29 @@ body {
 
 /* 2025 Liquid Glass Architecture */
 .card-liquid-glass {
-  /* 1. The Surface: High opacity 'Milk Glass' for light mode contrast */
-  background: linear-gradient(145deg,
-      rgba(255, 255, 255, 0.85) 0%,
-      /* Top-Left: More opaque */
-      rgba(255, 255, 255, 0.60) 100%
-      /* Bottom-Right: More transparent */
-    );
+  /* Dark-mode glass surface (less milky, more consistent). */
+  background: linear-gradient(145deg, rgba(2, 6, 23, 0.78) 0%, rgba(2, 6, 23, 0.42) 100%);
 
-  /* 2. The Lens: Saturation boost for 'Vibrancy' separation */
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
 
-  /* 3. The Rim: Gradient border for light-source simulation */
-  border: 1px solid rgba(255, 255, 255, 0.4);
-
-  /* 4. The Levitation: Ambient Indigo Shadow */
+  border: 1px solid rgba(148, 163, 184, 0.16);
   box-shadow:
-    0 8px 32px 0 rgba(31, 38, 135, 0.15),
-    /* Deep Indigo Ambient */
-    inset 0 0 0 1px rgba(255, 255, 255, 0.2);
-  /* Inner Polish/Glow */
+    0 18px 55px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 
-  /* 5. Geometry */
   border-radius: 24px;
-  /* Squircle aesthetic */
-  transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1),
+    box-shadow 0.25s cubic-bezier(0.25, 0.8, 0.25, 1),
+    border-color 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .card-liquid-glass:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow:
-    0 12px 40px 0 rgba(31, 38, 135, 0.25),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+    0 22px 70px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  border-color: rgba(148, 163, 184, 0.22);
 }
 
 /* Typography Weight Inflation for Glass */
@@ -189,10 +192,7 @@ h3,
 h4,
 h5,
 h6 {
-  @apply font-semibold;
-  /* Was Regular/Medium */
-  color: #1E1B4B;
-  /* Deep Indigo */
+  @apply font-semibold text-slate-100;
 }
 
 /* Custom Scrollbar - Minimalist */
@@ -202,18 +202,20 @@ h6 {
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(2, 6, 23, 0.35);
+}
+
+::-webkit-scrollbar-corner {
+  background: rgba(2, 6, 23, 0.35);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  /* Slate 300 */
+  background: rgba(148, 163, 184, 0.75);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-  /* Slate 400 */
+  background: rgba(148, 163, 184, 0.92);
 }
 
 /* UI Utilities */
@@ -222,7 +224,7 @@ h6 {
 }
 
 .btn-secondary {
-  @apply bg-white text-slate-700 border border-slate-200 font-medium px-5 py-2.5 rounded-full hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm;
+  @apply bg-white/5 text-slate-200 border border-white/10 font-medium px-5 py-2.5 rounded-full hover:bg-white/10 transition-all shadow-sm shadow-black/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25;
 }
 
 .btn-success {
@@ -230,7 +232,27 @@ h6 {
 }
 
 .input-field {
-  @apply bg-white/80 border border-slate-200 rounded-lg px-4 py-2 text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 outline-none transition-all shadow-sm;
+  @apply bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-indigo-400/50 focus:border-indigo-400/40 outline-none transition-all shadow-sm shadow-black/20;
+}
+
+/* Improve native form control theming on dark UI.
+   - Select dropdowns (option list) are OS-controlled in many browsers,
+     but these rules improve consistency where supported. */
+select {
+  color-scheme: dark;
+}
+
+/* A consistent "panel" surface for tool cards/settings blocks. */
+.panel-surface {
+  @apply rounded-xl border border-white/10 bg-gradient-to-b from-slate-900/40 to-slate-950/30 backdrop-blur-md shadow-sm shadow-black/35;
+}
+
+.panel-surface-strong {
+  @apply rounded-xl border border-white/10 bg-gradient-to-b from-slate-900/55 to-slate-950/40 backdrop-blur-md shadow-md shadow-black/45;
+}
+
+.control-field {
+  @apply w-full border border-white/10 bg-slate-950/55 text-white rounded-lg px-3 py-2 placeholder-slate-400 shadow-sm shadow-black/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/50 focus-visible:border-indigo-400/40;
 }
 
 /* Utilities used across components */

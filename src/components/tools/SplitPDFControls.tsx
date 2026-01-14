@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { SplitOptions } from '@/hooks/useSplitPDF';
 
 interface SplitPDFControlsProps {
@@ -18,7 +18,7 @@ const SplitPDFControls: React.FC<SplitPDFControlsProps> = ({ onSettingsChange, c
     setEndPage(currentOptions?.endPage.toString() || '');
   }, [currentOptions]);
 
-  const handleInputChange = () => {
+  const handleInputChange = useCallback(() => {
     const startNum = parseInt(startPage, 10);
     const endNum = parseInt(endPage, 10);
     let currentError = '';
@@ -43,16 +43,16 @@ const SplitPDFControls: React.FC<SplitPDFControlsProps> = ({ onSettingsChange, c
      else {
       onSettingsChange(null); // Invalid settings
     }
-  };
+  }, [endPage, onSettingsChange, startPage]);
 
   // Call handleInputChange on mount and when startPage/endPage changes to validate and propagate
   useEffect(() => {
     handleInputChange();
-  }, [startPage, endPage]);
+  }, [handleInputChange]);
 
 
   return (
-    <div className="p-4 space-y-4 bg-white/5 rounded-xl border border-white/10">
+    <div className="p-4 space-y-4 panel-surface">
       <h3 className="text-lg font-semibold text-white">Split PDF Settings</h3>
 
       <div className="grid grid-cols-2 gap-4">
@@ -68,7 +68,7 @@ const SplitPDFControls: React.FC<SplitPDFControlsProps> = ({ onSettingsChange, c
             value={startPage}
             onChange={(e) => setStartPage(e.target.value)}
             // onBlur={handleInputChange} // Validate on blur or instantly via useEffect
-            className="mt-1 block w-full pl-3 pr-3 py-2 border border-white/10 bg-black/20 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400/50 focus:border-indigo-400/40 sm:text-sm rounded-lg"
+            className="mt-1 block control-field"
             placeholder="e.g., 1"
           />
         </div>
@@ -84,7 +84,7 @@ const SplitPDFControls: React.FC<SplitPDFControlsProps> = ({ onSettingsChange, c
             value={endPage}
             onChange={(e) => setEndPage(e.target.value)}
             // onBlur={handleInputChange}
-            className="mt-1 block w-full pl-3 pr-3 py-2 border border-white/10 bg-black/20 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400/50 focus:border-indigo-400/40 sm:text-sm rounded-lg"
+            className="mt-1 block control-field"
             placeholder="e.g., 5"
           />
         </div>

@@ -105,8 +105,8 @@ export function useProcessPDF() {
           titlePrefix = "Rotated";
           processedPdf = await rotatePdf(file, options.rotateOptions, (p, m) => onProgress(p, m));
 
-        } else if (options.activeToolName === 'Compress PDF') {
-          titlePrefix = "Compressed";
+        } else if (options.activeToolName === 'Optimize PDF') {
+          titlePrefix = "Optimized";
           processedPdf = await compressPdf(file, (p, m) => onProgress(p, m));
 
         } else if (options.activeToolName === 'Extract Pages') {

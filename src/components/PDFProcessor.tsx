@@ -3,6 +3,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { motion } from 'framer-motion';
 import { useProcessPDF, ProcessOptions } from '../hooks/useProcessPDF';
 import { XCircleIcon, DocumentPlusIcon, ArrowUpOnSquareIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { PDFDocument } from 'pdf-lib';
 import { DarkModeOptions } from '@/hooks/useDarkMode';
 import { SplitOptions } from '@/hooks/useSplitPDF';
 import { RotateOptions } from '@/hooks/useRotatePDF'; // Added
@@ -43,18 +44,56 @@ function PDFProcessor({
   const [progress, setProgress] = useState(0);
   const { processDocument, isProcessing } = useProcessPDF();
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  const downloadUrlRef = useRef<string | null>(null);
+  const [selectedPdfPageCount, setSelectedPdfPageCount] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const idCounterRef = useRef(0);
 
   useEffect(() => {
+    downloadUrlRef.current = downloadUrl;
+  }, [downloadUrl]);
+
+  useEffect(() => {
     setSelectedFiles([]);
     setProgress(0);
-    if (downloadUrl) {
-      URL.revokeObjectURL(downloadUrl);
+    setSelectedPdfPageCount(null);
+    if (downloadUrlRef.current) {
+      URL.revokeObjectURL(downloadUrlRef.current);
+      downloadUrlRef.current = null;
     }
     setDownloadUrl(null);
   }, [toolId]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function computePageCount() {
+      setSelectedPdfPageCount(null);
+
+      // Only compute for single-file workflows.
+      if (allowMultipleFiles) return;
+      if (selectedFiles.length !== 1) return;
+
+      // Only show where it matters most.
+      const name = activeTool?.name;
+      const shouldShow = name === 'Split PDF' || name === 'Extract Pages';
+      if (!shouldShow) return;
+
+      try {
+        const buffer = await selectedFiles[0].file.arrayBuffer();
+        const doc = await PDFDocument.load(buffer);
+        if (!cancelled) setSelectedPdfPageCount(doc.getPageCount());
+      } catch {
+        if (!cancelled) setSelectedPdfPageCount(null);
+      }
+    }
+
+    computePageCount();
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTool?.name, allowMultipleFiles, selectedFiles]);
 
   const handleFilesSelected = (files: FileList | null) => {
     if (files) {
@@ -184,7 +223,7 @@ function PDFProcessor({
     <div
       role="region"
       aria-label="PDF processing area"
-      className="space-y-6 p-4 rounded-xl border border-white/10 bg-white/5"
+      className="space-y-6 p-4 panel-surface"
     >
       <div
         onDragOver={handleDragOver}
@@ -222,6 +261,11 @@ function PDFProcessor({
                   {selectedFiles.length} file{selectedFiles.length === 1 ? '' : 's'} • {totalSizeKb.toFixed(1)} KB total
                 </p>
               )}
+              {!allowMultipleFiles && selectedPdfPageCount && (
+                <p className="text-xs text-slate-300/70">
+                  PDF has {selectedPdfPageCount} page{selectedPdfPageCount === 1 ? '' : 's'}
+                </p>
+              )}
             </div>
             <button
               type="button"
@@ -233,7 +277,7 @@ function PDFProcessor({
           </div>
           <ul className="space-y-1">
             {selectedFiles.map((item, index) => (
-              <li key={item.id} className="flex items-center justify-between gap-3 p-3 bg-black/20 rounded-lg text-sm text-slate-100 border border-white/10">
+              <li key={item.id} className="flex items-center justify-between gap-3 p-3 bg-slate-950/45 rounded-lg text-sm text-slate-100 border border-white/10">
                 <span className="truncate">{item.file.name} ({(item.file.size / 1024).toFixed(1)} KB)</span>
                 <div className="flex items-center gap-2">
                   {showMergeReorder && (
@@ -241,7 +285,7 @@ function PDFProcessor({
                       <button
                         type="button"
                         onClick={() => moveFile(index, -1)}
-                        className="p-1.5 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 transition-colors"
+                        className="p-1.5 rounded-md bg-slate-950/45 hover:bg-white/10 border border-white/10 text-slate-200 transition-colors"
                         aria-label={`Move ${item.file.name} up`}
                       >
                         <ChevronUpIcon className="w-4 h-4" />
@@ -249,7 +293,7 @@ function PDFProcessor({
                       <button
                         type="button"
                         onClick={() => moveFile(index, 1)}
-                        className="p-1.5 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 transition-colors"
+                        className="p-1.5 rounded-md bg-slate-950/45 hover:bg-white/10 border border-white/10 text-slate-200 transition-colors"
                         aria-label={`Move ${item.file.name} down`}
                       >
                         <ChevronDownIcon className="w-4 h-4" />

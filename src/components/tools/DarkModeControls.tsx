@@ -61,7 +61,7 @@ const DarkModeControls: React.FC<DarkModeControlsProps> = ({ onSettingsChange, c
   // const handleContrastChange = (event: React.ChangeEvent<HTMLInputElement>) => { ... };
 
   return (
-    <div className="p-4 space-y-4 bg-white/5 rounded-xl border border-white/10">
+    <div className="p-4 space-y-4 panel-surface">
       <h3 className="text-lg font-semibold text-white">Dark Mode Settings</h3>
 
       <div>
@@ -73,7 +73,7 @@ const DarkModeControls: React.FC<DarkModeControlsProps> = ({ onSettingsChange, c
           name="mode"
           value={selectedMode}
           onChange={handleModeChange}
-          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-white/10 bg-black/20 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400/50 focus:border-indigo-400/40 sm:text-sm rounded-lg"
+          className="mt-1 block control-field"
         >
           {modes.map(m => (
             <option key={m.value} value={m.value}>
@@ -95,7 +95,7 @@ const DarkModeControls: React.FC<DarkModeControlsProps> = ({ onSettingsChange, c
           name="theme"
           value={selectedTheme}
           onChange={handleThemeChange}
-          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-white/10 bg-black/20 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400/50 focus:border-indigo-400/40 sm:text-sm rounded-lg"
+          className="mt-1 block control-field"
         >
           {themes.map(themeName => (
             <option key={themeName} value={themeName}>

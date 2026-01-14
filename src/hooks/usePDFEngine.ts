@@ -24,7 +24,9 @@ export function usePDFEngine() {
                 if (type === 'SUCCESS') {
                     job.resolve(data);
                 } else {
-                    job.reject(new Error(error));
+                    // Improved error handling
+                    const errorMsg = typeof error === 'string' ? error : (error?.message || 'Unknown Worker Error');
+                    job.reject(new Error(errorMsg));
                 }
                 jobsRef.current.delete(id);
             }
@@ -33,7 +35,15 @@ export function usePDFEngine() {
         workerRef.current = worker;
         setIsReady(true);
 
+        // Capture ref value for cleanup to satisfy linter
+        const activeJobs = jobsRef.current;
+
         return () => {
+            // Fix 1: Cleanup pending jobs to prevent hanging promises
+            activeJobs.forEach((job) => {
+                job.reject(new Error('Worker terminated'));
+            });
+            activeJobs.clear();
             worker.terminate();
         };
     }, []);

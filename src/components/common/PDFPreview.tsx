@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Document, Page, pdfjs } from 'react-pdf';
+import { Page, pdfjs } from 'react-pdf';
 import { VariableSizeList as List } from 'react-window';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
@@ -7,8 +7,11 @@ import { usePdfBuffer } from '../../hooks/usePdfBuffer';
 import { MagnifyingGlassMinusIcon, MagnifyingGlassPlusIcon } from '@heroicons/react/24/outline';
 import { TiltCard } from './TiltCard';
 
-// Configure worker dynamically
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// Fix 10 (Refined): Use Vite's explicit explicit URL import to guarantee version match
+// This resolves directly to the installed 'pdfjs-dist@5.4.296' file.
+import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+
+pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
 interface PDFPreviewProps {
     file: string | File | Blob | { data: Uint8Array } | null;
@@ -30,9 +33,17 @@ export default function PDFPreview({ file }: PDFPreviewProps) {
 
         const loadMetadata = async () => {
             try {
-                // Cast to any because pdfjs-dist types might not explicitly support SharedArrayBuffer yet, 
-                // even though the worker does.
-                const loadingTask = pdfjs.getDocument(bufferState.buffer as any);
+                // Fix: Wrapper + Copy. pdfjs-dist expects TypedArray/ArrayBuffer.
+                // If the buffer is a SAB (isShared), we MUST copy it to a standard ArrayBuffer (via slice)
+                // because pdf.worker cannot transfer SABs and will throw DataCloneError.
+                let finalBuffer: Uint8Array;
+                if (bufferState.isShared) {
+                    finalBuffer = new Uint8Array(bufferState.buffer as ArrayBufferLike).slice(0); // Copy to standard AB
+                } else {
+                    finalBuffer = new Uint8Array(bufferState.buffer as ArrayBufferLike); // Just wrap
+                }
+
+                const loadingTask = pdfjs.getDocument({ data: finalBuffer });
                 const pdfDoc = await loadingTask.promise;
                 setPdfDocument(pdfDoc);
 
@@ -65,35 +76,38 @@ export default function PDFPreview({ file }: PDFPreviewProps) {
 
     // Auto-Scale Logic: Fit Width
     useEffect(() => {
-        if (containerWidth && pageSizes.length > 0) {
-            // Base on first page
-            const firstPageWidth = pageSizes[0].width;
-            const targetScale = (containerWidth - 40) / firstPageWidth;
-            // Cap at 1.2 to avoid getting huge
-            setScale(Math.min(targetScale, 1.2));
+        const firstPageWidth = pageSizes[0]?.width;
+        if (containerWidth && firstPageWidth) {
+            const targetScale = (containerWidth - 48) / firstPageWidth; // 48px padding roughly
+            // Cap at 1.2 to avoid getting huge, ensure at least 0.1
+            setScale(Math.max(0.1, Math.min(targetScale, 1.2)));
         }
-    }, [containerWidth, pageSizes.length]); // Ensure dependencies are correct
+    }, [containerWidth, pageSizes]);
 
     // Recalculate list heights when scale changes
     useEffect(() => {
-        listRef.current?.resetAfterIndex(0);
+        // Fix 3: Force update (true) to ensure cached measurements are cleared
+        listRef.current?.resetAfterIndex(0, true);
     }, [scale]);
 
     const getItemSize = (index: number) => {
         if (!pageSizes[index]) return 800;
-        return (pageSizes[index].height * scale) + 20;
+        // Fix 2: Virtualized height exactly matches rendered height
+        // Page renders at (originalHeight * scale)
+        // Add 24px vertical padding/margin
+        return (pageSizes[index].height * scale) + 24;
     };
 
-    function zoomIn() { setScale(s => s + 0.1); }
+    // Fix 7: Normalize zoom clamping
+    function zoomIn() { setScale(s => Math.min(2.5, s + 0.1)); } // Increased max zoom slightly
     function zoomOut() { setScale(s => Math.max(0.2, s - 0.1)); }
 
     if (bufferState.status === 'loading') return <div className="text-slate-200 font-medium p-4">Buffering PDF...</div>;
     if (bufferState.status === 'error') return <div className="text-rose-300 font-medium p-4">Error loading PDF buffer.</div>;
     if (!pdfDocument || pageSizes.length === 0 || bufferState.status !== 'ready') return <div className="text-slate-200 font-medium p-4">Loading Metadata...</div>;
 
-    // Dynamic list height: fit available space inside the preview area.
-    // Reserve room for the top controls and padding.
-    const computedListHeight = Math.max(240, Math.floor((containerHeight || 640) - 140));
+    // Fix 4: More robust list height calculation based on measured container
+    const computedListHeight = containerHeight > 100 ? containerHeight - 120 : 600;
 
     return (
         <div className="w-full h-full flex flex-col" ref={containerRef}>
@@ -106,10 +120,7 @@ export default function PDFPreview({ file }: PDFPreviewProps) {
                 </div>
 
                 {/* Virtualized List Container */}
-                {/* We need p-6 to account for the card padding and give space */}
                 <div className="flex-1 w-full overflow-hidden rounded-[20px] bg-black/20 mt-16 mb-4 mx-4 relative border border-white/10">
-                    <Document file={bufferState.buffer as any} className="hidden" />
-
                     <List
                         height={computedListHeight}
                         itemCount={pdfDocument.numPages}
@@ -119,14 +130,14 @@ export default function PDFPreview({ file }: PDFPreviewProps) {
                         className="no-scrollbar"
                     >
                         {({ index, style }: { index: number, style: React.CSSProperties }) => (
-                            <div style={{ ...style, display: 'flex', justifyContent: 'center' }}>
+                            <div style={{ ...style, display: 'flex', justifyContent: 'center', alignItems: 'flex-start', paddingTop: '12px' }}>
+                                {/* Fix 1: Remove width prop. Use scale only. */}
                                 <Page
                                     pdf={pdfDocument}
                                     pageIndex={index}
-                                    renderTextLayer={true}
-                                    renderAnnotationLayer={true}
+                                    renderTextLayer={false}
+                                    renderAnnotationLayer={false}
                                     scale={scale}
-                                    width={pageSizes[index]?.width}
                                     loading={<div className="h-full w-full bg-slate-100 animate-pulse rounded-lg" />}
                                     className="shadow-xl shadow-indigo-900/10 rounded-lg"
                                 />

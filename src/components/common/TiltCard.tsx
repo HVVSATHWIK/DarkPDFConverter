@@ -24,7 +24,7 @@ export const TiltCard = ({ children, className = "" }: TiltCardProps) => {
     // Dynamic Glare: Moves opposite to tilt
     const glareX = useTransform(mouseX, [-0.5, 0.5], ["0%", "100%"]);
     const glareY = useTransform(mouseY, [-0.5, 0.5], ["0%", "100%"]);
-    const glareOpacity = useTransform(mouseX, [-0.5, 0.5], [0, 0.2]);
+    const glareOpacity = useTransform(mouseX, [-0.5, 0.5], [0, 0.12]);
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!ref.current) return;
@@ -61,8 +61,8 @@ export const TiltCard = ({ children, className = "" }: TiltCardProps) => {
                         opacity: glareOpacity,
                         background: `radial-gradient(
               circle at ${glareX} ${glareY}, 
-              rgba(255,255,255,0.6) 0%, 
-              transparent 80%
+                            rgba(255,255,255,0.28) 0%, 
+                            transparent 70%
             )`
                     }}
                     className="absolute inset-0 pointer-events-none z-10"
