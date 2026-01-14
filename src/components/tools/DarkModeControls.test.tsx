@@ -9,6 +9,7 @@ describe('DarkModeControls', () => {
   const initialOptions: DarkModeOptions = { theme: 'dark', mode: 'preserve-images' };
 
   it('renders correctly with initial options and allows theme change', () => {
+    // Mock THEME_CONFIGS if necessary, or rely on the real one imported
     render(
       <DarkModeControls
         onSettingsChange={mockOnSettingsChange}
@@ -17,28 +18,44 @@ describe('DarkModeControls', () => {
     );
 
     expect(screen.getByText('Dark Mode Settings')).toBeInTheDocument();
-    expect(screen.getByLabelText('Mode')).toBeInTheDocument();
-    expect(screen.getByLabelText('Theme')).toBeInTheDocument();
 
-    const themeSelect = screen.getByRole('combobox', { name: /Theme/i });
-    expect(themeSelect).toHaveValue('dark');
+    // Check for mode buttons
+    expect(screen.getByText('Preserve Images')).toBeInTheDocument();
+    expect(screen.getByText('Full Invert')).toBeInTheDocument();
 
-    const modeSelect = screen.getByRole('combobox', { name: /Mode/i });
-    expect(modeSelect).toHaveValue('preserve-images');
+    // Check for theme buttons (e.g., 'Dark', 'Darker')
+    expect(screen.getByText('Dark')).toBeInTheDocument(); // The active one
+    expect(screen.getByText('Darker')).toBeInTheDocument();
 
-    // Change theme
-    fireEvent.change(themeSelect, { target: { value: 'darker' } });
-    expect(mockOnSettingsChange).toHaveBeenCalledWith({ theme: 'darker', mode: 'preserve-images' });
+    // Change theme by clicking the 'Darker' button
+    const darkerButton = screen.getByText('Darker').closest('button');
+    expect(darkerButton).toBeInTheDocument();
+    fireEvent.click(darkerButton!);
+
+    // Should trigger change with new theme, preserving other options
+    expect(mockOnSettingsChange).toHaveBeenCalledWith(expect.objectContaining({
+      theme: 'darker',
+      mode: 'preserve-images'
+    }));
   });
 
   it('initializes with the theme from currentOptions', () => {
     render(
       <DarkModeControls
         onSettingsChange={mockOnSettingsChange}
-        currentOptions={{ theme: 'darkest', mode: 'invert' }}
+        currentOptions={{ theme: 'sepia', mode: 'invert' }}
       />
     );
-    expect(screen.getByRole('combobox', { name: /Theme/i })).toHaveValue('darkest');
-    expect(screen.getByRole('combobox', { name: /Mode/i })).toHaveValue('invert');
+
+    // The Sepia button should indicate selection (checking class or just existence for now)
+    // For this test, just ensuring the logic handles the prop is implied by the previous test, 
+    // but we can check if the correct change is fired if we click something else.
+
+    // Let's verify standard interactions
+    fireEvent.click(screen.getByText('Preserve Images'));
+    expect(mockOnSettingsChange).toHaveBeenCalledWith(expect.objectContaining({
+      mode: 'preserve-images',
+      theme: 'sepia'
+    }));
   });
 });

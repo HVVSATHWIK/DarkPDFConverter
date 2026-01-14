@@ -21,8 +21,8 @@ export function useExtractPages() {
         const arrayBuffer = await file.arrayBuffer();
 
         try {
-            // 0-based index for backend?
-            const indices = options.pageNumbers.map(p => p - 1);
+            // 1-based index for backend (validated in worker)
+            const indices = options.pageNumbers;
             const result = await workerExtract(new Uint8Array(arrayBuffer), indices);
             onProgress?.(1, "Done!");
             return result;
