@@ -1,12 +1,60 @@
 import { PDFDocument, rgb, BlendMode } from 'pdf-lib';
 
-export type ThemeName = 'dark' | 'darker' | 'darkest';
+export type ThemeName = 'dark' | 'darker' | 'darkest' | 'sepia' | 'midnight' | 'slate';
 export type DarkModeRenderMode = 'preserve-images' | 'invert';
 
 export interface DarkModeOptions {
   theme?: ThemeName;
   mode?: DarkModeRenderMode;
+  brightness?: number;
+  contrast?: number;
 }
+
+interface ThemeConfig {
+  name: string;
+  description: string;
+  overlayColor: { r: number; g: number; b: number };
+  backgroundColor: { r: number; g: number; b: number };
+}
+
+const THEME_CONFIGS: Record<ThemeName, ThemeConfig> = {
+  dark: {
+    name: 'Dark',
+    description: 'Classic dark blue theme',
+    overlayColor: { r: 0.95, g: 0.93, b: 0.88 },
+    backgroundColor: { r: 0.05, g: 0.07, b: 0.12 }
+  },
+  darker: {
+    name: 'Darker',
+    description: 'Deep charcoal theme',
+    overlayColor: { r: 0.97, g: 0.97, b: 0.95 },
+    backgroundColor: { r: 0.03, g: 0.03, b: 0.05 }
+  },
+  darkest: {
+    name: 'Darkest',
+    description: 'Pure black for OLED',
+    overlayColor: { r: 1.0, g: 1.0, b: 1.0 },
+    backgroundColor: { r: 0.0, g: 0.0, b: 0.0 }
+  },
+  sepia: {
+    name: 'Sepia',
+    description: 'Warm sepia tones',
+    overlayColor: { r: 0.88, g: 0.92, b: 0.98 },
+    backgroundColor: { r: 0.12, g: 0.08, b: 0.02 }
+  },
+  midnight: {
+    name: 'Midnight',
+    description: 'Deep navy blue',
+    overlayColor: { r: 0.94, g: 0.92, b: 0.85 },
+    backgroundColor: { r: 0.06, g: 0.08, b: 0.15 }
+  },
+  slate: {
+    name: 'Slate',
+    description: 'Cool gray theme',
+    overlayColor: { r: 0.95, g: 0.95, b: 0.96 },
+    backgroundColor: { r: 0.05, g: 0.05, b: 0.04 }
+  }
+};
 
 export function useDarkMode() {
   const applyDarkMode = async (
@@ -14,25 +62,36 @@ export function useDarkMode() {
     options: DarkModeOptions = {}
   ): Promise<PDFDocument> => {
     const currentThemeName = options.theme || 'dark';
-    console.log('Applying dark mode with theme:', currentThemeName);
+    const brightness = options.brightness ?? 1.0;
+    const contrast = options.contrast ?? 1.0;
+    const mode = options.mode || 'preserve-images';
 
+    console.log('Applying dark mode:', { theme: currentThemeName, brightness, contrast, mode });
+
+    const themeConfig = THEME_CONFIGS[currentThemeName];
     const pages = pdfDoc.getPages();
-
-    // Strategy: Single-Pass Difference Blend
-    // We want White (1,1,1) -> Deep Dark Blue (0.05, 0.07, 0.12)
-    // Formula: |Source - Overlay| = Target
-    // Since Source is 1.0, |1.0 - Overlay| = Target => Overlay = 1.0 - Target
-    // R: 1.0 - 0.05 = 0.95
-    // G: 1.0 - 0.07 = 0.93
-    // B: 1.0 - 0.12 = 0.88
-    // Result for Black Text (0,0,0): |0 - 0.95| = 0.95 (Off-White/Beige). Excellent contrast.
-
-    const overlayColor = rgb(0.95, 0.93, 0.88);
 
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i];
       const { width, height } = page.getSize();
 
+      // Apply brightness adjustment to overlay color
+      let overlayR = themeConfig.overlayColor.r * brightness;
+      let overlayG = themeConfig.overlayColor.g * brightness;
+      let overlayB = themeConfig.overlayColor.b * brightness;
+
+      // Apply contrast adjustment (adjust toward 0.5 for lower contrast, away for higher)
+      const adjustContrast = (value: number, contrastFactor: number) => {
+        return 0.5 + (value - 0.5) * contrastFactor;
+      };
+
+      overlayR = Math.max(0, Math.min(1, adjustContrast(overlayR, contrast)));
+      overlayG = Math.max(0, Math.min(1, adjustContrast(overlayG, contrast)));
+      overlayB = Math.max(0, Math.min(1, adjustContrast(overlayB, contrast)));
+
+      const overlayColor = rgb(overlayR, overlayG, overlayB);
+
+      // Main difference blend for color inversion
       page.drawRectangle({
         x: -100,
         y: -100,
@@ -42,11 +101,32 @@ export function useDarkMode() {
         blendMode: BlendMode.Difference,
         opacity: 1,
       });
+
+      // For preserve-images mode, add a subtle overlay to reduce image inversion
+      if (mode === 'preserve-images') {
+        const preserveOverlay = rgb(
+          themeConfig.backgroundColor.r * 0.3,
+          themeConfig.backgroundColor.g * 0.3,
+          themeConfig.backgroundColor.b * 0.3
+        );
+
+        page.drawRectangle({
+          x: -100,
+          y: -100,
+          width: width + 200,
+          height: height + 200,
+          color: preserveOverlay,
+          blendMode: BlendMode.Multiply,
+          opacity: 0.15,
+        });
+      }
     }
 
-    console.log(`Dark mode applied (Single-Pass Difference Strategy).`);
+    console.log(`Dark mode applied: ${themeConfig.name} theme`);
     return pdfDoc;
   };
 
-  return { applyDarkMode };
+  return { applyDarkMode, THEME_CONFIGS };
 }
+
+export { THEME_CONFIGS };
