@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { DarkModeOptions, DarkModeRenderMode, ThemeName, THEME_CONFIGS } from '@/hooks/useDarkMode';
-import { MoonIcon, SunIcon, SparklesIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
+import { MoonIcon, SunIcon, SparklesIcon, AdjustmentsHorizontalIcon, PhotoIcon } from '@heroicons/react/24/outline';
 
 interface DarkModeControlsProps {
   onSettingsChange: (options: DarkModeOptions) => void;
@@ -12,7 +12,7 @@ const modes: { value: DarkModeRenderMode; label: string; hint: string; icon: Rea
     value: 'preserve-images',
     label: 'Preserve Images',
     hint: 'Keeps photos closer to original colors (recommended)',
-    icon: <SparklesIcon className="w-5 h-5" />
+    icon: <PhotoIcon className="w-5 h-5" />
   },
   {
     value: 'invert',
@@ -95,11 +95,10 @@ const DarkModeControls: React.FC<DarkModeControlsProps> = ({ onSettingsChange, c
             <button
               key={m.value}
               onClick={() => handleModeChange(m.value)}
-              className={`p-3 rounded-lg text-left transition-all border ${
-                selectedMode === m.value
+              className={`p-3 rounded-lg text-left transition-all border ${selectedMode === m.value
                   ? 'bg-indigo-500/25 border-indigo-400/50 text-white shadow-lg'
                   : 'bg-black/20 border-white/10 text-slate-200 hover:bg-white/10'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-2 mb-1">
                 {m.icon}
@@ -122,11 +121,10 @@ const DarkModeControls: React.FC<DarkModeControlsProps> = ({ onSettingsChange, c
               <button
                 key={themeName}
                 onClick={() => handleThemeChange(themeName)}
-                className={`p-3 rounded-lg transition-all border text-left ${
-                  selectedTheme === themeName
+                className={`p-3 rounded-lg transition-all border text-left ${selectedTheme === themeName
                     ? 'bg-white/10 border-white/20 shadow-lg ring-2 ring-indigo-400/50'
                     : 'bg-black/20 border-white/10 hover:bg-white/5'
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-2 mb-2">
                   <div
