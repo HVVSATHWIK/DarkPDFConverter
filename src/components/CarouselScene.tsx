@@ -51,7 +51,7 @@ function AnimatedToolCardWrapper({
   const [{ phase }, api] = useSpring(() => ({
     phase: 0,
     // Calmer, more "glide" feel with minimal overshoot
-    config: { mass: 1.6, tension: 220, friction: 44 },
+    config: { mass: 2.0, tension: 170, friction: 50 },
   }));
 
   // Track opacity separately as it's simple
@@ -68,7 +68,7 @@ function AnimatedToolCardWrapper({
         // Fix: Animate 'phase' to 0 (Slot) instead of using legacy position props
         api.start({
           phase: 0,
-          config: { mass: 1.6, tension: 220, friction: 44 },
+          config: { mass: 2.0, tension: 170, friction: 50 },
           onRest: () => onReturnComplete(tool.id),
         });
         opacityApi.start({ opacity: 1 });
@@ -199,7 +199,7 @@ export default function CarouselScene({
   // Target rotation for snappy navigation
   const [rotationSpring, rotationApi] = useSpring(() => ({
     rotationY: Math.PI / 2, // Start rotated +90deg to bring Index 0 (Right) to Front (+Z)
-    config: { mass: 1, tension: 200, friction: 30 } // Snappy but smooth
+    config: { mass: 1.5, tension: 140, friction: 40 } // Snappy but smooth
   }));
 
   const currentRotationIndex = useRef(0);
@@ -328,10 +328,10 @@ function CameraRig({ isAnyToolProcessActive }: { isAnyToolProcessActive: boolean
       return;
     }
 
-    // Subtle breathing/sway (idle only)
+    // Subtle breathing/sway (idle only) - Reduced amplitude
     const t = state.clock.elapsedTime;
-    state.camera.position.y = Math.sin(t * 0.5) * 0.03;
-    state.camera.rotation.z = Math.sin(t * 0.2) * 0.003;
+    state.camera.position.y = Math.sin(t * 0.4) * 0.015; // Slower, less movement
+    state.camera.rotation.z = Math.sin(t * 0.15) * 0.0015;
 
     // Mouse parallax (idle only)
     const { x, y } = state.pointer;

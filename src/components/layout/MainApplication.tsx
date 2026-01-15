@@ -147,6 +147,13 @@ export function MainApplication() {
         )
       }
 
+      {/* Experimental Visualization Caption */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-10 pointer-events-none opacity-40 mix-blend-screen">
+        <p className="text-[10px] tracking-[0.25em] font-mono text-cyan-200/80 uppercase">
+          Engine Visualization / Experimental
+        </p>
+      </div>
+
       {/* Replaced old LitasDark header with empty container if needed for spacing, else removed */}
 
       {/* Explore view does not open the tool workspace in-place anymore. */}

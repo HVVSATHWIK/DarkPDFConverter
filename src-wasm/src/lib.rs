@@ -28,6 +28,9 @@ pub fn merge_pdfs_direct(js_files: JsValue) -> Result<Vec<u8>, JsValue> {
         // Note: max_id might need to be recalculated if not tracked perfectly, 
         // but renumber_objects_with usually handles it relative to the offset.
         doc.renumber_objects_with(master_doc.max_id + 1);
+        
+        // FIX: Update master_doc.max_id so the next file starts after this one
+        master_doc.max_id = doc.max_id;
 
         // Get pages BEFORE moving objects
         // We need to collect the Page Object IDs to add to the master's page tree.
@@ -56,7 +59,7 @@ pub fn merge_pdfs_direct(js_files: JsValue) -> Result<Vec<u8>, JsValue> {
         if let Ok(catalog_id) = master_doc.trailer.get(b"Root").and_then(|o| o.as_reference()) {
             if let Ok(catalog) = master_doc.get_object(catalog_id).and_then(|o| o.as_dict()) {
                 if let Ok(pages_id) = catalog.get(b"Pages").and_then(|o| o.as_reference()) {
-                     // Update the Pages object
+                     // 1. Update the Pages object (Kids and Count)
                      if let Ok(pages_dict) = master_doc.get_object_mut(pages_id).and_then(|o| o.as_dict_mut()) {
                          // Add Kids
                          if let Ok(kids) = pages_dict.get_mut(b"Kids").and_then(|o| o.as_array_mut()) {
@@ -68,6 +71,13 @@ pub fn merge_pdfs_direct(js_files: JsValue) -> Result<Vec<u8>, JsValue> {
                          // Update Count
                          if let Ok(count) = pages_dict.get_mut(b"Count").and_then(|o| o.as_i64()) {
                              pages_dict.set(b"Count", Object::Integer(count + pages_to_add.len() as i64));
+                         }
+                     } // End of mutable borrow of 'pages_dict' (and 'master_doc')
+
+                     // 2. Update Parent pointers for the added pages (New mutable borrow)
+                     for pid in &pages_to_add {
+                         if let Ok(page_dict) = master_doc.get_object_mut(*pid).and_then(|o| o.as_dict_mut()) {
+                             page_dict.set(b"Parent", Object::Reference(pages_id));
                          }
                      }
                 }
@@ -165,6 +175,14 @@ pub fn extract_pages(file_bytes: &[u8], page_indices: Vec<u32>) -> Result<Vec<u8
     
     // Update Count
     pages_dict.set(b"Count", Object::Integer(selected_ids.len() as i64));
+
+    // START FIX: Update Parent pointers for extracted pages to point to the new Root Pages
+    for pid in &selected_ids {
+        if let Ok(page_dict) = final_doc.get_object_mut(*pid).and_then(|o| o.as_dict_mut()) {
+             page_dict.set(b"Parent", Object::Reference(pages_id));
+        }
+    }
+    // END FIX
 
     // Prune unused
     final_doc.prune_objects();

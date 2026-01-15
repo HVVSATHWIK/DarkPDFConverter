@@ -9,8 +9,10 @@
 
   color-scheme: dark;
   /* App is visually dark; default text must be light for contrast. */
-  --text-primary: #f8fafc; /* Slate 50 */
-  --text-secondary: #cbd5e1; /* Slate 300 */
+  --text-primary: #f8fafc;
+  /* Slate 50 */
+  --text-secondary: #cbd5e1;
+  /* Slate 300 */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -47,36 +49,19 @@ body {
   display: block;
   min-width: 320px;
   min-height: 100vh;
-  /* Deep mesh gradient (logo-matching: navy + cyan/blue) */
-  background-color: #0f172a;
-  background-image:
-    radial-gradient(at 20% 10%, rgba(59, 130, 246, 0.35) 0px, transparent 55%),
-    radial-gradient(at 85% 15%, rgba(0, 240, 255, 0.22) 0px, transparent 60%),
-    radial-gradient(at 50% 90%, rgba(139, 92, 246, 0.18) 0px, transparent 55%);
+  /* 3D Liquid Background Base Color */
+  background-color: #020617;
 
   color: var(--text-primary);
   overflow-x: hidden;
   overflow-y: hidden;
 }
 
-/* Lightweight "4D" background (2D time-based aurora overlay)
-   - CSS-only (no JS), low opacity
-   - Disabled for users who prefer reduced motion */
+/* 
+   Legacy CSS Aurora Background - Disabled in favor of 3D Liquid
+*/
 .bg-aurora {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2;
-  opacity: 0.18;
-  mix-blend-mode: screen;
-  filter: blur(16px) saturate(145%) contrast(112%);
-  background:
-    radial-gradient(60% 40% at 20% 20%, rgba(59, 130, 246, 0.55) 0%, transparent 62%),
-    radial-gradient(50% 45% at 80% 30%, rgba(0, 240, 255, 0.30) 0%, transparent 64%),
-    radial-gradient(55% 50% at 55% 85%, rgba(139, 92, 246, 0.28) 0%, transparent 66%);
-  transform: translate3d(0, 0, 0);
-  will-change: transform, opacity;
-  animation: aurora-drift 18s ease-in-out infinite alternate;
+  display: none;
 }
 
 .bg-aurora::before {
@@ -119,6 +104,7 @@ body {
     transform: translate3d(-6%, -4%, 0) scale(1.06) rotate(-0.8deg);
     opacity: 0.20;
   }
+
   100% {
     transform: translate3d(6%, 4%, 0) scale(1.12) rotate(0.8deg);
     opacity: 0.36;
@@ -130,6 +116,7 @@ body {
     transform: translate3d(4%, -5%, 0) scale(1.03) rotate(0.6deg);
     opacity: 0.45;
   }
+
   100% {
     transform: translate3d(-5%, 4%, 0) scale(1.10) rotate(-0.6deg);
     opacity: 0.70;
@@ -141,6 +128,7 @@ body {
     transform: translate3d(-10px, -8px, 0);
     opacity: 0.08;
   }
+
   100% {
     transform: translate3d(10px, 8px, 0);
     opacity: 0.12;
@@ -152,6 +140,7 @@ body {
     animation: none;
     opacity: 0.10;
   }
+
   .bg-aurora::before,
   .bg-aurora::after {
     animation: none;

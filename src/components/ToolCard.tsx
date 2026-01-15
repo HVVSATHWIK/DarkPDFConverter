@@ -12,7 +12,7 @@ interface ToolCardProps {
   tool: Tool;
   isActive: boolean;
   onClick: () => void;
-  opacity?: any;
+
 }
 
 export default function ToolCard({
@@ -20,8 +20,8 @@ export default function ToolCard({
   rotation: initialRotation,
   tool,
   isActive,
-  onClick,
-  opacity
+  onClick
+
 }: ToolCardProps) {
   const meshRef = useRef<Mesh>(null);
   const [hovered, setHovered] = useState(false);
@@ -77,11 +77,11 @@ export default function ToolCard({
     // Low-cost "alive" effect: subtle emissive pulse on active card only.
     const mat = meshRef.current.material as THREE.MeshStandardMaterial;
     if (isActive) {
-      mat.emissiveIntensity = 0.22 + Math.sin(state.clock.elapsedTime * 2.0) * 0.05;
+      mat.emissiveIntensity = 0.16 + Math.sin(state.clock.elapsedTime * 1.5) * 0.03; // Reduced active pulse
     } else if (hovered) {
-      mat.emissiveIntensity = 0.14;
+      mat.emissiveIntensity = 0.10; // Reduced hover glow
     } else {
-      mat.emissiveIntensity = 0.06;
+      mat.emissiveIntensity = 0.04;
     }
   });
 
@@ -121,28 +121,32 @@ export default function ToolCard({
         position={springs.position as any}
         rotation={springs.rotation as any}
       >
+        {/* Drop Shadow Mesh - Anchors the card */}
+        <mesh position={[0.05, -0.05, -0.06]}>
+          <planeGeometry args={[2.25, 3.25]} />
+          <meshBasicMaterial color="#000000" transparent opacity={0.4} />
+        </mesh>
+
         {/* Card Body - Visible Slate-800 Surface */}
         <boxGeometry args={[2.2, 3.2, 0.1]} />
         <animated.meshStandardMaterial
           color={springs.color as any}
-          // Add depth without looking like a mirror
-          roughness={0.55}
-          metalness={0.22}
-          emissive={isActive ? '#2563eb' : hovered ? '#3b82f6' : '#0f172a'}
+          roughness={0.4}
+          metalness={0.3}
+          emissive={isActive ? '#0891b2' : hovered ? '#06b6d4' : '#0f172a'} // Cyan 600 active, Cyan 500 hover
           transparent={true}
-          opacity={opacity ?? 1}
-          depthWrite={false}
-          depthTest={true}
-          side={THREE.FrontSide} // Don't render the back face (prevents mirror/back-card artifacts)
+          opacity={0.95}
+          depthWrite={true}
+          side={THREE.FrontSide}
         />
 
-        {/* Subtle Border Glow (using slightly larger plane behind or just Edge) */}
+        {/* Enhanced Border Glow - Using Brand Cyan */}
         <Edges
           scale={1.0}
           threshold={15}
-          color={hovered || isActive ? "#60a5fa" : "#334155"} // Blue glow or Slate border
+          color={hovered || isActive ? "#22d3ee" : "#475569"} // Cyan 400 for pop
         >
-          <meshBasicMaterial transparent opacity={isActive ? 0.9 : hovered ? 0.7 : 0.35} />
+          <meshBasicMaterial transparent opacity={isActive ? 1.0 : hovered ? 0.9 : 0.5} />
         </Edges>
 
         <group ref={contentRef}>
@@ -151,7 +155,7 @@ export default function ToolCard({
             <Text
               position={[0, 1.2, 0.15]}
               fontSize={0.2}
-              color={hovered || isActive ? '#93c5fd' : '#f8fafc'}
+              color={hovered || isActive ? '#67e8f9' : '#f8fafc'} // Cyan 200 hover
               anchorX="center"
               anchorY="middle"
               maxWidth={1.8}
@@ -160,20 +164,20 @@ export default function ToolCard({
               {tool.name}
             </Text>
 
-            {/* Floating Icon - REMOVING WHITE BOX */}
+            {/* Floating Icon - Brand Signature Treatment */}
             <Html
               transform
               center
-              position={[0, 0.1, 0.3]} // Lower z, central position
+              position={[0, 0.1, 0.3]}
               style={{ pointerEvents: 'none' }}
               distanceFactor={6}
             >
               <div
                 className={`transition-all duration-300 p-4 rounded-xl flex items-center justify-center ${hovered || isActive
-                  ? 'bg-blue-600/20 text-blue-400 scale-110 border border-blue-500/50 shadow-[0_0_30px_rgba(59,130,246,0.3)]'
-                  : 'bg-slate-700/50 text-slate-400 border border-slate-600/50'
+                  ? 'bg-gradient-to-br from-cyan-950/80 to-blue-900/80 text-cyan-400 scale-110 border border-cyan-500/50 shadow-[0_0_35px_rgba(6,182,212,0.4)]' // Signature Litas Glass Glow
+                  : 'bg-slate-800/50 text-slate-400 border border-slate-700/50'
                   }`}
-                style={{ width: '90px', height: '90px', backdropFilter: 'blur(4px)' }}
+                style={{ width: '90px', height: '90px', backdropFilter: 'blur(8px)' }}
               >
                 {tool.icon}
               </div>
@@ -195,25 +199,26 @@ export default function ToolCard({
               </Text>
             )}
 
-            {/* CTA Button */}
+            {/* CTA Button - Demoted to "Inspect" (Ghost/Outline style) */}
             <group position={[0, -1.35, 0.2]}>
               <mesh onClick={(e) => { e.stopPropagation(); onClick(); }}>
                 <planeGeometry args={[1.2, 0.3]} />
-                <meshBasicMaterial color={hovered ? "#3b82f6" : "#1e293b"} />
+                <meshBasicMaterial color={hovered ? "#1e293b" : "#0f172a"} transparent opacity={0.6} />
               </mesh>
-              {/* Button Border */}
+              {/* Button Border - Fine line only */}
               <lineSegments>
                 <edgesGeometry args={[new BoxGeometry(1.2, 0.3, 0)]} />
-                <lineBasicMaterial color={hovered ? "#60a5fa" : "#334155"} />
+                <lineBasicMaterial color={hovered ? "#94a3b8" : "#334155"} />
               </lineSegments>
               <Text
                 position={[0, 0, 0.01]}
-                fontSize={0.12}
-                color={hovered ? "white" : "#94a3b8"}
+                fontSize={0.10} // Smaller font
+                color={hovered ? "#f8fafc" : "#64748b"} // Muted text color
                 anchorX="center"
                 anchorY="middle"
+                letterSpacing={0.05}
               >
-                {isActive ? "Active" : "Try Now →"}
+                {isActive ? "ACTIVE" : "INSPECT"}
               </Text>
             </group>
           </group>

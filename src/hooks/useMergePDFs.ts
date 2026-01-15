@@ -34,6 +34,12 @@ export function useMergePDFs() {
       // The heavy work happens off-thread now!
       const mergedPdfBytes = await mergePDFsViaWorker(fileBuffers);
 
+      if (mergedPdfBytes) {
+        console.log(`Merge successful! Result size: ${mergedPdfBytes.length} bytes`);
+      } else {
+        console.warn("Merge worker returned null bytes.");
+      }
+
       onProgress(1, files.length, files.length);
       return mergedPdfBytes;
 

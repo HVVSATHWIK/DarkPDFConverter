@@ -38,9 +38,9 @@ export const usePdfBuffer = (file: string | File | Blob | { data: Uint8Array } |
 
                 // Check availability of SAB (SharedArrayBuffer)
                 // Note: requires COOP/COEP headers
-                const supportsSAB = typeof window.SharedArrayBuffer !== 'undefined' && window.crossOriginIsolated;
+                // const supportsSAB = typeof window.SharedArrayBuffer !== 'undefined' && window.crossOriginIsolated;
 
-                if (supportsSAB) {
+                if (false /* supportsSAB - DISABLED FOR STABILITY */) {
                     try {
                         // Fix 4: Try/Catch for SharedArrayBuffer
                         const sab = new SharedArrayBuffer(rawBuffer.byteLength);

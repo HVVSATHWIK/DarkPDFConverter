@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { FlaskConical } from 'lucide-react';
 
 export function Header() {
   const location = useLocation();
@@ -18,19 +19,21 @@ export function Header() {
           </span>
         </Link>
 
-        <nav className="flex items-center gap-2">
+        <nav className="flex items-center gap-6">
           <Link
             to="/"
-            className="text-sm font-semibold text-slate-200/90 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-4 py-2 transition-colors"
+            className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
           >
             Tools
           </Link>
           <Link
             to="/explore"
-            className="text-sm font-semibold text-slate-200/90 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-4 py-2 transition-colors"
+            className="hidden md:flex items-center gap-2 group text-xs font-medium text-slate-600 hover:text-slate-400 transition-colors"
           >
-            Explore (3D)
+            <FlaskConical size={14} className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 -translate-x-1 group-hover:translate-x-0" />
+            Labs
           </Link>
+
         </nav>
       </div>
     </header>

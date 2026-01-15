@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+
 import { TOOL_DEFINITIONS, getToolById, type ToolDefinition } from '@/config/tools';
+import ToolGridCard from '@/components/tools/ToolGridCard';
 
 const RECENTS_KEY = 'litas.recentToolIds';
 
@@ -48,30 +49,10 @@ export default function ToolsDashboard() {
           <section className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-slate-200">Recent tools</h2>
-              <Link
-                to="/explore"
-                className="text-sm font-semibold text-slate-200/90 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-4 py-2 transition-colors"
-              >
-                Explore (3D)
-              </Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {recentTools.map((tool) => (
-                <Link
-                  key={tool.id}
-                  to={tool.path}
-                  className="panel-surface p-5 hover:bg-white/5 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-indigo-200 p-2 bg-white/5 rounded-xl ring-1 ring-white/10">
-                      {tool.icon}
-                    </span>
-                    <div className="min-w-0">
-                      <div className="font-semibold text-slate-100 truncate">{tool.name}</div>
-                      <div className="text-sm text-slate-300/70 truncate">{tool.description}</div>
-                    </div>
-                  </div>
-                </Link>
+                <ToolGridCard key={tool.id} tool={tool} />
               ))}
             </div>
           </section>
@@ -80,31 +61,12 @@ export default function ToolsDashboard() {
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-slate-200">All tools</h2>
-            <Link
-              to="/explore"
-              className="text-sm font-semibold text-slate-200/90 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-4 py-2 transition-colors"
-            >
-              Explore (3D)
-            </Link>
+
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {TOOL_DEFINITIONS.map((tool) => (
-              <Link
-                key={tool.id}
-                to={tool.path}
-                className="panel-surface p-5 hover:bg-white/5 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-indigo-200 p-2 bg-white/5 rounded-xl ring-1 ring-white/10">
-                    {tool.icon}
-                  </span>
-                  <div className="min-w-0">
-                    <div className="font-semibold text-slate-100 truncate">{tool.name}</div>
-                    <div className="text-sm text-slate-300/70 truncate">{tool.description}</div>
-                  </div>
-                </div>
-              </Link>
+              <ToolGridCard key={tool.id} tool={tool} />
             ))}
           </div>
         </section>
