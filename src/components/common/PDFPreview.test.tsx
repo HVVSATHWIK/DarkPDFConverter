@@ -4,6 +4,8 @@ global.ResizeObserver = class ResizeObserver {
     disconnect() { }
 } as any;
 
+import React from 'react';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
@@ -29,12 +31,12 @@ vi.mock('react-pdf', () => {
 
 // Mock react-window to just render something simple
 vi.mock('react-window', () => ({
-    VariableSizeList: ({ children }: any) => (
+    VariableSizeList: React.forwardRef(({ children }: any, _ref: any) => (
         <div data-testid="list-mock">
             {/* Render just one item to trigger the children render prop */}
             {children({ index: 0, style: {} })}
         </div>
-    )
+    )),
 }));
 
 // Mock the usePdfBuffer hook

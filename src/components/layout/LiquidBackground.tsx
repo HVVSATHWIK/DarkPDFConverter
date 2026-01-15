@@ -264,6 +264,8 @@ const ParticleMaterial = shaderMaterial(
 extend({ LiquidMaterial, ParticleMaterial });
 
 declare global {
+    // JSX intrinsic element augmentation requires a namespace.
+    // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace JSX {
         interface IntrinsicElements {
             liquidMaterial: ReactThreeFiber.Object3DNode<

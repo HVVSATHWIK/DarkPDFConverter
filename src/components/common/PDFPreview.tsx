@@ -23,9 +23,9 @@ export default function PDFPreview({ file }: PDFPreviewProps) {
     const [pageSizes, setPageSizes] = useState<{ height: number; width: number }[]>([]);
     const [scale, setScale] = useState<number>(1.0);
     const listRef = useRef<List>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
+    const listHostRef = useRef<HTMLDivElement>(null);
     const [containerWidth, setContainerWidth] = useState<number>(0);
-    const [containerHeight, setContainerHeight] = useState<number>(0);
+    const [listHostHeight, setListHostHeight] = useState<number>(0);
 
     // Metadata Pre-flight
     useEffect(() => {
@@ -62,27 +62,40 @@ export default function PDFPreview({ file }: PDFPreviewProps) {
         loadMetadata();
     }, [bufferState]);
 
-    // Container Resize Observer
+    // Measure the actual scroll host (the box that contains the virtualized list).
+    // This avoids feedback loops where the outer container height depends on the list height.
     useEffect(() => {
+        if (!listHostRef.current) return;
+
         const observer = new ResizeObserver(entries => {
-            if (entries[0]) {
-                setContainerWidth(entries[0].contentRect.width);
-                setContainerHeight(entries[0].contentRect.height);
-            }
+            const entry = entries[0];
+            if (!entry) return;
+            setContainerWidth(entry.contentRect.width);
+            setListHostHeight(entry.contentRect.height);
         });
-        if (containerRef.current) observer.observe(containerRef.current);
+
+        observer.observe(listHostRef.current);
         return () => observer.disconnect();
     }, []);
 
-    // Auto-Scale Logic: Fit Width
+    // Auto-Scale Logic: Fit Page (prevents the "only half visible" first impression).
     useEffect(() => {
-        const firstPageWidth = pageSizes[0]?.width;
-        if (containerWidth && firstPageWidth) {
-            const targetScale = (containerWidth - 48) / firstPageWidth; // 48px padding roughly
-            // Cap at 1.2 to avoid getting huge, ensure at least 0.1
-            setScale(Math.max(0.1, Math.min(targetScale, 1.2)));
-        }
-    }, [containerWidth, pageSizes]);
+        const first = pageSizes[0];
+        if (!first) return;
+        if (!containerWidth || !listHostHeight) return;
+
+        const availableWidth = Math.max(0, containerWidth - 24); // padding + borders
+        const availableHeight = Math.max(0, listHostHeight - 16); // breathing room
+        if (!availableWidth || !availableHeight) return;
+
+        const widthScale = availableWidth / first.width;
+        const heightScale = availableHeight / first.height;
+        const targetScale = Math.min(widthScale, heightScale);
+
+        // Let the preview fill the available viewport while keeping the full page visible.
+        // Clamp defensively to avoid extreme values.
+        setScale(Math.max(0.1, Math.min(targetScale, 3.0)));
+    }, [containerWidth, listHostHeight, pageSizes]);
 
     // Recalculate list heights when scale changes
     useEffect(() => {
@@ -106,44 +119,54 @@ export default function PDFPreview({ file }: PDFPreviewProps) {
     if (bufferState.status === 'error') return <div className="text-rose-300 font-medium p-4">Error loading PDF buffer.</div>;
     if (!pdfDocument || pageSizes.length === 0 || bufferState.status !== 'ready') return <div className="text-slate-200 font-medium p-4">Loading Metadata...</div>;
 
-    // Fix 4: More robust list height calculation based on measured container
-    const computedListHeight = containerHeight > 100 ? containerHeight - 120 : 600;
+    const computedHostHeight = listHostHeight || 220;
+    const isSinglePage = pdfDocument.numPages === 1;
 
     return (
-        <div className="w-full h-full flex flex-col" ref={containerRef}>
-            <TiltCard className="w-full h-full flex flex-col">
-                {/* Controls */}
-                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex items-center gap-4 text-slate-100 mb-2 bg-slate-950/55 backdrop-blur-md border border-white/10 px-5 py-2 rounded-full shadow-lg shadow-black/20 z-30">
-                    <button onClick={zoomOut} className="p-1 hover:bg-white/10 text-slate-100 rounded-full transition-colors" aria-label="Zoom out"><MagnifyingGlassMinusIcon className="w-5 h-5" /></button>
-                    <span className="text-xs font-semibold tracking-wide">{Math.round(scale * 100)}%</span>
-                    <button onClick={zoomIn} className="p-1 hover:bg-white/10 text-slate-100 rounded-full transition-colors" aria-label="Zoom in"><MagnifyingGlassPlusIcon className="w-5 h-5" /></button>
-                </div>
+        <div className="w-full h-full min-h-0 flex flex-col overflow-hidden">
+            <TiltCard className="w-full h-full flex flex-col overflow-hidden">
+                <div className="h-full min-h-0 flex flex-col p-3 overflow-hidden">
+                    {/* Controls */}
+                    <div className="flex items-center justify-center pb-3">
+                        <div className="flex items-center gap-4 text-slate-100 bg-slate-950/55 backdrop-blur-md border border-white/10 px-5 py-2 rounded-full shadow-lg shadow-black/20">
+                            <button onClick={zoomOut} className="p-1 hover:bg-white/10 text-slate-100 rounded-full transition-colors" aria-label="Zoom out"><MagnifyingGlassMinusIcon className="w-5 h-5" /></button>
+                            <span className="text-xs font-semibold tracking-wide">{Math.round(scale * 100)}%</span>
+                            <button onClick={zoomIn} className="p-1 hover:bg-white/10 text-slate-100 rounded-full transition-colors" aria-label="Zoom in"><MagnifyingGlassPlusIcon className="w-5 h-5" /></button>
+                        </div>
+                    </div>
 
-                {/* Virtualized List Container */}
-                <div className="flex-1 w-full overflow-hidden rounded-[20px] bg-black/20 mt-16 mb-4 mx-4 relative border border-white/10">
-                    <List
-                        height={computedListHeight}
-                        itemCount={pdfDocument.numPages}
-                        itemSize={getItemSize}
-                        width="100%"
-                        ref={listRef}
-                        className="no-scrollbar"
+                    {/* Virtualized List Container */}
+                    <div
+                        ref={listHostRef}
+                        className={
+                            "flex-1 min-h-[220px] w-full overflow-hidden rounded-[20px] bg-black/20 relative border border-white/10 " +
+                            (isSinglePage ? 'flex items-center justify-center' : '')
+                        }
                     >
-                        {({ index, style }: { index: number, style: React.CSSProperties }) => (
-                            <div style={{ ...style, display: 'flex', justifyContent: 'center', alignItems: 'flex-start', paddingTop: '12px' }}>
-                                {/* Fix 1: Remove width prop. Use scale only. */}
-                                <Page
-                                    pdf={pdfDocument}
-                                    pageIndex={index}
-                                    renderTextLayer={false}
-                                    renderAnnotationLayer={false}
-                                    scale={scale}
-                                    loading={<div className="h-full w-full bg-slate-100 animate-pulse rounded-lg" />}
-                                    className="shadow-xl shadow-indigo-900/10 rounded-lg"
-                                />
-                            </div>
-                        )}
-                    </List>
+                        <List
+                            height={computedHostHeight}
+                            itemCount={pdfDocument.numPages}
+                            itemSize={getItemSize}
+                            width="100%"
+                            ref={listRef}
+                            className="no-scrollbar"
+                        >
+                            {({ index, style }: { index: number, style: React.CSSProperties }) => (
+                                <div style={{ ...style, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '12px' }}>
+                                    <Page
+                                        pdf={pdfDocument}
+                                        pageIndex={index}
+                                        renderTextLayer={false}
+                                        renderAnnotationLayer={false}
+                                        scale={scale}
+                                        devicePixelRatio={typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 2) : 1}
+                                        loading={<div className="h-full w-full bg-slate-100 animate-pulse rounded-lg" />}
+                                        className="shadow-xl shadow-indigo-900/10 rounded-lg"
+                                    />
+                                </div>
+                            )}
+                        </List>
+                    </div>
                 </div>
             </TiltCard>
         </div>

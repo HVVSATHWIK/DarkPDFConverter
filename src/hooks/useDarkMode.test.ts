@@ -1,6 +1,6 @@
 /// <reference types="vitest/globals" />
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { PDFDocument, StandardFonts } from 'pdf-lib'; // PDFOperator, PDFOperatorNames, Color removed
+import { PDFDocument } from 'pdf-lib'; // PDFOperator, PDFOperatorNames, Color removed
 import { useDarkMode } from './useDarkMode';
 
 // Mock pdf-lib
@@ -69,30 +69,42 @@ describe('useDarkMode', () => {
     } as unknown as PDFDocument;
   });
 
-  it('should call drawRectangle for page background and drawText for watermark on each page', async () => {
+  it('should draw the dark-mode overlay rectangles for each page', async () => {
     const { applyDarkMode } = useDarkMode();
     await applyDarkMode(mockPdfDoc);
 
     expect(mockPdfDoc.getPages).toHaveBeenCalled();
-    // Default is image-preserving mode:
-    // - a Multiply darken pass
-    // - then a partial Difference pass
-    expect(mockPage.drawRectangle).toHaveBeenCalledWith(expect.objectContaining({
-      blendMode: 'Multiply',
-    }));
-    expect(mockPage.drawRectangle).toHaveBeenCalledWith(expect.objectContaining({
-      color: { red: 1, green: 1, blue: 1, type: 'RGB' },
-      blendMode: 'Difference',
-      opacity: expect.any(Number),
-    }));
-    expect(mockPage.drawText).toHaveBeenCalledWith(
-      'LitasDark Preview',
+
+    // Default mode is 'preserve-images', so we expect two passes:
+    // 1) Difference inversion (pure white)
+    // 2) SoftLight tint layer
+    expect(mockPage.drawRectangle).toHaveBeenCalledTimes(2);
+    expect(mockPage.drawRectangle).toHaveBeenNthCalledWith(
+      1,
       expect.objectContaining({
-        size: 10,
-        color: { red: 0.8, green: 0.8, blue: 0.8, type: 'RGB' },
+        blendMode: 'Difference',
+        opacity: 0.88,
+        color: expect.objectContaining({
+          type: 'RGB',
+          red: 1,
+          green: 1,
+          blue: 1,
+        }),
       })
     );
-    expect(mockPdfDoc.embedFont).toHaveBeenCalledWith(StandardFonts.Helvetica);
+    expect(mockPage.drawRectangle).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        blendMode: 'SoftLight',
+        opacity: 0.55,
+        color: expect.objectContaining({
+          type: 'RGB',
+          red: expect.closeTo(0.05, 6),
+          green: expect.closeTo(0.07, 6),
+          blue: expect.closeTo(0.12, 6),
+        }),
+      })
+    );
   });
 
   it('should use default theme if no options provided', async () => {

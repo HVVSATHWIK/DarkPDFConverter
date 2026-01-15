@@ -19,18 +19,14 @@ describe('DarkModeControls', () => {
 
     expect(screen.getByText('Dark Mode Settings')).toBeInTheDocument();
 
-    // Check for mode buttons
-    expect(screen.getByText('Preserve Images')).toBeInTheDocument();
-    expect(screen.getByText('Full Invert')).toBeInTheDocument();
+    const modeSelect = screen.getByLabelText('Mode') as HTMLSelectElement;
+    const themeSelect = screen.getByLabelText('Theme') as HTMLSelectElement;
 
-    // Check for theme buttons (e.g., 'Dark', 'Darker')
-    expect(screen.getByText('Dark')).toBeInTheDocument(); // The active one
-    expect(screen.getByText('Darker')).toBeInTheDocument();
+    expect(modeSelect.value).toBe('preserve-images');
+    expect(themeSelect.value).toBe('dark');
 
-    // Change theme by clicking the 'Darker' button
-    const darkerButton = screen.getByText('Darker').closest('button');
-    expect(darkerButton).toBeInTheDocument();
-    fireEvent.click(darkerButton!);
+    // Change theme via select
+    fireEvent.change(themeSelect, { target: { value: 'darker' } });
 
     // Should trigger change with new theme, preserving other options
     expect(mockOnSettingsChange).toHaveBeenCalledWith(expect.objectContaining({
@@ -51,8 +47,14 @@ describe('DarkModeControls', () => {
     // For this test, just ensuring the logic handles the prop is implied by the previous test, 
     // but we can check if the correct change is fired if we click something else.
 
-    // Let's verify standard interactions
-    fireEvent.click(screen.getByText('Preserve Images'));
+    const modeSelect = screen.getByLabelText('Mode') as HTMLSelectElement;
+    const themeSelect = screen.getByLabelText('Theme') as HTMLSelectElement;
+
+    expect(themeSelect.value).toBe('sepia');
+    expect(modeSelect.value).toBe('invert');
+
+    // Switch mode back to preserve-images
+    fireEvent.change(modeSelect, { target: { value: 'preserve-images' } });
     expect(mockOnSettingsChange).toHaveBeenCalledWith(expect.objectContaining({
       mode: 'preserve-images',
       theme: 'sepia'

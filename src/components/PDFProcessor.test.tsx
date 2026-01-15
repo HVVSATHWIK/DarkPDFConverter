@@ -110,7 +110,14 @@ describe('PDFProcessor', () => {
       expect(mockProcessDocumentGlobal).toHaveBeenCalledWith(file, expect.any(Function), expect.objectContaining({ activeToolName: 'Test Tool' }))
     );
     await waitFor(() =>
-      expect(mockOnComplete).toHaveBeenCalledWith(specificMockSuccessResult)
+      expect(mockOnComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ...specificMockSuccessResult,
+          appliedOptions: expect.objectContaining({
+            activeToolName: 'Test Tool',
+          }),
+        })
+      )
     );
     await waitFor(() => {
         expect(global.URL.createObjectURL).toHaveBeenCalled();
@@ -216,7 +223,16 @@ describe('PDFProcessor', () => {
             [file1, file2], expect.any(Function), expect.objectContaining({ activeToolName: 'Merge PDFs' })
         );
     });
-    await waitFor(() => { expect(mockOnComplete).toHaveBeenCalledWith(mockMergeResult); });
+    await waitFor(() => {
+      expect(mockOnComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ...mockMergeResult,
+          appliedOptions: expect.objectContaining({
+            activeToolName: 'Merge PDFs',
+          }),
+        })
+      );
+    });
   });
 
   it('calls processDocument with splitPdfOptions when Split PDF tool is active', async () => {
@@ -254,7 +270,17 @@ describe('PDFProcessor', () => {
             file, expect.any(Function), expect.objectContaining({ activeToolName: 'Split PDF', splitPdfOptions: splitOptions })
         );
     });
-    await waitFor(() => { expect(mockOnComplete).toHaveBeenCalledWith(mockSplitResult); });
+    await waitFor(() => {
+      expect(mockOnComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ...mockSplitResult,
+          appliedOptions: expect.objectContaining({
+            activeToolName: 'Split PDF',
+            splitPdfOptions: splitOptions,
+          }),
+        })
+      );
+    });
   });
 });
 

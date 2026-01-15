@@ -36,30 +36,10 @@ export const usePdfBuffer = (file: string | File | Blob | { data: Uint8Array } |
                     throw new Error("Unknown file format");
                 }
 
-                // Check availability of SAB (SharedArrayBuffer)
-                // Note: requires COOP/COEP headers
-                // const supportsSAB = typeof window.SharedArrayBuffer !== 'undefined' && window.crossOriginIsolated;
-
-                if (false /* supportsSAB - DISABLED FOR STABILITY */) {
-                    try {
-                        // Fix 4: Try/Catch for SharedArrayBuffer
-                        const sab = new SharedArrayBuffer(rawBuffer.byteLength);
-                        new Uint8Array(sab).set(new Uint8Array(rawBuffer));
-                        setState({ status: 'ready', buffer: sab as unknown as ArrayBufferLike, isShared: true });
-                    } catch (sabError) {
-                        console.warn("SAB creation failed, falling back to ArrayBuffer", sabError);
-                        // Fallback logic handled below if this block fails/skips
-                        const clone = rawBuffer.slice(0);
-                        setState({ status: 'ready', buffer: clone, isShared: false });
-                    }
-                } else {
-                    // Fallback: Use standard ArrayBuffer (copied here to ensure ownership for UI)
-                    // Fix 5: We clone it to prevent detachment if the same buffer was used elsewhere.
-                    // Optimisation: If we know we have exclusive ownership (e.g. created from strict input), we could skip copy,
-                    // but safety first for now.
-                    const clone = rawBuffer.slice(0);
-                    setState({ status: 'ready', buffer: clone, isShared: false });
-                }
+                // Use standard ArrayBuffer (copied here to ensure ownership for UI).
+                // We clone it to prevent detachment if the same buffer was used elsewhere.
+                const clone = rawBuffer.slice(0);
+                setState({ status: 'ready', buffer: clone, isShared: false });
             } catch (e: unknown) {
                 // Fix 2: Remove usage of `any` type for error handling
                 console.error("Buffer Load Error:", e);

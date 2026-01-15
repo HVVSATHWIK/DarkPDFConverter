@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 import { Tool } from '../types';
@@ -35,18 +35,36 @@ function pushRecentToolId(id: number) {
 export default function WorkspacePanel({ activeTool }: ToolPageProps) {
   const location = useLocation();
   const [processedData, setProcessedData] = useState<any>(null);
+  const [selectedFilesForPreview, setSelectedFilesForPreview] = useState<File[]>([]);
+  const [previewTab, setPreviewTab] = useState<'output' | 'input'>('input');
   const [darkModeSettings, setDarkModeSettings] = useState<DarkModeOptions>({ theme: 'dark' });
   const [splitPdfSettings, setSplitPdfSettings] = useState<SplitOptions | null>(null);
   const [rotateSettings, setRotateSettings] = useState<RotateOptions | null>(null);
   const [extractSettings, setExtractSettings] = useState<ExtractOptions | null>(null);
+  const didMountRef = useRef(false);
 
   useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+
     setProcessedData(null);
+    setSelectedFilesForPreview([]);
     if (activeTool.name !== 'Dark Mode') setDarkModeSettings({ theme: 'dark' });
     if (activeTool.name !== 'Split PDF') setSplitPdfSettings(null);
     if (activeTool.name !== 'Rotate PDF') setRotateSettings(null);
     if (activeTool.name !== 'Extract Pages') setExtractSettings(null);
   }, [activeTool.id, activeTool.name]);
+
+  useEffect(() => {
+    // Default to input when selecting files, output when processing completes.
+    if (processedData) setPreviewTab('output');
+  }, [processedData]);
+
+  useEffect(() => {
+    if (selectedFilesForPreview.length > 0 && !processedData) setPreviewTab('input');
+  }, [processedData, selectedFilesForPreview.length]);
 
   useEffect(() => {
     pushRecentToolId(activeTool.id);
@@ -83,12 +101,22 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
               allowMultipleFiles={false}
               onComplete={handleComplete}
               onError={handleError}
-              processActionName="Apply Dark Mode"
+              onSelectionChange={setSelectedFilesForPreview}
+              processActionName="Apply Theme"
               darkModePreviewOptions={darkModeSettings}
-            />
-            <DarkModeControls
-              onSettingsChange={setDarkModeSettings}
-              currentOptions={darkModeSettings}
+              autoProcess
+              autoProcessOnSelect
+              autoProcessDeps={[darkModeSettings.theme, darkModeSettings.mode]}
+              autoProcessDebounceMs={400}
+              controls={
+                <DarkModeControls
+                  onSettingsChange={setDarkModeSettings}
+                  currentOptions={darkModeSettings}
+                  embedded
+                />
+              }
+              controlsLabel="Theme & Mode"
+              trustLabel="Processed locally in your browser — your files stay on your device."
             />
           </>
         );
@@ -101,6 +129,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
               allowMultipleFiles={false}
               onComplete={handleComplete}
               onError={handleError}
+              onSelectionChange={setSelectedFilesForPreview}
               processActionName="Split PDF"
               splitPdfOptions={splitPdfSettings || undefined}
             />
@@ -118,6 +147,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
             allowMultipleFiles={true}
             onComplete={handleComplete}
             onError={handleError}
+            onSelectionChange={setSelectedFilesForPreview}
             processActionName="Merge Selected PDFs"
           />
         );
@@ -130,6 +160,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
               allowMultipleFiles={false}
               onComplete={handleComplete}
               onError={handleError}
+              onSelectionChange={setSelectedFilesForPreview}
               processActionName="Rotate PDF"
               rotateOptions={rotateSettings || undefined}
             />
@@ -148,6 +179,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
               allowMultipleFiles={false}
               onComplete={handleComplete}
               onError={handleError}
+              onSelectionChange={setSelectedFilesForPreview}
               processActionName="Extract Pages"
               extractOptions={extractSettings || undefined}
             />
@@ -165,6 +197,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
             allowMultipleFiles={false}
             onComplete={handleComplete}
             onError={handleError}
+            onSelectionChange={setSelectedFilesForPreview}
             processActionName="Optimize PDF"
           />
         );
@@ -237,15 +270,49 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
             </section>
 
             <section className="space-y-4 min-w-0 md:col-start-2 md:col-end-3">
-              <h2 className="text-lg font-semibold text-slate-200 border-b border-white/10 pb-2">Preview / Output</h2>
-              <div className="w-full min-w-0 min-h-[200px] md:min-h-[300px] h-full bg-black/25 rounded-xl flex flex-col items-center justify-center text-slate-200/90 p-4 shadow-inner border border-white/10">
+              <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-2">
+                <h2 className="text-lg font-semibold text-slate-200">Preview / Output</h2>
+                {processedData && selectedFilesForPreview.length > 0 && (
+                  <div className="flex items-center gap-1 rounded-full bg-white/5 border border-white/10 p-1">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewTab('output')}
+                      className={
+                        'px-3 py-1.5 text-xs font-semibold rounded-full transition ' +
+                        (previewTab === 'output' ? 'bg-white/10 text-white' : 'text-slate-300/80 hover:text-white')
+                      }
+                    >
+                      Output
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewTab('input')}
+                      className={
+                        'px-3 py-1.5 text-xs font-semibold rounded-full transition ' +
+                        (previewTab === 'input' ? 'bg-white/10 text-white' : 'text-slate-300/80 hover:text-white')
+                      }
+                    >
+                      Original
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div className="w-full min-w-0 min-h-[240px] md:min-h-[340px] h-[60vh] md:h-[70vh] max-h-[720px] bg-black/25 rounded-xl overflow-hidden text-slate-200/90 shadow-inner border border-white/10">
                 {processedData ? (
-                  <div className="w-full h-full flex-1 flex flex-col items-center gap-4 min-h-0">
-                    {(processedData.processedPdf || processedData instanceof Uint8Array || processedData instanceof Blob) && (
-                      <PDFPreview file={processedData.processedPdf || processedData} />
+                  <div className="w-full h-full min-h-0 flex flex-col gap-4 p-4">
+                    {previewTab === 'output' && (processedData.processedPdf || processedData instanceof Uint8Array || processedData instanceof Blob) && (
+                      <div className="flex-1 min-h-0">
+                        <PDFPreview file={processedData.processedPdf || processedData} />
+                      </div>
                     )}
 
-                    <div className="text-sm text-left w-full">
+                    {previewTab === 'input' && selectedFilesForPreview.length > 0 && (
+                      <div className="flex-1 min-h-0">
+                        <PDFPreview file={selectedFilesForPreview[0]} />
+                      </div>
+                    )}
+
+                    <div className="text-sm text-left w-full overflow-y-auto">
                       {processedData.error && <p className="text-red-400">Error: {processedData.error}</p>}
                       {processedData.title && <p><strong>Title:</strong> {processedData.title}</p>}
                       {processedData.pageCount && <p><strong>Pages:</strong> {processedData.pageCount}</p>}
@@ -260,8 +327,19 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
                       )}
                     </div>
                   </div>
+                ) : selectedFilesForPreview.length > 0 ? (
+                  <div className="w-full h-full min-h-0 flex flex-col gap-3 p-4">
+                    <div className="text-xs text-slate-300/80">
+                      Previewing uploaded PDF{activeTool.name === 'Merge PDFs' && selectedFilesForPreview.length > 1 ? ' (first file)' : ''}.
+                    </div>
+                    <div className="flex-1 min-h-0">
+                      <PDFPreview file={selectedFilesForPreview[0]} />
+                    </div>
+                  </div>
                 ) : (
-                  <p>PDF preview or processing results will appear here.</p>
+                  <div className="w-full h-full flex items-center justify-center p-4">
+                    <p>PDF preview or processing results will appear here.</p>
+                  </div>
                 )}
               </div>
             </section>

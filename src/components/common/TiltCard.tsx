@@ -50,7 +50,7 @@ export const TiltCard = ({ children, className = "" }: TiltCardProps) => {
             }}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            className={`relative rounded-[24px] perspective-1000 ${className}`}
+            className={`relative rounded-[24px] perspective-1000 overflow-hidden ${className}`}
         >
             {/* The Liquid Glass Container */}
             <div className="card-liquid-glass absolute inset-0 w-full h-full overflow-hidden backface-hidden">
