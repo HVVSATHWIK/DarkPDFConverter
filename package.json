@@ -20,7 +20,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -p tsconfig.build.json && vite build",
     "typecheck": "tsc -b",
     "lint": "eslint src vite.config.* vitest.config.* tailwind.config.* postcss.config.js",
     "lint:fix": "eslint src vite.config.* vitest.config.* tailwind.config.* postcss.config.js --fix",

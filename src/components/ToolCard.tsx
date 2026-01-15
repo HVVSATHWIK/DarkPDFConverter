@@ -12,7 +12,7 @@ interface ToolCardProps {
   tool: Tool;
   isActive: boolean;
   onClick: () => void;
-
+  opacity?: any; // SpringValue<number>
 }
 
 export default function ToolCard({
@@ -20,8 +20,8 @@ export default function ToolCard({
   rotation: initialRotation,
   tool,
   isActive,
-  onClick
-
+  onClick,
+  opacity
 }: ToolCardProps) {
   const meshRef = useRef<Mesh>(null);
   const [hovered, setHovered] = useState(false);
@@ -135,7 +135,7 @@ export default function ToolCard({
           metalness={0.3}
           emissive={isActive ? '#0891b2' : hovered ? '#06b6d4' : '#0f172a'} // Cyan 600 active, Cyan 500 hover
           transparent={true}
-          opacity={0.95}
+          opacity={opacity || 0.95}
           depthWrite={true}
           side={THREE.FrontSide}
         />
