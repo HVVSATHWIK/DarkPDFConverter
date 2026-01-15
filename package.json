@@ -46,7 +46,7 @@
     "lodash": "^4.17.21",
     "lucide-react": "^0.562.0",
     "pdf-lib": "^1.17.1",
-    "pdfjs-dist": "^5.4.296",
+    "pdfjs-dist": "4.8.69",
     "postcss": "^8.4.35",
     "postprocessing": "^6.38.2",
     "react": "^18.2.0",
