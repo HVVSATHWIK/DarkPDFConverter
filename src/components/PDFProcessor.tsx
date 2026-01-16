@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { motion } from 'framer-motion';
 import { useProcessPDF, ProcessOptions } from '../hooks/useProcessPDF';
-import { XCircleIcon, DocumentPlusIcon, ArrowUpOnSquareIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { XCircleIcon, DocumentPlusIcon, ArrowUpOnSquareIcon } from '@heroicons/react/24/outline';
 import { PDFDocument } from 'pdf-lib';
 import { DarkModeOptions } from '@/hooks/useDarkMode';
 import { SplitOptions } from '@/hooks/useSplitPDF';
@@ -36,17 +36,13 @@ export interface PDFProcessorProps {
   activeTool?: Tool | null;
 }
 
-function PDFProcessor({
-  onComplete,
+onComplete,
   onError,
   onSelectionChange,
   allowMultipleFiles,
   toolId,
   activeTool,
-  processActionName = "Process PDF",
   controls,
-  controlsLabel = 'Options',
-  trustLabel = 'Local processing — files never leave your device.',
   autoProcess = false,
   autoProcessDeps = [],
   autoProcessDebounceMs = 350,
@@ -61,7 +57,6 @@ function PDFProcessor({
   const { processDocument, isProcessing } = useProcessPDF();
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const downloadUrlRef = useRef<string | null>(null);
-  const [selectedPdfPageCount, setSelectedPdfPageCount] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const idCounterRef = useRef(0);
@@ -222,35 +217,7 @@ function PDFProcessor({
     isProcessDisabled,
   ]);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function computePageCount() {
-      setSelectedPdfPageCount(null);
-
-      // Only compute for single-file workflows.
-      if (allowMultipleFiles) return;
-      if (selectedFiles.length !== 1) return;
-
-      // Only show where it matters most.
-      const name = activeTool?.name;
-      const shouldShow = name === 'Split PDF' || name === 'Extract Pages';
-      if (!shouldShow) return;
-
-      try {
-        const buffer = await selectedFiles[0].file.arrayBuffer();
-        const doc = await PDFDocument.load(buffer);
-        if (!cancelled) setSelectedPdfPageCount(doc.getPageCount());
-      } catch {
-        if (!cancelled) setSelectedPdfPageCount(null);
-      }
-    }
-
-    computePageCount();
-    return () => {
-      cancelled = true;
-    };
-  }, [activeTool?.name, allowMultipleFiles, selectedFiles]);
+  /* Removed Page Count Effect as it is unused in the new UI */
 
   const handleFilesSelected = (files: FileList | null) => {
     if (files) {
@@ -284,17 +251,7 @@ function PDFProcessor({
     setDownloadUrl(null);
   };
 
-  const moveFile = (index: number, direction: -1 | 1) => {
-    setSelectedFiles((prev) => {
-      const nextIndex = index + direction;
-      if (nextIndex < 0 || nextIndex >= prev.length) return prev;
-      const next = [...prev];
-      const tmp = next[index];
-      next[index] = next[nextIndex];
-      next[nextIndex] = tmp;
-      return next;
-    });
-  };
+  /* Removed moveFile as reordering is not in compact UI */
 
   const removeFile = (id: string) => {
     setSelectedFiles(prev => prev.filter(item => item.id !== id));
@@ -314,12 +271,7 @@ function PDFProcessor({
     handleFilesSelected(event.dataTransfer.files);
   };
 
-  const totalSizeKb = selectedFiles.reduce((acc, item) => acc + item.file.size, 0) / 1024;
-  const showMergeReorder = allowMultipleFiles && activeTool?.name === 'Merge PDFs' && selectedFiles.length > 1;
-
-  const step2Hint = autoProcess
-    ? 'Changes auto-apply after a moment. Use Apply to refresh immediately.'
-    : 'Changes apply when you run the action.';
+  /* Removed unused variables: totalSizeKb, showMergeReorder, step2Hint */
 
   return (
     <div
@@ -384,7 +336,7 @@ function PDFProcessor({
             />
 
             <ul className="space-y-2">
-              {selectedFiles.map((item, index) => (
+              {selectedFiles.map((item) => (
                 <li key={item.id} className="group flex items-center justify-between gap-3 p-2.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/5 hover:border-white/10 transition-colors">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-8 h-8 rounded bg-rose-500/10 flex items-center justify-center shrink-0">
