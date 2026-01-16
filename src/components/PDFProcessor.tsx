@@ -325,171 +325,153 @@ function PDFProcessor({
     <div
       role="region"
       aria-label="PDF processing area"
-      className="space-y-6 p-4 panel-surface"
+      className="space-y-6"
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-xs font-semibold text-slate-300/80 tracking-wide uppercase">Step 1</p>
-          <h3 className="text-sm font-semibold text-slate-200">Upload PDF</h3>
-          <p className="text-xs text-slate-300/70 mt-1">{trustLabel}</p>
-        </div>
-      </div>
-
-      <div
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()}
-        className={`flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-xl cursor-pointer
-                    ${isDragging
-            ? 'border-indigo-400/80 bg-indigo-500/10'
-            : 'border-white/15 hover:border-white/25 bg-black/10'}
-                    transition-colors duration-200 ease-in-out`}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".pdf"
-          multiple={allowMultipleFiles}
-          onChange={handleFileChange}
-          className="hidden"
-          id={`pdf-upload-${toolId}`}
-        />
-        <DocumentPlusIcon className="w-12 h-12 text-slate-300 mb-2" />
-        <p className="text-slate-200 text-center">
-          Drag & drop {allowMultipleFiles ? "PDFs" : "a PDF"} here, or click to select.
-        </p>
-      </div>
-
-      {selectedFiles.length > 0 && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-slate-200">Selected file(s)</h3>
-              {allowMultipleFiles && (
-                <p className="text-xs text-slate-300/70">
-                  {selectedFiles.length} file{selectedFiles.length === 1 ? '' : 's'} • {totalSizeKb.toFixed(1)} KB total
-                </p>
-              )}
-              {!allowMultipleFiles && selectedPdfPageCount && (
-                <p className="text-xs text-slate-300/70">
-                  PDF has {selectedPdfPageCount} page{selectedPdfPageCount === 1 ? '' : 's'}
-                </p>
-              )}
+      {/* File Uploader Section */}
+      <div className="space-y-3">
+        {selectedFiles.length === 0 ? (
+          // Empty State: Big Dropzone (refined)
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+            className={`group flex flex-col items-center justify-center p-8 border border-dashed rounded-xl cursor-pointer
+                        ${isDragging
+                ? 'border-indigo-400/80 bg-indigo-500/10'
+                : 'border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10'}
+                        transition-all duration-200 ease-in-out`}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf"
+              multiple={allowMultipleFiles}
+              onChange={handleFileChange}
+              className="hidden"
+              id={`pdf-upload-${toolId}`}
+            />
+            <div className={`p-3 rounded-full mb-3 transition-colors ${isDragging ? 'bg-indigo-500/20' : 'bg-white/5 group-hover:bg-white/10'}`}>
+              <DocumentPlusIcon className={`w-6 h-6 ${isDragging ? 'text-indigo-300' : 'text-slate-400'}`} />
             </div>
-            <button
-              type="button"
-              onClick={clearAllFiles}
-              className="shrink-0 text-xs font-semibold text-slate-200/90 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg px-3 py-2 transition-colors"
-            >
-              Clear all
-            </button>
+            <p className="text-sm font-medium text-slate-300 group-hover:text-white">
+              {allowMultipleFiles ? "Upload PDFs" : "Upload PDF"}
+            </p>
+            <p className="text-xs text-slate-500 mt-1">Drag & drop or click</p>
           </div>
-          <ul className="space-y-1">
-            {selectedFiles.map((item, index) => (
-              <li key={item.id} className="flex items-center justify-between gap-3 p-3 bg-slate-950/45 rounded-lg text-sm text-slate-100 border border-white/10">
-                <span className="truncate">{item.file.name} ({(item.file.size / 1024).toFixed(1)} KB)</span>
-                <div className="flex items-center gap-2">
-                  {showMergeReorder && (
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => moveFile(index, -1)}
-                        className="p-1.5 rounded-md bg-slate-950/45 hover:bg-white/10 border border-white/10 text-slate-200 transition-colors"
-                        aria-label={`Move ${item.file.name} up`}
-                      >
-                        <ChevronUpIcon className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => moveFile(index, 1)}
-                        className="p-1.5 rounded-md bg-slate-950/45 hover:bg-white/10 border border-white/10 text-slate-200 transition-colors"
-                        aria-label={`Move ${item.file.name} down`}
-                      >
-                        <ChevronDownIcon className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => removeFile(item.id)}
-                    className="text-slate-300/80 hover:text-rose-300 transition-colors"
-                    aria-label={`Remove ${item.file.name}`}
-                    title={`Remove ${item.file.name}`}
-                  >
-                    <XCircleIcon className="w-5 h-5" />
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+        ) : (
+          // Compact File List
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Source</span>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="text-xs text-indigo-300 hover:text-indigo-200 flex items-center gap-1"
+              >
+                <DocumentPlusIcon className="w-3 h-3" />
+                Add/Change
+              </button>
+            </div>
 
-      {selectedFiles.length > 0 && controls && (
-        <div className="space-y-3">
-          <div>
-            <p className="text-xs font-semibold text-slate-300/80 tracking-wide uppercase">Step 2</p>
-            <h3 className="text-sm font-semibold text-slate-200">{controlsLabel}</h3>
-            <p className="text-xs text-slate-300/80 mt-1">{step2Hint}</p>
+            {/* Hidden input for add/change */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf"
+              multiple={allowMultipleFiles}
+              onChange={handleFileChange}
+              className="hidden"
+            />
+
+            <ul className="space-y-2">
+              {selectedFiles.map((item, index) => (
+                <li key={item.id} className="group flex items-center justify-between gap-3 p-2.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/5 hover:border-white/10 transition-colors">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded bg-rose-500/10 flex items-center justify-center shrink-0">
+                      <span className="text-[10px] font-bold text-rose-400">PDF</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm text-slate-200 truncate font-medium">{item.file.name}</p>
+                      <p className="text-[10px] text-slate-500">{(item.file.size / 1024).toFixed(1)} KB</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); removeFile(item.id); }}
+                    className="p-1 text-slate-500 hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <XCircleIcon className="w-4 h-4" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+
+            {allowMultipleFiles && selectedFiles.length > 1 && (
+              <button onClick={clearAllFiles} className="text-[10px] text-slate-500 hover:text-slate-300 underline">
+                Clear all
+              </button>
+            )}
           </div>
+        )}
+      </div>
+
+      {/* Controls Section */}
+      {selectedFiles.length > 0 && controls && (
+        <div className="space-y-3 py-4 border-t border-white/5">
+          {/* <div className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">{controlsLabel}</div> */}
           <div>{controls}</div>
         </div>
       )}
 
-      {selectedFiles.length > 0 && !isProcessing && (
-        <div className="space-y-2">
-          <div>
-            <p className="text-xs font-semibold text-slate-300/80 tracking-wide uppercase">Step 3</p>
-            <h3 className="text-sm font-semibold text-slate-200">{downloadUrl ? 'Update output' : 'Apply'}</h3>
-            {downloadUrl && (
-              <p className="text-xs text-slate-300/80 mt-1">
-                Re-run with your current settings to generate a new output.
-              </p>
-            )}
-          </div>
-          <button
-            onClick={handleProcessClick}
-            disabled={isProcessDisabled()}
-            className="btn-primary w-full p-3 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <ArrowUpOnSquareIcon className="w-5 h-5" />
-            {processActionName}
-          </button>
-        </div>
-      )}
+      {/* Action Section (Apply / Download) */}
+      {selectedFiles.length > 0 && (
+        <div className="pt-4 border-t border-white/5 space-y-3">
+          {/* Processing Status */}
+          {isProcessing && (
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-[10px] uppercase text-indigo-300 font-medium">
+                <span>Processing...</span>
+                <span>{progress}%</span>
+              </div>
+              <motion.div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-indigo-500"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                />
+              </motion.div>
+            </div>
+          )}
 
-      {isProcessing && (
-        <div className="space-y-2">
-          <p className="text-sm text-slate-200 text-center">Processing: {progress}%</p>
-          <motion.div
-            className="w-full h-2 bg-white/10 rounded-full overflow-hidden"
-            aria-label={`Processing progress: ${progress}%`}
-          >
+          {/* Download Button (Success State) */}
+          {downloadUrl && !isProcessing ? (
             <motion.div
-              className="h-full bg-gradient-to-r from-indigo-400 to-violet-400 rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ type: 'tween', duration: 0.18, ease: 'easeOut' }}
-            />
-          </motion.div>
-        </div>
-      )}
-
-      {downloadUrl && !isProcessing && (
-        <div className="space-y-3">
-          <div>
-            <p className="text-xs font-semibold text-slate-300/80 tracking-wide uppercase">Step 4</p>
-            <h3 className="text-sm font-semibold text-slate-200">Download</h3>
-          </div>
-
-          <a
-            href={downloadUrl}
-            download={`processed-${activeTool?.name || 'file'}.pdf`}
-            className="btn-success block w-full text-center"
-          >
-            Download Processed PDF
-          </a>
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <a
+                href={downloadUrl}
+                download={`processed-${activeTool?.name || 'file'}.pdf`}
+                className="flex items-center justify-center gap-2 w-full p-3 bg-white text-black font-semibold rounded-lg hover:bg-slate-200 transition-colors shadow-lg shadow-white/5"
+              >
+                <ArrowUpOnSquareIcon className="w-4 h-4" />
+                Download Result
+              </a>
+              <p className="text-center text-[10px] text-slate-500 mt-2">
+                Ready to save. {autoProcess ? 'Updated automatically.' : ''}
+              </p>
+            </motion.div>
+          ) : (
+            // Apply Button (Only if NOT autoProcess or if explicitly needed)
+            (!autoProcess || !isProcessing) && !downloadUrl && (
+              <button
+                onClick={handleProcessClick}
+                disabled={isProcessDisabled()}
+                className="w-full p-3 bg-white/10 hover:bg-white/20 text-white font-medium rounded-lg border border-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {activeTool?.name === 'Merge PDFs' ? 'Merge Files' : 'Process PDF'}
+              </button>
+            )
+          )}
         </div>
       )}
     </div>
