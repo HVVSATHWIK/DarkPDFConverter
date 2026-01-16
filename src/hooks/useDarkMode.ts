@@ -182,55 +182,11 @@ export function useDarkMode() {
     // In the real app, use a rasterized pipeline for consistent output
     // across viewers (including pdf.js). In tests, keep a lightweight vector
     // overlay path to avoid heavy canvas/pdfjs work.
-    if (import.meta.env?.MODE !== 'test') {
-      const out = await rasterizeDarkMode(pdfDoc, { theme: currentThemeName, brightness, contrast, mode }, themeConfig);
-      console.log(`Dark mode applied (raster): ${themeConfig.name} theme`);
-      return out;
-    }
-
-    const adjustContrast = (value: number, contrastFactor: number) => {
-      return 0.5 + (value - 0.5) * contrastFactor;
-    };
-
-    for (let i = 0; i < pages.length; i++) {
-      const page = pages[i];
-      const { width, height } = page.getSize();
-
-      // True inversion requires pure white with Difference blend.
-      // Using off-white values can wash out text and make pages look blank.
-      const invertOpacity = mode === 'preserve-images' ? 0.88 : 1.0;
-      page.drawRectangle({
-        x: -100,
-        y: -100,
-        width: width + 200,
-        height: height + 200,
-        color: rgb(1, 1, 1),
-        blendMode: BlendMode.Difference,
-        opacity: invertOpacity,
-      });
-
-      // Theme tint layer: gentle color grading without killing contrast.
-      // Brightness/contrast are applied here (if ever exposed in UI).
-      let tintR = themeConfig.backgroundColor.r * brightness;
-      let tintG = themeConfig.backgroundColor.g * brightness;
-      let tintB = themeConfig.backgroundColor.b * brightness;
-      tintR = clamp01(adjustContrast(tintR, contrast));
-      tintG = clamp01(adjustContrast(tintG, contrast));
-      tintB = clamp01(adjustContrast(tintB, contrast));
-
-      page.drawRectangle({
-        x: -100,
-        y: -100,
-        width: width + 200,
-        height: height + 200,
-        color: rgb(tintR, tintG, tintB),
-        blendMode: BlendMode.SoftLight,
-        opacity: 0.55,
-      });
-    }
-
-    console.log(`Dark mode applied: ${themeConfig.name} theme`);
-    return pdfDoc;
+    // Always use rasterization for consistent reliable dark mode
+    // (Vector overlay with BlendMode.Difference is flaky in many viewers including pdf.js)
+    const out = await rasterizeDarkMode(pdfDoc, { theme: currentThemeName, brightness, contrast, mode }, themeConfig);
+    console.log(`Dark mode applied (raster): ${themeConfig.name} theme`);
+    return out;
   };
 
   return { applyDarkMode, THEME_CONFIGS };

@@ -11,26 +11,34 @@ export function useCompressPDF() {
         onProgress?.(0.1, "Loading PDF...");
         const arrayBuffer = await file.arrayBuffer();
 
-        // Load the PDF. pdf-lib automatically removes minimal "junk" on load/save cycles.
-        // For deeper compression, we can try to find and remove unused objects, 
-        // but pdf-lib's 'save' is already quite efficient at structural cleanup.
-        // The "Structural Pruning" in the report mentioned removing unreferenced objects.
-        // pdf-lib does garbage collection of unreferenced objects by default when saving *if* they are not added to the new doc structure.
-        // However, simply loading and saving provides baseline structural repair/compression.
+        // Structural Compression Strategy:
+        // 1. Load original document.
+        // 2. Create a NEW empty document.
+        // 3. Copy pages from original to new.
+        // 4. Save new document with useObjectStreams: true (PDF 1.5 compression).
+        // This ensures unused objects (garbage) from the original are left behind, 
+        // and the new structure is serialized efficiently.
 
         const pdfDoc = await PDFDocument.load(arrayBuffer);
+        const totalPages = pdfDoc.getPageCount();
 
-        onProgress?.(0.5, "Optimizing structures...");
+        onProgress?.(0.3, "Analyzing structure...");
 
-        // In Phase 1 client-side without external libs, the best "compression" is 
-        // simply re-serializing the document efficiently.
-        // pdf-lib does not support image downsampling natively without canvas (Phase 2).
+        // Create fresh document
+        const newPdfDoc = await PDFDocument.create();
 
-        onProgress?.(0.8, "Saving optimized PDF...");
+        // Copy all pages
+        const pageIndices = Array.from({ length: totalPages }, (_, i) => i);
 
-        // useObjectStreams: false is default/standard. 
-        // Currently no high-level API to "prune" aggressively beyond what save() does.
-        const compressedPdfBytes = await pdfDoc.save({ useObjectStreams: false });
+        onProgress?.(0.5, "Rebuilding document...");
+        const copiedPages = await newPdfDoc.copyPages(pdfDoc, pageIndices);
+        copiedPages.forEach(page => newPdfDoc.addPage(page));
+
+        onProgress?.(0.8, "Compressing streams...");
+
+        // useObjectStreams: true forces PDF 1.5 object stream compression.
+        // limit: false allows unconstrained stream size for better ratio? (default is fine)
+        const compressedPdfBytes = await newPdfDoc.save({ useObjectStreams: true });
 
         onProgress?.(1, "Done!");
         return compressedPdfBytes;

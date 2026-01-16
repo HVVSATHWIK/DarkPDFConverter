@@ -69,7 +69,7 @@ export const TiltCard = ({ children, className = "" }: TiltCardProps) => {
                 />
 
                 {/* Content Layer (Projected forward slightly) */}
-                <div className="relative z-20 h-full flex flex-col transform translate-z-10">
+                <div className="relative z-20 h-full min-h-0 flex flex-col transform translate-z-10">
                     {children}
                 </div>
             </div>

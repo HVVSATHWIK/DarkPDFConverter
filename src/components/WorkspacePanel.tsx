@@ -132,6 +132,9 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
               onSelectionChange={setSelectedFilesForPreview}
               processActionName="Split PDF"
               splitPdfOptions={splitPdfSettings || undefined}
+              autoProcess
+              autoProcessDeps={[splitPdfSettings?.startPage, splitPdfSettings?.endPage]}
+              autoProcessDebounceMs={600}
             />
             <SplitPDFControls
               onSettingsChange={setSplitPdfSettings}
@@ -149,6 +152,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
             onError={handleError}
             onSelectionChange={setSelectedFilesForPreview}
             processActionName="Merge Selected PDFs"
+          // Merge is manual to prevent accidental heavy processing
           />
         );
       case 'Rotate PDF':
@@ -163,6 +167,9 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
               onSelectionChange={setSelectedFilesForPreview}
               processActionName="Rotate PDF"
               rotateOptions={rotateSettings || undefined}
+              autoProcess
+              autoProcessOnSelect
+              autoProcessDeps={[rotateSettings?.degrees, rotateSettings?.rotationType]}
             />
             <RotatePDFControls
               onSettingsChange={setRotateSettings}
@@ -182,6 +189,9 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
               onSelectionChange={setSelectedFilesForPreview}
               processActionName="Extract Pages"
               extractOptions={extractSettings || undefined}
+              autoProcess
+              autoProcessDeps={[extractSettings?.pageNumbers]}
+              autoProcessDebounceMs={600}
             />
             <ExtractPagesControls
               onSettingsChange={setExtractSettings}
