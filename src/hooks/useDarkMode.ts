@@ -1,4 +1,4 @@
-import { PDFDocument, rgb, BlendMode } from 'pdf-lib';
+import { PDFDocument } from 'pdf-lib';
 import { pdfjs } from 'react-pdf';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
@@ -59,10 +59,6 @@ const THEME_CONFIGS: Record<ThemeName, ThemeConfig> = {
 };
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
-
-function clamp01(v: number) {
-  return Math.max(0, Math.min(1, v));
-}
 
 function clamp(v: number, min: number, max: number) {
   return Math.max(min, Math.min(max, v));
@@ -177,8 +173,6 @@ export function useDarkMode() {
     console.log('Applying dark mode:', { theme: currentThemeName, brightness, contrast, mode });
 
     const themeConfig = THEME_CONFIGS[currentThemeName];
-    const pages = pdfDoc.getPages();
-
     // In the real app, use a rasterized pipeline for consistent output
     // across viewers (including pdf.js). In tests, keep a lightweight vector
     // overlay path to avoid heavy canvas/pdfjs work.
