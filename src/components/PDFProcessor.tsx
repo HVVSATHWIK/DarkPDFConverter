@@ -3,7 +3,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { motion } from 'framer-motion';
 import { useProcessPDF, ProcessOptions } from '../hooks/useProcessPDF';
 import { XCircleIcon, DocumentPlusIcon, ArrowUpOnSquareIcon } from '@heroicons/react/24/outline';
-import { PDFDocument } from 'pdf-lib';
+/* import { PDFDocument } from 'pdf-lib'; // Removed */
 import { DarkModeOptions } from '@/hooks/useDarkMode';
 import { SplitOptions } from '@/hooks/useSplitPDF';
 import { RotateOptions } from '@/hooks/useRotatePDF'; // Added
