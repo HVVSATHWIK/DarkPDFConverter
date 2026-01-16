@@ -104,10 +104,6 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
               onSelectionChange={setSelectedFilesForPreview}
               processActionName="Apply Theme"
               darkModePreviewOptions={darkModeSettings}
-              autoProcess
-              autoProcessOnSelect
-              autoProcessDeps={[darkModeSettings.theme, darkModeSettings.mode]}
-              autoProcessDebounceMs={400}
               controls={
                 <DarkModeControls
                   onSettingsChange={setDarkModeSettings}
@@ -269,8 +265,8 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
                 <button
                   onClick={() => setPreviewTab('input')}
                   className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${previewTab === 'input'
-                      ? 'bg-white/10 text-white shadow-sm'
-                      : 'text-slate-500 hover:text-slate-300'
+                    ? 'bg-white/10 text-white shadow-sm'
+                    : 'text-slate-500 hover:text-slate-300'
                     }`}
                 >
                   Original
@@ -278,8 +274,8 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
                 <button
                   onClick={() => setPreviewTab('output')}
                   className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${previewTab === 'output'
-                      ? 'bg-indigo-500/20 text-indigo-200 shadow-sm ring-1 ring-inset ring-indigo-500/20'
-                      : 'text-slate-500 hover:text-slate-300'
+                    ? 'bg-indigo-500/20 text-indigo-200 shadow-sm ring-1 ring-inset ring-indigo-500/20'
+                    : 'text-slate-500 hover:text-slate-300'
                     }`}
                 >
                   Output
