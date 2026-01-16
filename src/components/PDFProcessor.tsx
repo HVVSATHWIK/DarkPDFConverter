@@ -36,7 +36,8 @@ export interface PDFProcessorProps {
   activeTool?: Tool | null;
 }
 
-onComplete,
+function PDFProcessor({
+  onComplete,
   onError,
   onSelectionChange,
   allowMultipleFiles,
@@ -71,7 +72,7 @@ onComplete,
   useEffect(() => {
     setSelectedFiles([]);
     setProgress(0);
-    setSelectedPdfPageCount(null);
+    // Removed setSelectedPdfPageCount(null);
     if (downloadUrlRef.current) {
       URL.revokeObjectURL(downloadUrlRef.current);
       downloadUrlRef.current = null;
