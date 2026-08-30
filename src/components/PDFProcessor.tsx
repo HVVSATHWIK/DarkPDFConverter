@@ -44,6 +44,7 @@ function PDFProcessor({
   toolId,
   activeTool,
   controls,
+  processActionName,
   autoProcess = false,
   autoProcessDeps = [],
   autoProcessDebounceMs = 350,
