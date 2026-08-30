@@ -421,7 +421,7 @@ function PDFProcessor({
                 disabled={isProcessDisabled()}
                 className="w-full p-3 bg-white/10 hover:bg-white/20 text-white font-medium rounded-lg border border-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                {activeTool?.name === 'Merge PDFs' ? 'Merge Files' : 'Process PDF'}
+                {processActionName || (activeTool?.name === 'Merge PDFs' ? 'Merge Files' : 'Process PDF')}
               </button>
             )
           )}

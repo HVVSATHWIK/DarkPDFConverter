@@ -1,6 +1,6 @@
 import { ExtractOptions } from '@/hooks/useExtractPages';
 import { DocumentDuplicateIcon } from '@heroicons/react/24/outline';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface ExtractPagesControlsProps {
     onSettingsChange: (settings: ExtractOptions | null) => void;
@@ -9,6 +9,10 @@ interface ExtractPagesControlsProps {
 
 export default function ExtractPagesControls({ onSettingsChange, currentOptions }: ExtractPagesControlsProps) {
     const [inputStr, setInputStr] = useState(currentOptions?.pageNumbers.join(", ") || "");
+
+    useEffect(() => {
+        setInputStr(currentOptions?.pageNumbers.join(", ") || "");
+    }, [currentOptions]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
