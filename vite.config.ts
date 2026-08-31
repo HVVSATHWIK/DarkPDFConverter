@@ -32,6 +32,13 @@ export default defineConfig({
   optimizeDeps: {
     include: ['pdfjs-dist']
   },
+  preview: {
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+    },
+    port: 4173,
+  },
   server: {
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin',
