@@ -109,6 +109,10 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
               onSelectionChange={setSelectedFilesForPreview}
               processActionName="Apply Theme"
               darkModePreviewOptions={darkModeSettings}
+              autoProcess
+              autoProcessOnSelect
+              autoProcessDeps={[darkModeSettings.theme, darkModeSettings.mode]}
+              autoProcessDebounceMs={600}
               controls={
                 <DarkModeControls
                   onSettingsChange={setDarkModeSettings}

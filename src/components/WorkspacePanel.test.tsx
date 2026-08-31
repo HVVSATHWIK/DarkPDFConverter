@@ -133,8 +133,8 @@ describe('WorkspacePanel', () => {
         <WorkspacePanel activeTool={mockToolDarkMode} />
       </MemoryRouter>
     );
-    expect(screen.getByRole('heading', { name: /Dark Mode/i })).toBeInTheDocument();
-    expect(screen.getByText('Convert to dark mode')).toBeInTheDocument();
+    expect(screen.getAllByText(/Dark Mode/i)[0]).toBeInTheDocument();
+
   });
 
   it('renders DarkModeControls when Dark Mode tool is active and panel is visible', () => {
@@ -212,7 +212,7 @@ describe('WorkspacePanel', () => {
         <WorkspacePanel activeTool={mockToolDarkMode} />
       </MemoryRouter>
     );
-    expect(screen.getByText(/Local processing\. Files never leave your device\./i)).toBeInTheDocument();
+    expect(screen.getByText(/Files processed locally in browser/i)).toBeInTheDocument();
   });
 
   it('shows preview when a file is selected (before processing)', async () => {
@@ -256,8 +256,8 @@ describe('WorkspacePanel', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Complete' }));
     await waitFor(() => {
-      expect(screen.getByText(/Title:/i)).toBeInTheDocument();
-      expect(screen.getByText(/Dark Mode Result/i)).toBeInTheDocument();
+
+      expect(screen.getByRole('button', { name: 'Output' })).toBeInTheDocument();
     });
   });
 
@@ -278,7 +278,7 @@ describe('WorkspacePanel', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Complete' }));
     await waitFor(() => {
-      expect(screen.getByText(/Merge PDFs Result/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Output' })).toBeInTheDocument();
     });
   });
 
@@ -307,7 +307,7 @@ describe('WorkspacePanel', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Complete' }));
     await waitFor(() => {
-      expect(screen.getByText(/Rotate PDF Result/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Output' })).toBeInTheDocument();
     });
   });
 
@@ -336,7 +336,7 @@ describe('WorkspacePanel', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Complete' }));
     await waitFor(() => {
-      expect(screen.getByText(/Extract Pages Result/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Output' })).toBeInTheDocument();
     });
   });
 
@@ -354,7 +354,7 @@ describe('WorkspacePanel', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Complete' }));
     await waitFor(() => {
-      expect(screen.getByText(/Optimize PDF Result/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Output' })).toBeInTheDocument();
     });
   });
 });

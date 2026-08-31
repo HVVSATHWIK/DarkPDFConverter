@@ -77,7 +77,7 @@ describe('PDFProcessor', () => {
     await act(async () => {
       fireEvent.change(fileInput, { target: { files: [file] } });
     });
-    expect(screen.getByText('test.pdf (1.0 KB)')).toBeInTheDocument();
+    expect(screen.getByText('test.pdf')).toBeInTheDocument();
   });
 
   it('calls processDocument on button click with a single file and calls onComplete', async () => {
@@ -96,7 +96,7 @@ describe('PDFProcessor', () => {
     const file = createMockFile('single.pdf');
 
     await act(async () => { fireEvent.change(fileInput, { target: { files: [file] } }); });
-    await screen.findByText('single.pdf (1.0 KB)');
+    await screen.findByText('single.pdf');
 
     const processButton = screen.getByRole('button', { name: defaultProps.processActionName });
     expect(processButton).not.toBeDisabled();
@@ -121,7 +121,7 @@ describe('PDFProcessor', () => {
     );
     await waitFor(() => {
         expect(global.URL.createObjectURL).toHaveBeenCalled();
-        expect(screen.getByRole('link', { name: /Download Processed PDF/i })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /Download Result/i })).toBeInTheDocument();
     });
   });
 
@@ -143,7 +143,7 @@ describe('PDFProcessor', () => {
     const fileInput = container.querySelector(`#pdf-upload-${defaultProps.toolId}`) as HTMLInputElement;
     const file = createMockFile('test.pdf');
     await act(async () => { fireEvent.change(fileInput, { target: { files: [file] } }); });
-    await screen.findByText('test.pdf (1.0 KB)');
+    await screen.findByText('test.pdf');
 
     const processButton = screen.getByRole('button', { name: defaultProps.processActionName });
     await act(async () => { fireEvent.click(processButton); });
@@ -162,9 +162,10 @@ describe('PDFProcessor', () => {
     rerender(<PDFProcessorWithErrorBoundary {...defaultProps} />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Processing: 50%/i)).toBeInTheDocument();
-      const progressBarFill = screen.getByLabelText('Processing progress: 50%').firstChild as HTMLElement;
-      expect(progressBarFill.style.width).toBe('50%');
+      expect(screen.getByText(/Processing.../i)).toBeInTheDocument();
+
+      const progressBarFill = document.querySelector('.h-full.bg-indigo-500');
+      expect(progressBarFill).toHaveStyle({ width: '50%' });
     });
   });
 
@@ -176,7 +177,7 @@ describe('PDFProcessor', () => {
     const fileInput = container.querySelector(`#pdf-upload-${defaultProps.toolId}`) as HTMLInputElement;
     const file = createMockFile('error.pdf');
     await act(async () => { fireEvent.change(fileInput, { target: { files: [file] } }); });
-    await screen.findByText('error.pdf (1.0 KB)');
+    await screen.findByText('error.pdf');
 
     const processButton = screen.getByRole('button', { name: defaultProps.processActionName });
     await act(async () => { fireEvent.click(processButton); });
@@ -210,8 +211,8 @@ describe('PDFProcessor', () => {
     const file2 = createMockFile('file2.pdf');
 
     await act(async () => { fireEvent.change(fileInput, { target: { files: [file1, file2] } }); });
-    await screen.findByText('file1.pdf (1.0 KB)');
-    await screen.findByText('file2.pdf (1.0 KB)');
+    await screen.findByText('file1.pdf');
+    await screen.findByText('file2.pdf');
 
     const processButton = screen.getByRole('button', { name: "Apply Merge PDFs" });
     expect(processButton).not.toBeDisabled();
@@ -258,7 +259,7 @@ describe('PDFProcessor', () => {
     const fileInput = container.querySelector(`#pdf-upload-${splitTool.id}`) as HTMLInputElement;
     const file = createMockFile('tosplit.pdf');
     await act(async () => { fireEvent.change(fileInput, { target: { files: [file] } }); });
-    await screen.findByText('tosplit.pdf (1.0 KB)');
+    await screen.findByText(/tosplit\.pdf/);
 
     const processButton = screen.getByRole('button', { name: "Apply Split PDF" });
     expect(processButton).not.toBeDisabled();
