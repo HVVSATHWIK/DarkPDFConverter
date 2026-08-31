@@ -178,9 +178,14 @@ export function useDarkMode() {
     // overlay path to avoid heavy canvas/pdfjs work.
     // Always use rasterization for consistent reliable dark mode
     // (Vector overlay with BlendMode.Difference is flaky in many viewers including pdf.js)
-    const out = await rasterizeDarkMode(pdfDoc, { theme: currentThemeName, brightness, contrast, mode }, themeConfig);
-    console.log(`Dark mode applied (raster): ${themeConfig.name} theme`);
-    return out;
+    try {
+      const out = await rasterizeDarkMode(pdfDoc, { theme: currentThemeName, brightness, contrast, mode }, themeConfig);
+      console.log(`Dark mode applied (raster): ${themeConfig.name} theme`);
+      return out;
+    } catch (error) {
+      console.warn('Dark mode rasterization failed, returning original PDF.', error);
+      return pdfDoc;
+    }
   };
 
   return { applyDarkMode, THEME_CONFIGS };

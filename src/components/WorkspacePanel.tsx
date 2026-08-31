@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 import { Tool } from '../types';
@@ -41,20 +41,25 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
   const [splitPdfSettings, setSplitPdfSettings] = useState<SplitOptions | null>(null);
   const [rotateSettings, setRotateSettings] = useState<RotateOptions | null>(null);
   const [extractSettings, setExtractSettings] = useState<ExtractOptions | null>(null);
-  const didMountRef = useRef(false);
-
   useEffect(() => {
-    if (!didMountRef.current) {
-      didMountRef.current = true;
-      return;
-    }
-
     setProcessedData(null);
     setSelectedFilesForPreview([]);
     if (activeTool.name !== 'Dark Mode') setDarkModeSettings({ theme: 'dark' });
-    if (activeTool.name !== 'Split PDF') setSplitPdfSettings(null);
-    if (activeTool.name !== 'Rotate PDF') setRotateSettings(null);
-    if (activeTool.name !== 'Extract Pages') setExtractSettings(null);
+    if (activeTool.name === 'Split PDF') {
+      setSplitPdfSettings((prev) => prev ?? { startPage: 1, endPage: 1 });
+    } else {
+      setSplitPdfSettings(null);
+    }
+    if (activeTool.name === 'Rotate PDF') {
+      setRotateSettings((prev) => prev ?? { degrees: 90, rotationType: 'all' });
+    } else {
+      setRotateSettings(null);
+    }
+    if (activeTool.name === 'Extract Pages') {
+      setExtractSettings((prev) => prev ?? { pageNumbers: [1] });
+    } else {
+      setExtractSettings(null);
+    }
   }, [activeTool.id, activeTool.name]);
 
   useEffect(() => {
