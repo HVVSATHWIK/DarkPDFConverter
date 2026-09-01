@@ -10,6 +10,8 @@ Allow: /rotate*
 Allow: /compress*
 Allow: /optimize*
 Allow: /extract*
+Allow: /cleanse-metadata*
+Allow: /images-to-pdf*
 Allow: /tools-for/*
 Allow: /alternatives/*
 Allow: /privacy-architecture
