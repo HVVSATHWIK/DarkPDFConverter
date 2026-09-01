@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { AppRoutes } from './AppRoutes';
 import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import { LiquidBackground } from '@/components/layout/LiquidBackground';
 import './index.css';
 
@@ -12,10 +13,12 @@ function App() {
       <div className="relative h-screen flex flex-col overflow-hidden">
         <LiquidBackground />
         <Header />
-        <main className="flex-grow min-h-0 overflow-y-auto relative z-10">
-          <AppRoutes />
+        <main className="flex-grow min-h-0 overflow-y-auto relative z-10 flex flex-col">
+          <div className="flex-1">
+            <AppRoutes />
+          </div>
+          <Footer />
         </main>
-        {/* <p style={{ textAlign: 'center', padding: '10px', backgroundColor: 'lightblue' }}>Verification: v_final_check_01</p> */}
       </div>
       <Toaster />
     </BrowserRouter>

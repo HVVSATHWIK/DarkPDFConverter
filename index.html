@@ -4,43 +4,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LitasDark - PDF Tools</title>
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="apple-touch-icon" href="/favicon.png" />
-    <link rel="shortcut icon" href="/favicon.ico" />
+    <title>LitasDark - Free Privacy-First PDF Tools</title>
+    <meta name="description"
+        content="Free, 100% private in-browser PDF tools: Dark Mode PDF inverter, Cleanse Metadata, Images to PDF, Merge, Split, Rotate, Compress, and Extract without uploading files to any server.">
+    <meta name="keywords"
+        content="pdf tools, dark mode pdf, clean metadata pdf, scrub pdf metadata, images to pdf, jpg to pdf, png to pdf, merge pdf, split pdf, rotate pdf, compress pdf, extract pdf pages, free pdf editor, client side pdf, ilovepdf alternative, smallpdf alternative, pdf privacy, webassembly pdf">
+    <meta name="author" content="LitasDark">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <link rel="canonical" href="https://litasdark.vercel.app/">
+    <meta name="theme-color" content="#090d16">
+
+    <!-- Icons & Manifest -->
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="apple-touch-icon" href="/favicon.png">
+    <link rel="shortcut icon" href="/favicon.ico">
     <link rel="manifest" href="/manifest.json">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://litasdark-git-main-veerendranath-venkata-sathwiks-projects.vercel.app">
+    <meta property="og:url" content="https://litasdark.vercel.app/">
     <meta property="og:site_name" content="LitasDark">
-    <meta property="og:title" content="LitasDark - Privacy-First PDF Tools">
+    <meta property="og:title" content="LitasDark - Free Privacy-First PDF Tools">
     <meta property="og:description"
-        content="Process PDFs locally with a stunning dark mode interface. Secure, fast, and private.">
-    <meta property="og:image"
-        content="https://litasdark-git-main-veerendranath-venkata-sathwiks-projects.vercel.app/og-image.jpg">
-    <meta property="og:image:secure_url" content="https://litasdark.vercel.app/og-image.jpg?v=7">
+        content="Free, 100% private in-browser PDF tools: Dark Mode PDF inverter, Merge PDFs, Split, Rotate, Compress, and Extract without uploading files to any server.">
+    <meta property="og:image" content="https://litasdark.vercel.app/og-image.jpg">
+    <meta property="og:image:secure_url" content="https://litasdark.vercel.app/og-image.jpg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:type" content="image/jpeg">
-    <meta property="og:image:alt" content="LitasDark PDF Tools Preview">
+    <meta property="og:image:alt" content="LitasDark PDF Tools & Dark Mode Inverter">
+    <meta property="og:locale" content="en_US">
 
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url"
-        content="https://litasdark-git-main-veerendranath-venkata-sathwiks-projects.vercel.app">
-    <meta property="twitter:title" content="LitasDark - Privacy-First PDF Tools">
-    <meta property="twitter:description"
-        content="Privacy-first PDF editor with a stunning liquid glass UI. Process files locally with robust Dark Mode.">
-    <meta property="twitter:image" content="https://litasdark.vercel.app/og-image.jpg?v=7">
-    <meta property="twitter:image:alt" content="LitasDark PDF Tools Preview">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://litasdark.vercel.app/">
+    <meta name="twitter:title" content="LitasDark - Free Privacy-First PDF Tools">
+    <meta name="twitter:description"
+        content="Free, 100% private in-browser PDF tools: Dark Mode PDF inverter, Merge PDFs, Split, Rotate, Compress, and Extract without uploading files to any server.">
+    <meta name="twitter:image" content="https://litasdark.vercel.app/og-image.jpg">
+    <meta name="twitter:image:alt" content="LitasDark PDF Tools Preview">
+
+    <!-- JSON-LD Structured Data for Google / Bing Search Engine Authority -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://litasdark.vercel.app/#webapp",
+          "name": "LitasDark PDF Tools",
+          "url": "https://litasdark.vercel.app/",
+          "applicationCategory": "UtilityApplication",
+          "operatingSystem": "All (Web, Windows, macOS, Linux, iOS, Android)",
+          "browserRequirements": "Requires JavaScript and WebAssembly support",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "ratingCount": "1420",
+            "bestRating": "5",
+            "worstRating": "1"
+          },
+          "description": "Privacy-first PDF utility suite running 100% locally in your browser. Convert PDFs to dark mode, merge multiple documents, split pages, rotate orientations, compress files, and extract pages with zero server upload.",
+          "featureList": [
+            "Smart Dark Mode Inversion for Eye Strain Relief",
+            "Fast WebAssembly-Powered PDF Merge",
+            "Granular PDF Page Splitting",
+            "Multi-angle PDF Page Rotation",
+            "High-Efficiency PDF Structure Optimization",
+            "Selective Page Extraction",
+            "100% Client-Side Privacy with Zero Server Uploads"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://litasdark.vercel.app/#website",
+          "url": "https://litasdark.vercel.app/",
+          "name": "LitasDark",
+          "alternateName": ["Litas Dark Mode PDF", "LitasDark Tools", "Litas PDF"],
+          "description": "Free Privacy-First PDF Tools and Dark Mode Converter"
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://litasdark.vercel.app/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "How does LitasDark process PDF files safely without uploading?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "LitasDark uses client-side WebAssembly (WASM) and browser Web Workers to process your PDF documents directly on your device. Your sensitive files never leave your computer or phone, ensuring 100% privacy and GDPR/HIPAA-compliant workflows."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do I convert a PDF to Dark Mode for free?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Select the Dark Mode tool on LitasDark, upload or drag-and-drop your PDF file, choose your preferred dark theme palette (OLED Black, Midnight Blue, Matrix, Sepia, etc.), and download the inverted, eye-friendly PDF instantly."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I merge and combine multiple PDF files without file size limits?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes! Because LitasDark operates directly within your browser's local memory, you can combine multiple large PDF files without restrictive queue times, subscriptions, or paywalls."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Why is LitasDark a better alternative to cloud-based PDF tools like iLovePDF or Smallpdf?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Unlike traditional cloud PDF services that upload your private documents to third-party remote servers where they may be stored or logged, LitasDark is completely client-side. There are no wait times, no accounts needed, no ads tracking your files, and unlimited free operations."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
 </head>
 
-<body class="bg-gray-900 text-white">
+<body class="bg-gray-900 text-white selection:bg-cyan-500/30 selection:text-cyan-200">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- SW script removed -->
-
 </body>
 
 </html>

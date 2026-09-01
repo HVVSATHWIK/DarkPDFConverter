@@ -1,6 +1,14 @@
+import { useEffect } from 'react';
 import { MainApplication } from '@/components/layout/MainApplication';
 
 export default function ExplorePage() {
-  // 3D carousel is intentionally optional and lives here.
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('litas_last_page', '/explore');
+    } catch {
+      // ignore
+    }
+  }, []);
+
   return <MainApplication />;
 }

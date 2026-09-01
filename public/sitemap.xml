@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  
+  <!-- Homepage / Core Application Hub -->
+  <url>
+    <loc>https://litasdark.vercel.app/</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://litasdark.vercel.app/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://litasdark.vercel.app/?lang=es" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://litasdark.vercel.app/?lang=pt" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://litasdark.vercel.app/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://litasdark.vercel.app/?lang=fr" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://litasdark.vercel.app/?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://litasdark.vercel.app/?lang=hi" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://litasdark.vercel.app/" />
+    <image:image>
+      <image:loc>https://litasdark.vercel.app/og-image.jpg</image:loc>
+      <image:title>LitasDark - Free Privacy-First PDF Tools</image:title>
+    </image:image>
+  </url>
+
+  <!-- Dedicated Tools Hub -->
+  <url>
+    <loc>https://litasdark.vercel.app/tools</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.98</priority>
+  </url>
+
+  <!-- Core Transactional Tool Routes -->
+  <url>
+    <loc>https://litasdark.vercel.app/dark-mode-pdf</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://litasdark.vercel.app/convert/pdf-to-dark-mode</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://litasdark.vercel.app/invert-pdf-colors</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://litasdark.vercel.app/merge-pdf</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://litasdark.vercel.app/split-pdf</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://litasdark.vercel.app/rotate-pdf</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://litasdark.vercel.app/compress-pdf</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://litasdark.vercel.app/extract-pdf</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Programmatic Industry & Compliance Hubs -->
+  <url>
+    <loc>https://litasdark.vercel.app/tools-for/legal-professionals</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://litasdark.vercel.app/tools-for/healthcare</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://litasdark.vercel.app/tools-for/students-researchers</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://litasdark.vercel.app/tools-for/developers</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- Competitor Intercept & Displacement Pages -->
+  <url>
+    <loc>https://litasdark.vercel.app/alternatives/ilovepdf-alternative</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://litasdark.vercel.app/alternatives/smallpdf-alternative</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://litasdark.vercel.app/alternatives/sejda-alternative</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Security & Architecture Whitepaper -->
+  <url>
+    <loc>https://litasdark.vercel.app/privacy-architecture</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <!-- 3D Interactive Lab -->
+  <url>
+    <loc>https://litasdark.vercel.app/explore</loc>
+    <lastmod>2026-08-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+</urlset>

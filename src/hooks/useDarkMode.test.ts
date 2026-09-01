@@ -107,6 +107,7 @@ describe('useDarkMode', () => {
     const { applyDarkMode } = useDarkMode();
     const result = await applyDarkMode(mockPdfDoc);
 
+    expect(result).toBeDefined();
     expect(mockPdfDoc.save).toHaveBeenCalled();
   });
 

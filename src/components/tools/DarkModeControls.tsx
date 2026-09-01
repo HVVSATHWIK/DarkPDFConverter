@@ -12,21 +12,21 @@ interface DarkModeControlsProps {
 const themes: ThemeName[] = ['dark', 'darker', 'darkest', 'sepia', 'midnight', 'slate'];
 
 const themeSwatches: Record<ThemeName, { label: string; className: string }> = {
-  dark: { label: 'Dark', className: 'bg-gradient-to-br from-slate-900 to-slate-700' },
-  darker: { label: 'Darker', className: 'bg-gradient-to-br from-zinc-950 to-slate-800' },
-  darkest: { label: 'Darkest', className: 'bg-gradient-to-br from-black to-slate-900' },
-  sepia: { label: 'Sepia', className: 'bg-gradient-to-br from-amber-900 to-amber-700' },
-  midnight: { label: 'Midnight', className: 'bg-gradient-to-br from-indigo-950 to-slate-800' },
-  slate: { label: 'Slate', className: 'bg-gradient-to-br from-slate-800 to-slate-600' },
+  dark: { label: 'Dark', className: 'bg-[#171c26] border border-slate-700' },
+  darker: { label: 'Darker', className: 'bg-[#0f0f14] border border-zinc-800' },
+  darkest: { label: 'Darkest', className: 'bg-black border border-neutral-800' },
+  sepia: { label: 'Sepia', className: 'bg-[#2e1f12] border border-amber-800' },
+  midnight: { label: 'Midnight', className: 'bg-[#0d172e] border border-indigo-800' },
+  slate: { label: 'Slate', className: 'bg-[#242933] border border-slate-600' },
 };
 
 const themeDescriptions: Record<ThemeName, string> = {
-  dark: 'Balanced dark look with readable contrast.',
-  darker: 'Deeper blacks with a cleaner, modern feel.',
-  darkest: 'Maximum darkness for OLED-like viewing.',
-  sepia: 'Warm, paper-like tone for long reading.',
-  midnight: 'Cool, bluish dark tone for night reading.',
-  slate: 'Neutral gray theme with softer highlights.',
+  dark: 'Classic dark slate theme with balanced contrast.',
+  darker: 'Deep charcoal modern theme.',
+  darkest: 'Pure OLED black for maximum contrast.',
+  sepia: 'Warm amber & parchment tone for relaxed reading.',
+  midnight: 'Deep navy blue with moonlight accents.',
+  slate: 'Cool graphite gray theme with softer highlights.',
 };
 const modes: { value: DarkModeRenderMode; label: string; hint: string }[] = [
   {

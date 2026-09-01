@@ -11,8 +11,9 @@ import RotatePDFControls from './tools/RotatePDFControls';
 import { RotateOptions } from '@/hooks/useRotatePDF';
 import ExtractPagesControls from './tools/ExtractPagesControls';
 import { ExtractOptions } from '@/hooks/useExtractPages';
+import ImagesToPDFControls from './tools/ImagesToPDFControls';
+import { ImageToPdfOptions } from '@/hooks/useImagesToPdf';
 import PDFPreview from './common/PDFPreview';
-// ...
 
 interface ToolPageProps {
   activeTool: Tool;
@@ -25,7 +26,7 @@ function pushRecentToolId(id: number) {
     const raw = localStorage.getItem(RECENTS_KEY);
     const current = raw ? (JSON.parse(raw) as unknown) : [];
     const ids = Array.isArray(current) ? current.filter((v) => typeof v === 'number') : [];
-    const next = [id, ...ids.filter((x) => x !== id)].slice(0, 6);
+    const next = [id, ...ids.filter((x) => x !== id)].slice(0, 8);
     localStorage.setItem(RECENTS_KEY, JSON.stringify(next));
   } catch {
     // ignore
@@ -41,6 +42,11 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
   const [splitPdfSettings, setSplitPdfSettings] = useState<SplitOptions | null>(null);
   const [rotateSettings, setRotateSettings] = useState<RotateOptions | null>(null);
   const [extractSettings, setExtractSettings] = useState<ExtractOptions | null>(null);
+  const [imageToPdfSettings, setImageToPdfSettings] = useState<ImageToPdfOptions>({
+    pageSize: 'fit',
+    margin: 0,
+  });
+
   useEffect(() => {
     setProcessedData(null);
     setSelectedFilesForPreview([]);
@@ -63,7 +69,6 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
   }, [activeTool.id, activeTool.name]);
 
   useEffect(() => {
-    // Default to input when selecting files, output when processing completes.
     if (processedData) setPreviewTab('output');
   }, [processedData]);
 
@@ -78,16 +83,12 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
   const handleComplete = (result: any) => {
     console.log(`Processing complete for ${activeTool?.name}:`, result);
 
-    // Deep clone the buffer to prevent "ArrayBuffer detached" errors if 
-    // downstream components (like react-pdf workers) transfer/consume it.
-    // Use Blob Wrapper Pattern (Architecture Strategy A)
-    // Convert ArrayBuffer/Uint8Array to Blob to prevent detachment errors and improve memory efficiency.
-    // Blobs are immutable and act as stable file references for react-pdf.
     if (result.processedPdf && !(result.processedPdf instanceof Blob)) {
       result.processedPdf = new Blob([result.processedPdf], { type: 'application/pdf' });
     }
 
     setProcessedData(result);
+    setPreviewTab('output');
   };
 
   const handleError = (error: Error) => {
@@ -99,32 +100,31 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
     switch (activeTool.name) {
       case 'Dark Mode':
         return (
-          <>
-            <PDFProcessorWithErrorBoundary
-              toolId={activeTool.id}
-              activeTool={activeTool}
-              allowMultipleFiles={false}
-              onComplete={handleComplete}
-              onError={handleError}
-              onSelectionChange={setSelectedFilesForPreview}
-              processActionName="Apply Theme"
-              darkModePreviewOptions={darkModeSettings}
-              autoProcess
-              autoProcessOnSelect
-              autoProcessDeps={[darkModeSettings.theme, darkModeSettings.mode]}
-              autoProcessDebounceMs={600}
-              controls={
-                <DarkModeControls
-                  onSettingsChange={setDarkModeSettings}
-                  currentOptions={darkModeSettings}
-                  embedded
-                />
-              }
-              controlsLabel="Theme & Mode"
-              trustLabel="Processed locally in your browser — your files stay on your device."
-            />
-          </>
+          <PDFProcessorWithErrorBoundary
+            toolId={activeTool.id}
+            activeTool={activeTool}
+            allowMultipleFiles={false}
+            onComplete={handleComplete}
+            onError={handleError}
+            onSelectionChange={setSelectedFilesForPreview}
+            processActionName="Apply Theme"
+            darkModePreviewOptions={darkModeSettings}
+            autoProcess
+            autoProcessOnSelect
+            autoProcessDeps={[darkModeSettings.theme, darkModeSettings.mode]}
+            autoProcessDebounceMs={200}
+            controls={
+              <DarkModeControls
+                onSettingsChange={setDarkModeSettings}
+                currentOptions={darkModeSettings}
+                embedded
+              />
+            }
+            controlsLabel="Theme & Mode"
+            trustLabel="Processed locally in your browser — your files stay on your device."
+          />
         );
+
       case 'Split PDF':
         return (
           <>
@@ -147,6 +147,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
             />
           </>
         );
+
       case 'Merge PDFs':
         return (
           <PDFProcessorWithErrorBoundary
@@ -157,9 +158,9 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
             onError={handleError}
             onSelectionChange={setSelectedFilesForPreview}
             processActionName="Merge Selected PDFs"
-          // Merge is manual to prevent accidental heavy processing
           />
         );
+
       case 'Rotate PDF':
         return (
           <>
@@ -182,6 +183,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
             />
           </>
         );
+
       case 'Extract Pages':
         return (
           <>
@@ -204,7 +206,8 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
             />
           </>
         );
-      case 'Optimize PDF': // Phase 1: structural optimization (honest naming)
+
+      case 'Optimize PDF':
         return (
           <PDFProcessorWithErrorBoundary
             toolId={activeTool.id}
@@ -216,37 +219,79 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
             processActionName="Optimize PDF"
           />
         );
+
+      case 'Cleanse Metadata':
+        return (
+          <PDFProcessorWithErrorBoundary
+            toolId={activeTool.id}
+            activeTool={activeTool}
+            allowMultipleFiles={false}
+            onComplete={handleComplete}
+            onError={handleError}
+            onSelectionChange={setSelectedFilesForPreview}
+            processActionName="Sanitize & Scrub Metadata"
+            autoProcess
+            autoProcessOnSelect
+            trustLabel="Strips internal computer paths, author tags, creation timestamps, and hidden layer metadata."
+          />
+        );
+
+      case 'Images to PDF':
+        return (
+          <>
+            <PDFProcessorWithErrorBoundary
+              toolId={activeTool.id}
+              activeTool={activeTool}
+              allowMultipleFiles={true}
+              onComplete={handleComplete}
+              onError={handleError}
+              onSelectionChange={setSelectedFilesForPreview}
+              processActionName="Compile Images to PDF"
+              imageToPdfOptions={imageToPdfSettings}
+              trustLabel="Lossless in-browser compiler. Compiles high-res PNG & JPG photos into a single PDF without downsampling."
+            />
+            <ImagesToPDFControls
+              currentOptions={imageToPdfSettings}
+              onSettingsChange={setImageToPdfSettings}
+            />
+          </>
+        );
+
       default:
         return <p className="text-gray-400">Tool UI for '{activeTool.name}' not implemented yet.</p>;
     }
   };
 
+  const isFromLabs =
+    (location.state as { from?: string } | null)?.from === '/explore' ||
+    (typeof window !== 'undefined' && sessionStorage.getItem('litas_last_page') === '/explore');
+  const backUrl = isFromLabs ? '/explore' : '/tools';
+  const backLabel = isFromLabs ? 'Labs 3D' : 'All Tools';
+
   const showTrustLine = location.pathname !== '/';
 
   return (
     <div className="w-full h-[calc(100vh-64px)] overflow-hidden bg-black">
-      {/* SaaS Dashboard Layout: Sidebar (Left) + Preview (Right) */}
       <div className="flex h-full">
-
         {/* Sidebar: Controls & Input */}
         <aside className="w-full md:w-[360px] shrink-0 border-r border-white/10 flex flex-col bg-[#050505] overflow-y-auto">
           <div className="p-5 space-y-6">
-
             {/* Header / Nav Back */}
             <div className="flex items-center justify-between">
               <Link
-                to="/"
+                to={backUrl}
                 className="group flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-white transition-colors"
+                aria-label={`Back to ${backLabel}`}
               >
                 <ArrowUturnLeftIcon className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-                <span>Tools</span>
+                <span>{backLabel}</span>
               </Link>
               <div className="text-xs font-semibold px-2 py-1 rounded bg-white/5 text-slate-400 border border-white/5">
                 {activeTool.name}
               </div>
             </div>
 
-            {/* Main Tool UI (PDFProcessor renders the controls) */}
+            {/* Main Tool UI */}
             <div className="space-y-6">
               {renderToolSpecificUI()}
             </div>
@@ -273,19 +318,21 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
               <div className="flex bg-black/40 rounded-lg p-0.5 border border-white/5">
                 <button
                   onClick={() => setPreviewTab('input')}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${previewTab === 'input'
-                    ? 'bg-white/10 text-white shadow-sm'
-                    : 'text-slate-500 hover:text-slate-300'
-                    }`}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                    previewTab === 'input'
+                      ? 'bg-white/10 text-white shadow-sm'
+                      : 'text-slate-500 hover:text-slate-300'
+                  }`}
                 >
                   Original
                 </button>
                 <button
                   onClick={() => setPreviewTab('output')}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${previewTab === 'output'
-                    ? 'bg-indigo-500/20 text-indigo-200 shadow-sm ring-1 ring-inset ring-indigo-500/20'
-                    : 'text-slate-500 hover:text-slate-300'
-                    }`}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                    previewTab === 'output'
+                      ? 'bg-indigo-500/20 text-indigo-200 shadow-sm ring-1 ring-inset ring-indigo-500/20'
+                      : 'text-slate-500 hover:text-slate-300'
+                  }`}
                 >
                   Output
                 </button>
@@ -294,20 +341,23 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
           </div>
 
           {/* Preview Canvas */}
-          <div className="flex-1 overflow-auto p-8 flex items-center justify-center relative bg-[radial-gradient(#1a1a1a_1px,transparent_1px)] [background-size:20px_20px]">
+          <div className="flex-1 min-h-0 w-full p-4 sm:p-6 flex items-center justify-center relative bg-[radial-gradient(#1a1a1a_1px,transparent_1px)] [background-size:20px_20px] overflow-hidden">
             {processedData ? (
-              <div className="relative shadow-2xl shadow-black/50 rounded-lg overflow-hidden border border-white/10 max-w-full max-h-full">
-                {previewTab === 'output' && (processedData.processedPdf || processedData instanceof Uint8Array || processedData instanceof Blob) && (
-                  <PDFPreview file={processedData.processedPdf || processedData} />
-                )}
+              <div className="w-full h-full max-w-5xl flex flex-col items-center justify-center relative shadow-2xl shadow-black/70 rounded-2xl overflow-hidden border border-white/10 bg-slate-950/80 backdrop-blur-sm">
+                {previewTab === 'output' &&
+                  (processedData.processedPdf ||
+                    processedData instanceof Uint8Array ||
+                    processedData instanceof Blob) && (
+                    <PDFPreview file={processedData.processedPdf || processedData} />
+                  )}
                 {previewTab === 'input' && selectedFilesForPreview[0] && (
                   <PDFPreview file={selectedFilesForPreview[0]} />
                 )}
 
                 {/* Error Overlay */}
                 {processedData.error && (
-                  <div className="absolute inset-0 bg-black/80 flex items-center justify-center p-8 backdrop-blur-sm">
-                    <div className="bg-rose-950/30 border border-rose-500/30 p-4 rounded-xl text-rose-200">
+                  <div className="absolute inset-0 bg-black/80 flex items-center justify-center p-8 backdrop-blur-sm z-30">
+                    <div className="bg-rose-950/30 border border-rose-500/30 p-4 rounded-xl text-rose-200 text-center max-w-md">
                       <p className="font-semibold mb-1">Error Processing PDF</p>
                       <p className="text-sm opacity-80">{processedData.error}</p>
                     </div>
@@ -315,18 +365,18 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
                 )}
               </div>
             ) : selectedFilesForPreview.length > 0 ? (
-              <div className="relative shadow-xl shadow-black/30 rounded-lg overflow-hidden border border-white/5 opacity-80 hover:opacity-100 transition-opacity">
-                <div className="absolute top-4 left-4 z-10 bg-black/60 backdrop-blur px-2 py-1 rounded text-[10px] font-mono text-slate-400 border border-white/5">
+              <div className="w-full h-full max-w-5xl flex flex-col items-center justify-center relative shadow-xl shadow-black/50 rounded-2xl overflow-hidden border border-white/10 bg-slate-950/80 backdrop-blur-sm">
+                <div className="absolute top-3 left-3 z-30 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-md text-[10px] font-mono text-slate-300 border border-white/10">
                   ORIGINAL
                 </div>
                 <PDFPreview file={selectedFilesForPreview[0]} />
               </div>
             ) : (
-              <div className="text-center space-y-4 opacity-30 select-none">
-                <div className="w-24 h-32 mx-auto border-2 border-dashed border-slate-500 rounded-lg flex items-center justify-center">
-                  <div className="w-16 h-1 bg-slate-700/50 rounded-full" />
+              <div className="text-center space-y-4 opacity-40 select-none">
+                <div className="w-24 h-32 mx-auto border-2 border-dashed border-slate-600 rounded-xl flex items-center justify-center bg-white/[0.02]">
+                  <div className="w-12 h-1 bg-slate-700 rounded-full" />
                 </div>
-                <p className="text-sm font-medium text-slate-500">Preview area</p>
+                <p className="text-sm font-medium text-slate-400">PDF Preview Area</p>
               </div>
             )}
           </div>

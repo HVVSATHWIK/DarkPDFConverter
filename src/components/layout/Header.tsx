@@ -4,36 +4,89 @@ import { FlaskConical } from 'lucide-react';
 export function Header() {
   const location = useLocation();
   const onExplore = location.pathname.startsWith('/explore');
+  const onHome = location.pathname === '/';
+  const onTools =
+    location.pathname === '/tools' ||
+    location.pathname === '/all-tools' ||
+    location.pathname.startsWith('/merge') ||
+    location.pathname.startsWith('/split') ||
+    location.pathname.startsWith('/rotate') ||
+    location.pathname.startsWith('/extract') ||
+    location.pathname.startsWith('/optimize') ||
+    location.pathname.startsWith('/compress');
+  const onDarkMode = location.pathname.startsWith('/dark-mode') || location.pathname.startsWith('/convert') || location.pathname === '/invert-pdf-colors';
+  const onPrivacy = location.pathname.startsWith('/privacy') || location.pathname.startsWith('/security') || location.pathname.startsWith('/compliance');
 
   return (
-    <header className={`sticky top-0 z-50 w-full ${onExplore ? 'bg-transparent' : 'bg-slate-950/35'} backdrop-blur-md border-b border-white/10`}>
-      <div className="mx-auto max-w-7xl px-4 py-4 md:px-6 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-3" aria-label="Go to tools dashboard">
+    <header className={`sticky top-0 z-50 w-full ${onExplore ? 'bg-transparent' : 'bg-slate-950/80'} backdrop-blur-md border-b border-white/10`}>
+      <div className="mx-auto max-w-7xl px-4 py-3.5 md:px-6 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-2.5 group" aria-label="LitasDark">
           <img
             src="/favicon.ico"
             alt="Litas Logo"
-            className="w-10 h-10 object-contain drop-shadow-[0_0_10px_rgba(59,130,246,0.25)]"
+            className="w-8 h-8 object-contain"
           />
-          <span className="text-2xl font-black tracking-wider bg-gradient-to-r from-sky-300 to-indigo-300 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(15,23,42,0.65)]">
-            LITASDARK
+          <span className="text-lg font-bold tracking-tight text-white">
+            LitasDark
           </span>
         </Link>
 
-        <nav className="flex items-center gap-6">
+        <nav className="flex items-center gap-2 sm:gap-5 text-xs sm:text-sm font-medium">
           <Link
             to="/"
-            className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
+            className={`px-2.5 py-1.5 rounded-lg transition-colors ${
+              onHome
+                ? 'text-cyan-300 font-semibold bg-white/5'
+                : 'text-slate-300 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            Home
+          </Link>
+
+          <Link
+            to="/tools"
+            className={`px-2.5 py-1.5 rounded-lg transition-colors ${
+              onTools
+                ? 'text-cyan-300 font-semibold bg-cyan-500/10 border border-cyan-500/20'
+                : 'text-slate-300 hover:text-white hover:bg-white/5'
+            }`}
           >
             Tools
           </Link>
+
           <Link
-            to="/explore"
-            className="hidden md:flex items-center gap-2 group text-xs font-medium text-slate-600 hover:text-slate-400 transition-colors"
+            to="/dark-mode-pdf"
+            className={`hidden md:inline-flex px-2.5 py-1.5 rounded-lg transition-colors ${
+              onDarkMode
+                ? 'text-cyan-300 font-semibold bg-white/5'
+                : 'text-slate-300 hover:text-white hover:bg-white/5'
+            }`}
           >
-            <FlaskConical size={14} className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 -translate-x-1 group-hover:translate-x-0" />
-            Labs
+            Dark Mode
           </Link>
 
+          <Link
+            to="/privacy-architecture"
+            className={`hidden lg:inline-flex px-2.5 py-1.5 rounded-lg transition-colors ${
+              onPrivacy
+                ? 'text-cyan-300 font-semibold bg-white/5'
+                : 'text-slate-300 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            Privacy
+          </Link>
+
+          <Link
+            to="/explore"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              onExplore
+                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-[0_0_15px_rgba(6,182,212,0.25)]'
+                : 'text-slate-300 hover:text-slate-100 hover:bg-white/5 border border-white/10'
+            }`}
+          >
+            <FlaskConical size={13} className={onExplore ? 'text-cyan-400' : 'text-indigo-400'} />
+            <span>3D Labs</span>
+          </Link>
         </nav>
       </div>
     </header>

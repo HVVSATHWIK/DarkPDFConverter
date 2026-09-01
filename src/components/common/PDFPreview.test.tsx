@@ -149,4 +149,30 @@ describe('PDFPreview Component', () => {
         expect(pageMock).toHaveAttribute('data-scale', '1');
         expect(pageMock).not.toHaveAttribute('data-width');
     });
+
+    it('handles zoom in, zoom out, and fit controls correctly', async () => {
+        const mockBuffer = new ArrayBuffer(10);
+        vi.mocked(usePdfBufferModule.usePdfBuffer).mockReturnValue({
+            status: 'ready',
+            buffer: mockBuffer,
+            isShared: false
+        });
+
+        const { fireEvent } = await import('@testing-library/react');
+        render(<PDFPreview file={new Blob([])} />);
+
+        await waitFor(() => {
+            expect(screen.getByTestId('page-mock')).toBeInTheDocument();
+        });
+
+        const zoomInBtn = screen.getByTitle('Zoom in (+15%)');
+        fireEvent.click(zoomInBtn);
+
+        expect(screen.getByTestId('page-mock')).toHaveAttribute('data-scale', '1.15');
+
+        const fitWidthBtn = screen.getByTitle('Fit to Width');
+        fireEvent.click(fitWidthBtn);
+
+        expect(screen.getByTestId('page-mock')).toBeInTheDocument();
+    });
 });

@@ -50,25 +50,32 @@ function AnimatedToolCardWrapper({
   // 1 = In Center (World Locked)
   const [{ phase }, api] = useSpring(() => ({
     phase: 0,
-    // Calmer, more "glide" feel with minimal overshoot
-    config: { mass: 2.0, tension: 170, friction: 50 },
+    config: { mass: 1.2, tension: 200, friction: 32 },
   }));
 
-  // Track opacity separately as it's simple
-  const [{ opacity }, opacityApi] = useSpring(() => ({ opacity: 1 }));
+  // Track opacity separately
+  const [{ opacity }, opacityApi] = useSpring(() => ({
+    opacity: 1,
+    config: { mass: 0.7, tension: 260, friction: 28 },
+  }));
 
   useEffect(() => {
     if (isWrapperActive) {
       if (isActuallyCenteredInApp) {
         // Go to Center (Phase 1)
-        api.start({ phase: 1, onRest: onCenterComplete });
+        api.start({
+          phase: 1,
+          config: { mass: 1.2, tension: 200, friction: 32 },
+          onRest: () => {
+            onCenterComplete();
+          },
+        });
         opacityApi.start({ opacity: 1 });
       } else {
         // Return to ring (Active tool but not centered, e.g. switching)
-        // Fix: Animate 'phase' to 0 (Slot) instead of using legacy position props
         api.start({
           phase: 0,
-          config: { mass: 2.0, tension: 170, friction: 50 },
+          config: { mass: 1.5, tension: 180, friction: 40 },
           onRest: () => onReturnComplete(tool.id),
         });
         opacityApi.start({ opacity: 1 });
@@ -76,16 +83,23 @@ function AnimatedToolCardWrapper({
     } else {
       // Inactive
       if (isAnyToolProcessActiveInApp) {
-        // Hide
+        // Smoothly disappear all other cards
         api.start({ phase: 0 });
-        opacityApi.start({ opacity: 0 });
+        opacityApi.start({
+          opacity: 0,
+          config: { mass: 0.6, tension: 280, friction: 26 },
+        });
       } else {
-        // Return to Ring (Phase 0)
+        // Return to Ring (Phase 0, Opacity 1)
         api.start({
           phase: 0,
-          onRest: () => onReturnComplete(tool.id)
+          config: { mass: 1.5, tension: 180, friction: 40 },
+          onRest: () => onReturnComplete(tool.id),
         });
-        opacityApi.start({ opacity: 1 });
+        opacityApi.start({
+          opacity: 1,
+          config: { mass: 0.8, tension: 220, friction: 28 },
+        });
       }
     }
   }, [isWrapperActive, isActuallyCenteredInApp, isAnyToolProcessActiveInApp, api, opacityApi, onCenterComplete, onReturnComplete, tool.id]);
@@ -94,27 +108,29 @@ function AnimatedToolCardWrapper({
     if (!cardGroupRef.current) return;
 
     const currentPhase = phase.get();
+    const currentOpacity = opacity.get();
     const parentRotationY = getParentRotationY(cardGroupRef.current);
     const PI = Math.PI;
 
+    // Disappear / hide inactive cards completely when another tool is active
+    if (!isWrapperActive && isAnyToolProcessActiveInApp) {
+      if (currentOpacity <= 0.01) {
+        cardGroupRef.current.visible = false;
+        return;
+      }
+      cardGroupRef.current.visible = true;
+      const shrinkScale = Math.max(0.001, currentOpacity);
+      cardGroupRef.current.scale.setScalar(shrinkScale);
+      return;
+    }
+
+    cardGroupRef.current.visible = true;
+
     // 1. Calculate "Slot" State (Local)
-    // Position: originalPosition
-    // Rotation: originalRotation
-    // Scale: [1,1,1]
-
     // 2. Calculate "Center" State (World Locked -> Converted to Local)
-    // Target World Pos: (0, 0, 3.5)
-    // Target World Rot: (0, 0, 0) relative to camera (So just Y=0 world)
-    // Local Pos = WorldPos rotated by -ParentRot
-    // Local Rot = -ParentRot
-
-    // Vector Math for Position
     const x_world = 0;
-    const z_world = 3.5; // Target distance
+    const z_world = 3.5; // Target distance in front of camera
 
-    // Rotate (0, 0, 3.5) by -parentRotationY around Y axis
-    // x' = x*cos(theta) - z*sin(theta)
-    // z' = x*sin(theta) + z*cos(theta)
     const sinN = Math.sin(-parentRotationY);
     const cosN = Math.cos(-parentRotationY);
 
@@ -122,47 +138,27 @@ function AnimatedToolCardWrapper({
     const targetLocalZ = x_world * sinN + z_world * cosN;
     const targetLocalY = 0; // Center Y
 
-    // 3. Interpolate (Lerp)
-    // We lerp Position, Rotation, and Scale based on Phase
-
-    // Position
+    // 3. Interpolate Position
     cardGroupRef.current.position.x = originalPosition[0] + (targetLocalX - originalPosition[0]) * currentPhase;
-    // Y Position: Add float effect if phase is low, lock if phase is high
     cardGroupRef.current.position.y = originalPosition[1] + (targetLocalY - originalPosition[1]) * currentPhase;
     cardGroupRef.current.position.z = originalPosition[2] + (targetLocalZ - originalPosition[2]) * currentPhase;
 
-    // Rotation
-    // Slot Rot Y is originalRotation[1]
-    // Target Rot Y is -parentRotationY (+ Math.PI? No, just face camera)
-    // We need to be careful with angle wrapping for lerp, but for < 360 it's ok. 
-    // Usually easier to slerp quaternions, but linear approximation is fine for short spring.
+    // Rotation interpolation
     const startRotY = originalRotation[1];
-    const endRotY = -parentRotationY; // Should face camera (World 0)
+    const endRotY = -parentRotationY; // Face camera
 
-    // Fix angle wrap (shortest path)
     let delta = endRotY - startRotY;
     while (delta > PI) delta -= 2 * PI;
     while (delta < -PI) delta += 2 * PI;
 
     cardGroupRef.current.rotation.y = startRotY + delta * currentPhase;
 
-    // Scale
+    // Active Card Scale
     const startScale = 1;
-    let endScale = 1.3;
-    if (isWrapperActive && !isActuallyCenteredInApp) endScale = 1.3; // Zoom in during flight
-
-    // If hidden (another tool active), we handle via opacity, but phase 0 keeps it at scale 1.
-    // Wait, inactive tools shrink? 
-    // logic: if inactive && isAnyToolProcessActiveInApp -> scale 0.3.
-    // Our 'phase' only handles Active <-> Slot. 
-    // We need a separate 'shrink' factor? 
-    // Let's rely on standard logic: 
-    // If phase is close to 0, logic is "Slot".
-    // If shrink is needed, we can multiply scale.
+    const endScale = 1.25;
 
     const currentScale = startScale + (endScale - startScale) * currentPhase;
     cardGroupRef.current.scale.setScalar(currentScale);
-
   });
 
   return (

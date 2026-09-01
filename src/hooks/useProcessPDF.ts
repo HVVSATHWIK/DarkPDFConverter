@@ -1,3 +1,5 @@
+import { useScrubMetadata } from './useScrubMetadata';
+import { useImagesToPdf, ImageToPdfOptions } from './useImagesToPdf';
 import { useState, useCallback } from 'react';
 import { PDFDocument } from 'pdf-lib';
 import { useDarkMode, DarkModeOptions } from './useDarkMode';
@@ -22,6 +24,7 @@ export interface ProcessOptions {
   splitPdfOptions?: SplitOptions;
   rotateOptions?: RotateOptions;
   extractOptions?: ExtractOptions;
+  imageToPdfOptions?: ImageToPdfOptions;
 }
 
 export function useProcessPDF() {
@@ -32,6 +35,8 @@ export function useProcessPDF() {
   const { rotatePdf } = useRotatePDF();
   const { compressPdf } = useCompressPDF();
   const { extractPages } = useExtractPages();
+  const { scrubMetadata } = useScrubMetadata();
+  const { convertImagesToPdf } = useImagesToPdf();
 
   const processDocument = useCallback(async (
     filesOrFile: File | File[],
@@ -44,15 +49,14 @@ export function useProcessPDF() {
 
       if (options.activeToolName === 'Merge PDFs') {
         if (!Array.isArray(filesOrFile) || filesOrFile.length === 0) {
-          throw new Error("No files provided for merging.");
+          throw new Error('No files provided for merging.');
         }
-        console.log(`useProcessPDF: Merge PDFs tool identified. Merging ${filesOrFile.length} files...`);
 
         const mergedPdfBytes = await mergePdfs(filesOrFile as File[], (perc, current, total) => {
           onProgress(perc * 0.95, `Merging file ${current} of ${total}...`);
         });
 
-        if (!mergedPdfBytes) throw new Error("Merging returned no data.");
+        if (!mergedPdfBytes) throw new Error('Merging returned no data.');
 
         const tempMergedDoc = await PDFDocument.load(mergedPdfBytes);
         onProgress(1, 'Merge complete!');
@@ -63,16 +67,34 @@ export function useProcessPDF() {
           isMerged: true,
         };
 
-      } else if (options.activeToolName === 'Split PDF') {
-        if (Array.isArray(filesOrFile) || !filesOrFile) throw new Error("A single file must be provided for splitting.");
-        if (!options.splitPdfOptions) throw new Error("Split PDF options not provided.");
+      } else if (options.activeToolName === 'Images to PDF') {
+        const fileList = Array.isArray(filesOrFile) ? filesOrFile : [filesOrFile];
+        if (fileList.length === 0) throw new Error('No images provided for PDF compilation.');
 
-        console.log(`useProcessPDF: Split PDF tool identified.`);
+        const compiledPdfBytes = await convertImagesToPdf(
+          fileList,
+          options.imageToPdfOptions || {},
+          (perc, msg) => onProgress(perc, msg)
+        );
+
+        if (!compiledPdfBytes) throw new Error('Failed to compile images to PDF.');
+        const tempDoc = await PDFDocument.load(compiledPdfBytes);
+        onProgress(1, 'Images compiled to PDF successfully!');
+        return {
+          pageCount: tempDoc.getPageCount(),
+          title: `Compiled Document (${fileList.length} images)`,
+          processedPdf: compiledPdfBytes,
+        };
+
+      } else if (options.activeToolName === 'Split PDF') {
+        if (Array.isArray(filesOrFile) || !filesOrFile) throw new Error('A single file must be provided for splitting.');
+        if (!options.splitPdfOptions) throw new Error('Split PDF options not provided.');
+
         const splitPdfBytes = await splitPdf(filesOrFile as File, options.splitPdfOptions, (perc, message) => {
           onProgress(perc * 0.95, message);
         });
 
-        if (!splitPdfBytes) throw new Error("Splitting PDF returned no data.");
+        if (!splitPdfBytes) throw new Error('Splitting PDF returned no data.');
 
         const newSplitDoc = await PDFDocument.load(splitPdfBytes);
         onProgress(1, 'Split complete!');
@@ -84,45 +106,48 @@ export function useProcessPDF() {
         };
 
       } else if (Array.isArray(filesOrFile)) {
-        throw new Error("Multiple files provided for a single file operation.");
+        throw new Error('Multiple files provided for a single file operation.');
       } else {
         // Single File Tools
         const file = filesOrFile as File;
         let processedPdf: Uint8Array | null = null;
-        let titlePrefix = "";
+        let titlePrefix = '';
 
         if (options.activeToolName === 'Dark Mode') {
-          console.log("useProcessPDF: Dark Mode - Smart Inversion...");
-          titlePrefix = "Dark Mode";
+          titlePrefix = 'Dark Mode';
           const arrayBuffer = await file.arrayBuffer();
           let pdfDoc = await PDFDocument.load(arrayBuffer);
-          onProgress(0.2, "Applying Smart Dark Mode...");
+          onProgress(0.2, 'Applying Smart Dark Mode...');
           pdfDoc = await applyDarkMode(pdfDoc, options.darkModeOptions || {});
           processedPdf = await pdfDoc.save();
 
         } else if (options.activeToolName === 'Rotate PDF') {
-          if (!options.rotateOptions) throw new Error("Rotate options missing.");
-          titlePrefix = "Rotated";
+          if (!options.rotateOptions) throw new Error('Rotate options missing.');
+          titlePrefix = 'Rotated';
           processedPdf = await rotatePdf(file, options.rotateOptions, (p, m) => onProgress(p, m));
 
         } else if (options.activeToolName === 'Optimize PDF') {
-          titlePrefix = "Optimized";
+          titlePrefix = 'Optimized';
           processedPdf = await compressPdf(file, (p, m) => onProgress(p, m));
 
         } else if (options.activeToolName === 'Extract Pages') {
-          if (!options.extractOptions) throw new Error("Extract options missing.");
-          titlePrefix = "Extracted";
+          if (!options.extractOptions) throw new Error('Extract options missing.');
+          titlePrefix = 'Extracted';
           processedPdf = await extractPages(file, options.extractOptions, (p, m) => onProgress(p, m));
 
+        } else if (options.activeToolName === 'Cleanse Metadata') {
+          titlePrefix = 'Sanitized';
+          processedPdf = await scrubMetadata(file, (p, m) => onProgress(p, m));
+
         } else {
-          // Fallback logic
+          // Fallback
           const arrayBuffer = await file.arrayBuffer();
           const pdfDoc = await PDFDocument.load(arrayBuffer);
           processedPdf = await pdfDoc.save();
-          titlePrefix = "Processed";
+          titlePrefix = 'Processed';
         }
 
-        if (!processedPdf) throw new Error("Processing failed to return data.");
+        if (!processedPdf) throw new Error('Processing failed to return data.');
 
         const tempDoc = await PDFDocument.load(processedPdf);
         onProgress(1, 'Processing complete!');
@@ -135,7 +160,7 @@ export function useProcessPDF() {
     } finally {
       setIsProcessing(false);
     }
-  }, [applyDarkMode, mergePdfs, splitPdf, rotatePdf, compressPdf, extractPages]);
+  }, [applyDarkMode, mergePdfs, splitPdf, rotatePdf, compressPdf, extractPages, scrubMetadata, convertImagesToPdf]);
 
   return { processDocument, isProcessing };
 }

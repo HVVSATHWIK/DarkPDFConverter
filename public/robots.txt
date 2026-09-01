@@ -1,0 +1,22 @@
+# Robots.txt for LitasDark PDF Tools & Programmatic SEO Architecture
+User-agent: *
+Allow: /
+Allow: /dark-mode*
+Allow: /convert/*
+Allow: /invert-pdf-colors
+Allow: /merge*
+Allow: /split*
+Allow: /rotate*
+Allow: /compress*
+Allow: /optimize*
+Allow: /extract*
+Allow: /tools-for/*
+Allow: /alternatives/*
+Allow: /privacy-architecture
+Allow: /security
+Allow: /compliance
+Allow: /explore
+
+# Host and Sitemap
+Sitemap: https://litasdark.vercel.app/sitemap.xml
+Host: https://litasdark.vercel.app
