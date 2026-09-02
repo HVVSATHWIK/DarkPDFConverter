@@ -86,8 +86,8 @@ export function CompetitorComparisonTable({
                 <div className="text-[11px] text-slate-500">Maximum allowable document capacity</div>
               </td>
               <td className="py-3.5 px-3 bg-cyan-500/[0.06] border-x border-cyan-500/20 text-cyan-200 font-semibold">
-                <div className="text-emerald-400 font-bold">Truly Unlimited</div>
-                <span className="text-[11px] text-cyan-300/80 font-normal">Bounded only by device RAM</span>
+                <div className="text-emerald-400 font-bold">Local Device RAM</div>
+                <span className="text-[11px] text-cyan-300/80 font-normal">Bounded by browser memory</span>
               </td>
               <td className="py-3.5 px-3 text-slate-400">
                 <span className="font-medium text-rose-300">Restricted</span>
@@ -110,8 +110,8 @@ export function CompetitorComparisonTable({
                 <div className="text-[11px] text-slate-500">Frequency limits on operations</div>
               </td>
               <td className="py-3.5 px-3 bg-cyan-500/[0.06] border-x border-cyan-500/20 text-cyan-200 font-semibold">
-                <div className="text-emerald-400 font-bold">Unmetered Forever</div>
-                <span className="text-[11px] text-cyan-300/80 font-normal">No queues, no cooldowns</span>
+                <div className="text-emerald-400 font-bold">No Daily Task Limit</div>
+                <span className="text-[11px] text-cyan-300/80 font-normal">No wait queues or cooldowns</span>
               </td>
               <td className="py-3.5 px-3 text-slate-400">
                 <span>Metered</span>

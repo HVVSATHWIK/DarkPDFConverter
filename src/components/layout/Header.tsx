@@ -13,28 +13,37 @@ export function Header() {
     location.pathname.startsWith('/rotate') ||
     location.pathname.startsWith('/extract') ||
     location.pathname.startsWith('/optimize') ||
-    location.pathname.startsWith('/compress');
-  const onDarkMode = location.pathname.startsWith('/dark-mode') || location.pathname.startsWith('/convert') || location.pathname === '/invert-pdf-colors';
-  const onPrivacy = location.pathname.startsWith('/privacy') || location.pathname.startsWith('/security') || location.pathname.startsWith('/compliance');
+    location.pathname.startsWith('/compress') ||
+    location.pathname.startsWith('/dark-mode') ||
+    location.pathname.startsWith('/cleanse') ||
+    location.pathname.startsWith('/images');
+  const onPrivacy =
+    location.pathname.startsWith('/privacy') ||
+    location.pathname.startsWith('/security') ||
+    location.pathname.startsWith('/compliance');
 
   return (
-    <header className={`sticky top-0 z-50 w-full ${onExplore ? 'bg-transparent' : 'bg-slate-950/80'} backdrop-blur-md border-b border-white/10`}>
+    <header className={`sticky top-0 z-50 w-full ${onExplore ? 'bg-transparent' : 'bg-slate-950/90'} backdrop-blur-md border-b border-white/10`}>
       <div className="mx-auto max-w-7xl px-4 py-3.5 md:px-6 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2.5 group" aria-label="LitasDark">
+        {/* Brand Area */}
+        <Link to="/" className="flex items-center gap-2.5 group" aria-label="LitasDark Home">
           <img
             src="/favicon.ico"
             alt="Litas Logo"
             className="w-8 h-8 object-contain"
           />
-          <span className="text-lg font-bold tracking-tight text-white">
-            LitasDark
-          </span>
+          <div className="flex flex-col">
+            <span className="text-lg font-bold tracking-tight text-white group-hover:text-cyan-300 transition-colors">
+              LitasDark
+            </span>
+          </div>
         </Link>
 
-        <nav className="flex items-center gap-2 sm:gap-5 text-xs sm:text-sm font-medium">
+        {/* Primary Clean Navigation */}
+        <nav className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm font-medium">
           <Link
             to="/"
-            className={`px-2.5 py-1.5 rounded-lg transition-colors ${
+            className={`px-3 py-1.5 rounded-lg transition-colors ${
               onHome
                 ? 'text-cyan-300 font-semibold bg-white/5'
                 : 'text-slate-300 hover:text-white hover:bg-white/5'
@@ -45,7 +54,7 @@ export function Header() {
 
           <Link
             to="/tools"
-            className={`px-2.5 py-1.5 rounded-lg transition-colors ${
+            className={`px-3 py-1.5 rounded-lg transition-colors ${
               onTools
                 ? 'text-cyan-300 font-semibold bg-cyan-500/10 border border-cyan-500/20'
                 : 'text-slate-300 hover:text-white hover:bg-white/5'
@@ -55,19 +64,8 @@ export function Header() {
           </Link>
 
           <Link
-            to="/dark-mode-pdf"
-            className={`hidden md:inline-flex px-2.5 py-1.5 rounded-lg transition-colors ${
-              onDarkMode
-                ? 'text-cyan-300 font-semibold bg-white/5'
-                : 'text-slate-300 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            Dark Mode
-          </Link>
-
-          <Link
             to="/privacy-architecture"
-            className={`hidden lg:inline-flex px-2.5 py-1.5 rounded-lg transition-colors ${
+            className={`hidden sm:inline-flex px-3 py-1.5 rounded-lg transition-colors ${
               onPrivacy
                 ? 'text-cyan-300 font-semibold bg-white/5'
                 : 'text-slate-300 hover:text-white hover:bg-white/5'

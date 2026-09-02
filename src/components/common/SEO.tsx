@@ -1,149 +1,123 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { TOOL_GUIDES } from '@/config/toolGuides';
 
 interface SEOProps {
   title?: string;
   description?: string;
   keywords?: string;
   canonicalPath?: string;
+  faqList?: { q: string; a: string }[];
+  steps?: { title: string; description: string }[];
+  noindex?: boolean;
 }
 
 const DEFAULT_SEO = {
-  title: 'LitasDark - 100% Free, Private In-Browser PDF Suite & Dark Mode Inverter',
+  title: 'LitasDark - Free, Private In-Browser PDF Suite & Dark Mode Inverter',
   description:
-    'Free, 100% private in-browser PDF tools: Dark Mode PDF inverter, Merge PDFs without limits, Split, Rotate, Compress, and Extract with zero server uploads and zero data logging.',
+    'Free client-side PDF suite: Dark Mode Inverter, Merge, Split, Rotate, Compress, Extract, Clean Metadata, and Images to PDF. Zero server uploads.',
   keywords:
-    'pdf tools, dark mode pdf, pdf dark mode converter, merge pdf, split pdf, rotate pdf, compress pdf, extract pdf pages, free pdf editor, client side pdf, ilovepdf alternative, smallpdf alternative, sejda alternative, pdf privacy, webassembly pdf, hipaa pdf, gdpr pdf',
+    'pdf tools, dark mode pdf, merge pdf, split pdf, rotate pdf, compress pdf, extract pdf pages, clean pdf metadata, images to pdf, private pdf tools, webassembly pdf',
 };
 
-const ROUTE_SEO: Record<string, { title: string; description: string; keywords: string }> = {
+const STATIC_ROUTE_SEO: Record<string, { title: string; description: string; keywords: string }> = {
   '/': {
-    title: 'LitasDark - 100% Free, Private In-Browser PDF Suite | Zero Server Uploads',
+    title: 'LitasDark - Free In-Browser PDF Tools | Zero Server Uploads',
     description:
-      'Process PDFs 100% locally in your browser with zero server uploads. Features Dark Mode PDF conversion, Merge, Split, Rotate, Compression, and Extraction with full HIPAA/GDPR privacy.',
+      'Free, privacy-focused PDF tools running 100% locally in your browser memory via WebAssembly. Dark Mode Inverter, Merge, Split, Rotate, Compress, Extract, and Metadata Cleaner.',
     keywords:
-      'pdf tools, pdf editor free, dark mode pdf, merge pdfs online, split pdf free, rotate pdf pages, optimize pdf size, privacy pdf, ilovepdf alternative, smallpdf alternative, sejda alternative',
+      'pdf tools, free pdf editor, dark mode pdf, merge pdf online, split pdf free, rotate pdf, compress pdf locally, sanitize pdf metadata, images to pdf, client side pdf',
   },
-  '/dark-mode': {
-    title: 'Dark Mode PDF Converter | Invert PDF Colors Free & 100% Private - LitasDark',
+  '/tools': {
+    title: 'All PDF Tools - Free, Private In-Browser Utilities | LitasDark',
     description:
-      'Convert bright white PDFs into eye-soothing dark mode with OLED Black, Sepia, and high-contrast palettes. 100% client-side WebAssembly, no file limits or uploads.',
+      'Browse our complete suite of free in-browser PDF utilities: Dark Mode Converter, Merge, Split, Rotate, Compress, Extract Pages, Clean Metadata, and Images to PDF.',
     keywords:
-      'dark mode pdf converter, invert pdf colors, pdf dark theme, night reading pdf, black background pdf, eye strain relief pdf, turn black to white pdf',
-  },
-  '/dark-mode-pdf': {
-    title: 'Dark Mode PDF Converter | Invert PDF Colors Free & 100% Private - LitasDark',
-    description:
-      'Convert bright white PDFs into eye-soothing dark mode with OLED Black, Sepia, and high-contrast palettes. 100% client-side WebAssembly, no file limits or uploads.',
-    keywords:
-      'dark mode pdf converter, invert pdf colors, pdf dark theme, night reading pdf, black background pdf, eye strain relief pdf, turn black to white pdf',
-  },
-  '/convert/pdf-to-dark-mode': {
-    title: 'Convert PDF to Dark Mode Online Free | Zero Uploads - LitasDark',
-    description:
-      'Instantly convert and invert PDF colors to high-contrast dark theme or sepia in your browser. 100% free with no file size limits or registration.',
-    keywords: 'convert pdf to dark mode, pdf to dark theme, invert pdf colors online, oled pdf reader, read pdf at night',
-  },
-  '/merge': {
-    title: 'Merge PDF Online Free - Unlimited & Zero Uploads | LitasDark',
-    description:
-      'Combine multiple PDF documents into a single file in seconds. High-speed WebAssembly client-side merging with zero server uploads, no caps, and total privacy.',
-    keywords:
-      'merge pdf, combine pdf files, join pdf online free, merge pdf no limit, ilovepdf merge alternative, client side pdf merge, unlimited pdf merger',
-  },
-  '/merge-pdf': {
-    title: 'Merge PDF Online Free - Unlimited & Zero Uploads | LitasDark',
-    description:
-      'Combine multiple PDF documents into a single file in seconds. High-speed WebAssembly client-side merging with zero server uploads, no caps, and total privacy.',
-    keywords:
-      'merge pdf, combine pdf files, join pdf online free, merge pdf no limit, ilovepdf merge alternative, client side pdf merge, unlimited pdf merger',
-  },
-  '/split': {
-    title: 'Split PDF Online Free - Separate PDF Pages Instantly | LitasDark',
-    description:
-      'Easily extract page ranges or split large PDF files into separate documents. 100% private, client-side WebAssembly, and lightning-fast.',
-    keywords:
-      'split pdf, separate pdf pages, extract pages from pdf, cut pdf online free, split pdf without uploading, split pdf document',
-  },
-  '/split-pdf': {
-    title: 'Split PDF Online Free - Separate PDF Pages Instantly | LitasDark',
-    description:
-      'Easily extract page ranges or split large PDF files into separate documents. 100% private, client-side WebAssembly, and lightning-fast.',
-    keywords:
-      'split pdf, separate pdf pages, extract pages from pdf, cut pdf online free, split pdf without uploading, split pdf document',
-  },
-  '/rotate': {
-    title: 'Rotate PDF Pages Online Free - 90, 180, 270 Degrees | LitasDark',
-    description:
-      'Rotate individual or all pages in your PDF document permanently. Instant in-browser rotation with zero quality loss and full security.',
-    keywords:
-      'rotate pdf, rotate pdf online, flip pdf orientation, turn pdf pages 90 degrees, free pdf rotator, rotate pdf permanent',
-  },
-  '/rotate-pdf': {
-    title: 'Rotate PDF Pages Online Free - 90, 180, 270 Degrees | LitasDark',
-    description:
-      'Rotate individual or all pages in your PDF document permanently. Instant in-browser rotation with zero quality loss and full security.',
-    keywords:
-      'rotate pdf, rotate pdf online, flip pdf orientation, turn pdf pages 90 degrees, free pdf rotator, rotate pdf permanent',
-  },
-  '/optimize': {
-    title: 'Compress & Optimize PDF Online Free | LitasDark',
-    description:
-      'Reduce PDF file size by stripping redundant structural metadata and dead objects without recompressing images. Safe, instant local optimization.',
-    keywords:
-      'compress pdf, optimize pdf, reduce pdf size, shrink pdf file free, fast pdf optimizer, smallpdf compression alternative',
-  },
-  '/compress-pdf': {
-    title: 'Compress PDF Online Free - Client-Side Optimization | LitasDark',
-    description:
-      'Optimize and reduce PDF size locally in your browser. No file size restrictions, no server delays, and 100% document privacy.',
-    keywords: 'compress pdf, optimize pdf locally, reduce pdf file size, lossless pdf compressor, private pdf compression',
-  },
-  '/extract': {
-    title: 'Extract Pages from PDF Online Free | LitasDark',
-    description:
-      'Select and extract specific pages from any PDF document into a fresh, standalone PDF file. 100% local processing in your browser.',
-    keywords:
-      'extract pdf pages, pull pages from pdf, save specific pages pdf, export pdf pages free, private pdf extractor',
-  },
-  '/extract-pdf': {
-    title: 'Extract Pages from PDF Online Free | LitasDark',
-    description:
-      'Select and extract specific pages from any PDF document into a fresh, standalone PDF file. 100% local processing in your browser.',
-    keywords:
-      'extract pdf pages, pull pages from pdf, save specific pages pdf, export pdf pages free, private pdf extractor',
+      'pdf tools list, free pdf utilities, online pdf tools no upload, client side pdf tools, all pdf editors',
   },
   '/privacy-architecture': {
-    title: 'Zero-Upload Privacy Architecture & Whitepaper | LitasDark',
+    title: 'Technical & Privacy Architecture Whitepaper | LitasDark',
     description:
-      'Learn how LitasDark protects your data using client-side WebAssembly and volatile browser memory. Complete GDPR and HIPAA-friendly technical architecture.',
+      'Learn how LitasDark processes documents entirely within volatile client-side browser RAM via WebAssembly and Web Workers with zero cloud transmission.',
     keywords:
-      'pdf privacy, zero upload pdf, client-side pdf processing, hipaa compliant pdf, gdpr pdf privacy, secure document management, webassembly security',
+      'pdf technical architecture, client side pdf security, zero upload architecture, in browser pdf processing, webassembly document privacy',
+  },
+  '/privacy': {
+    title: 'Privacy Policy | LitasDark',
+    description:
+      'Read our transparent Privacy Policy. LitasDark is an in-browser utility that does not collect, transmit, or store your document files or personal data.',
+    keywords: 'litasdark privacy policy, zero data retention, client side document privacy',
+  },
+  '/terms': {
+    title: 'Terms of Service | LitasDark',
+    description:
+      'Terms of Service and legal disclosures for using LitasDark in-browser client-side PDF manipulation tools.',
+    keywords: 'litasdark terms of service, legal terms, software disclaimers',
   },
   '/explore': {
-    title: '3D Interactive PDF Tool Lab | LitasDark',
+    title: 'Interactive PDF Tools Gallery | LitasDark',
     description:
-      'Experience the futuristic 3D WebGL carousel for local PDF manipulation tools. Fast, interactive, and fully hardware-accelerated.',
-    keywords:
-      '3d pdf tools, interactive pdf app, webgl pdf studio, litasdark 3d lab, futuristic pdf editor',
+      'Explore the full suite of client-side PDF manipulation tools with interactive visual previews and instant local processing.',
+    keywords: 'interactive pdf tools, litasdark gallery, visual pdf suite',
   },
 };
 
-export function SEO({ title, description, keywords, canonicalPath }: SEOProps) {
+export function SEO({
+  title,
+  description,
+  keywords,
+  canonicalPath,
+  faqList,
+  steps,
+  noindex = false,
+}: SEOProps) {
   const location = useLocation();
-  const path = location.pathname;
-  const routeConfig = ROUTE_SEO[path] || DEFAULT_SEO;
+  const path = location.pathname.replace(/\/$/, '') || '/';
 
-  const finalTitle = title || routeConfig.title;
-  const finalDescription = description || routeConfig.description;
-  const finalKeywords = keywords || routeConfig.keywords;
-  const finalCanonical = `https://litasdark.vercel.app${canonicalPath || path}`;
+  // Check tool guides first
+  const cleanSlug = path.replace(/^\//, '');
+  const toolGuide = TOOL_GUIDES[cleanSlug];
+
+  let calculatedTitle = title;
+  let calculatedDesc = description;
+  let calculatedKeywords = keywords;
+
+  if (toolGuide && !title) {
+    calculatedTitle = toolGuide.title;
+    calculatedDesc = toolGuide.metaDescription;
+    calculatedKeywords = toolGuide.metaKeywords;
+  } else if (!calculatedTitle && STATIC_ROUTE_SEO[path]) {
+    calculatedTitle = STATIC_ROUTE_SEO[path].title;
+    calculatedDesc = STATIC_ROUTE_SEO[path].description;
+    calculatedKeywords = STATIC_ROUTE_SEO[path].keywords;
+  }
+
+  const finalTitle = calculatedTitle || DEFAULT_SEO.title;
+  const finalDescription = calculatedDesc || DEFAULT_SEO.description;
+  const finalKeywords = calculatedKeywords || DEFAULT_SEO.keywords;
+  const finalCanonicalPath = canonicalPath || path;
+  const finalCanonical = `https://litasdark.vercel.app${finalCanonicalPath === '/' ? '' : finalCanonicalPath}`;
+
+  const activeFaqs = faqList || toolGuide?.faqs;
+  const activeSteps = steps || toolGuide?.steps;
 
   useEffect(() => {
-    // 1. Title
+    // 1. Document Title
     document.title = finalTitle;
 
-    // 2. Meta Description
+    // 2. Meta Robots
+    let metaRobots = document.querySelector('meta[name="robots"]');
+    if (!metaRobots) {
+      metaRobots = document.createElement('meta');
+      metaRobots.setAttribute('name', 'robots');
+      document.head.appendChild(metaRobots);
+    }
+    metaRobots.setAttribute(
+      'content',
+      noindex ? 'noindex, follow' : 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'
+    );
+
+    // 3. Meta Description
     let metaDesc = document.querySelector('meta[name="description"]');
     if (!metaDesc) {
       metaDesc = document.createElement('meta');
@@ -152,16 +126,16 @@ export function SEO({ title, description, keywords, canonicalPath }: SEOProps) {
     }
     metaDesc.setAttribute('content', finalDescription);
 
-    // 3. Meta Keywords
-    let metaKeywords = document.querySelector('meta[name="keywords"]');
-    if (!metaKeywords) {
-      metaKeywords = document.createElement('meta');
-      metaKeywords.setAttribute('name', 'keywords');
-      document.head.appendChild(metaKeywords);
+    // 4. Meta Keywords
+    let metaKw = document.querySelector('meta[name="keywords"]');
+    if (!metaKw) {
+      metaKw = document.createElement('meta');
+      metaKw.setAttribute('name', 'keywords');
+      document.head.appendChild(metaKw);
     }
-    metaKeywords.setAttribute('content', finalKeywords);
+    metaKw.setAttribute('content', finalKeywords);
 
-    // 4. Canonical
+    // 5. Canonical
     let linkCanonical = document.querySelector('link[rel="canonical"]');
     if (!linkCanonical) {
       linkCanonical = document.createElement('link');
@@ -170,7 +144,7 @@ export function SEO({ title, description, keywords, canonicalPath }: SEOProps) {
     }
     linkCanonical.setAttribute('href', finalCanonical);
 
-    // 5. OpenGraph
+    // 6. OpenGraph
     const ogTitle = document.querySelector('meta[property="og:title"]');
     if (ogTitle) ogTitle.setAttribute('content', finalTitle);
 
@@ -180,14 +154,14 @@ export function SEO({ title, description, keywords, canonicalPath }: SEOProps) {
     const ogUrl = document.querySelector('meta[property="og:url"]');
     if (ogUrl) ogUrl.setAttribute('content', finalCanonical);
 
-    // 6. Twitter
+    // 7. Twitter
     const twTitle = document.querySelector('meta[name="twitter:title"]');
     if (twTitle) twTitle.setAttribute('content', finalTitle);
 
     const twDesc = document.querySelector('meta[name="twitter:description"]');
     if (twDesc) twDesc.setAttribute('content', finalDescription);
 
-    // 7. Inject Structured Data Graph (JSON-LD)
+    // 8. Inject Page-Specific Structured Data Graph (JSON-LD)
     const schemaId = 'litasdark-json-ld';
     let schemaScript = document.getElementById(schemaId) as HTMLScriptElement | null;
     if (!schemaScript) {
@@ -197,116 +171,144 @@ export function SEO({ title, description, keywords, canonicalPath }: SEOProps) {
       document.head.appendChild(schemaScript);
     }
 
-    const structuredData = {
-      '@context': 'https://schema.org',
-      '@graph': [
-        {
-          '@type': 'WebApplication',
-          '@id': 'https://litasdark.vercel.app/#webapp',
-          name: 'LitasDark',
-          url: 'https://litasdark.vercel.app',
-          description:
-            '100% Free, private, in-browser PDF suite. Merge, split, compress, and invert PDF colors with zero server uploads.',
-          applicationCategory: 'BusinessApplication',
-          applicationSubCategory: 'PrivacyTool',
-          operatingSystem: 'All',
-          browserRequirements: 'Requires modern browser with WebAssembly (WASM) and Web Workers support',
-          offers: {
-            '@type': 'Offer',
-            price: '0.00',
-            priceCurrency: 'USD',
-            availability: 'https://schema.org/InStock',
-          },
-          aggregateRating: {
-            '@type': 'AggregateRating',
-            ratingValue: '4.9',
-            ratingCount: '1428',
-          },
-          featureList: [
-            'Dark Mode PDF Inverter with Custom Themes',
-            'Zero Server Uploads',
-            'HIPAA and GDPR Compliant Processing',
-            'Client-side Rust WebAssembly Engine',
-            'No File Size Limits or Paywalls',
-          ],
-          provider: {
-            '@type': 'Organization',
-            name: 'LitasDark',
-            url: 'https://litasdark.vercel.app',
-          },
+    const graphItems: any[] = [
+      {
+        '@type': 'WebSite',
+        '@id': 'https://litasdark.vercel.app/#website',
+        url: 'https://litasdark.vercel.app',
+        name: 'LitasDark',
+        description: 'Free, private in-browser PDF suite with zero server uploads.',
+      },
+      {
+        '@type': 'Organization',
+        '@id': 'https://litasdark.vercel.app/#organization',
+        name: 'LitasDark',
+        url: 'https://litasdark.vercel.app',
+        slogan: 'In-Browser PDF Suite with Zero Server Uploads',
+      },
+    ];
+
+    if (path === '/') {
+      graphItems.push({
+        '@type': 'WebApplication',
+        '@id': 'https://litasdark.vercel.app/#webapp',
+        name: 'LitasDark PDF Suite',
+        url: 'https://litasdark.vercel.app/',
+        applicationCategory: 'UtilitiesApplication',
+        operatingSystem: 'All (Web, Windows, macOS, Linux, iOS, Android)',
+        browserRequirements: 'Requires JavaScript and WebAssembly support',
+        offers: {
+          '@type': 'Offer',
+          price: '0.00',
+          priceCurrency: 'USD',
+          availability: 'https://schema.org/InStock',
         },
-        {
+        description:
+          'Free, 100% private in-browser PDF tools: Dark Mode PDF inverter, Cleanse Metadata, Images to PDF, Merge, Split, Rotate, Compress, and Extract without uploading files to any server.',
+        featureList: [
+          'Smart Dark Mode Inversion for Eye Strain Relief',
+          'Local Forensic Metadata Sanitizer and Cleaner',
+          'Lossless In-Browser Image to PDF Compiler',
+          'Fast WebAssembly-Powered PDF Merge',
+          'Granular PDF Page Splitting',
+          'Multi-angle PDF Page Rotation',
+          'PDF Structure Compression',
+          'Selective Page Extraction',
+          '100% Client-Side Privacy with Zero Server Uploads',
+        ],
+        provider: {
           '@type': 'Organization',
           '@id': 'https://litasdark.vercel.app/#organization',
+        },
+      });
+    }
+
+    if (toolGuide) {
+      graphItems.push({
+        '@type': 'WebApplication',
+        '@id': `https://litasdark.vercel.app/${toolGuide.slug}#webapp`,
+        name: toolGuide.h1,
+        url: `https://litasdark.vercel.app/${toolGuide.slug}`,
+        description: toolGuide.metaDescription,
+        applicationCategory: 'UtilitiesApplication',
+        operatingSystem: 'Any modern web browser with WebAssembly support',
+        browserRequirements: 'Requires HTML5, Web Workers, and WebAssembly',
+        offers: {
+          '@type': 'Offer',
+          price: '0.00',
+          priceCurrency: 'USD',
+          availability: 'https://schema.org/InStock',
+        },
+        featureList: toolGuide.features.map((f) => f.title),
+        provider: {
+          '@type': 'Organization',
           name: 'LitasDark',
           url: 'https://litasdark.vercel.app',
-          slogan: 'The 100% Free, Private, In-Browser PDF Suite',
-          description:
-            'LitasDark provides secure, client-side PDF manipulation tools including dark mode inversion, merging, splitting, and compression using WebAssembly.',
         },
-        {
-          '@type': 'FAQPage',
-          '@id': 'https://litasdark.vercel.app/#faq',
-          mainEntity: [
-            {
-              '@type': 'Question',
-              name: 'Is my PDF uploaded to a remote server for processing?',
-              acceptedAnswer: {
-                '@type': 'Answer',
-                text: 'No. LitasDark processes all PDF files locally within your web browser using a client-side WebAssembly engine. Your files never leave your device, ensuring 100% privacy, data security, and total GDPR/HIPAA compliance.',
-              },
-            },
-            {
-              '@type': 'Question',
-              name: 'Are there any file size limits or daily task caps?',
-              acceptedAnswer: {
-                '@type': 'Answer',
-                text: 'There are absolutely no file size limits, daily usage caps, or hourly restrictions on LitasDark. The application relies entirely on your device’s local memory, distinguishing it from legacy tools that restrict usage behind paywalls.',
-              },
-            },
-            {
-              '@type': 'Question',
-              name: 'Is LitasDark safe for legal, healthcare, and confidential business documents?',
-              acceptedAnswer: {
-                '@type': 'Answer',
-                text: 'Yes. Because zero bytes are sent across the internet, LitasDark is fully aligned with HIPAA and GDPR data privacy requirements. Your documents never exist on third-party cloud disks.',
-              },
-            },
-          ],
-        },
-        {
-          '@type': 'HowTo',
-          '@id': 'https://litasdark.vercel.app/#howto',
-          name: 'How to Invert PDF Colors to Dark Mode Without Uploading',
-          description:
-            'Instantly convert your PDF to a dark mode theme locally in your browser using the LitasDark WebAssembly engine.',
-          totalTime: 'PT1M',
-          step: [
-            {
-              '@type': 'HowToStep',
-              position: 1,
-              name: 'Select or Drop your PDF file',
-              text: 'Drag and drop your PDF document into the LitasDark interface. Because processing is client-side, the file remains securely on your device.',
-            },
-            {
-              '@type': 'HowToStep',
-              position: 2,
-              name: 'Choose a Dark Mode Theme',
-              text: 'Select from customizable themes (OLED Black, Sepia, High Contrast) or adjust brightness/contrast for optimal night reading.',
-            },
-            {
-              '@type': 'HowToStep',
-              position: 3,
-              name: 'Download the Processed Document',
-              text: 'Click "Save / Export". The local WebAssembly engine instantly outputs your dark mode PDF without any server processing delays.',
-            },
-          ],
-        },
-      ],
-    };
+      });
 
-    schemaScript.textContent = JSON.stringify(structuredData);
-  }, [finalTitle, finalDescription, finalKeywords, finalCanonical]);
+      graphItems.push({
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: 'https://litasdark.vercel.app',
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Tools',
+            item: 'https://litasdark.vercel.app/tools',
+          },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: toolGuide.h1,
+            item: `https://litasdark.vercel.app/${toolGuide.slug}`,
+          },
+        ],
+      });
+    }
+
+    if (activeFaqs && activeFaqs.length > 0) {
+      graphItems.push({
+        '@type': 'FAQPage',
+        '@id': `${finalCanonical}#faq`,
+        mainEntity: activeFaqs.map((faq) => ({
+          '@type': 'Question',
+          name: faq.q,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: faq.a,
+          },
+        })),
+      });
+    }
+
+    if (activeSteps && activeSteps.length > 0 && toolGuide) {
+      graphItems.push({
+        '@type': 'HowTo',
+        '@id': `${finalCanonical}#howto`,
+        name: `How to use ${toolGuide.h1}`,
+        description: toolGuide.subtitle,
+        totalTime: 'PT1M',
+        step: activeSteps.map((step, idx) => ({
+          '@type': 'HowToStep',
+          position: idx + 1,
+          name: step.title,
+          text: step.description,
+        })),
+      });
+    }
+
+    schemaScript.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@graph': graphItems,
+    });
+  }, [finalTitle, finalDescription, finalKeywords, finalCanonical, activeFaqs, activeSteps, noindex, toolGuide, path]);
 
   return null;
 }
+export default SEO;

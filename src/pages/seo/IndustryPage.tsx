@@ -1,4 +1,5 @@
 import { useParams, Link, Navigate } from 'react-router-dom';
+import { SEO } from '@/components/common/SEO';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { PrivacyBadges } from '@/components/seo/PrivacyBadges';
 import { CompetitorComparisonTable } from '@/components/seo/CompetitorComparisonTable';
@@ -149,6 +150,7 @@ export default function IndustryPage() {
 
   return (
     <div className="w-full">
+      <SEO title={data.title} description={data.description} faqList={data.faq} />
       <div className="mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-10 space-y-10">
         {/* Breadcrumb Navigation */}
         <Breadcrumbs

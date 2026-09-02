@@ -314,7 +314,7 @@ export default function ToolsPage() {
             </div>
             <div className="text-sm font-bold text-slate-200">Zero Cloud Transmission</div>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Strict client-side isolation ensuring compliance with GDPR, HIPAA, and corporate NDAs. No file is ever transmitted to any remote server.
+              Strict client-side isolation with in-memory execution. No file or metadata is ever transmitted to any remote server.
             </p>
           </div>
         </section>

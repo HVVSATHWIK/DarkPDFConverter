@@ -169,7 +169,7 @@ export function Footer() {
         {/* Bottom Bar with Language & Rights */}
         <div className="pt-4 border-t border-slate-800/40 flex flex-col md:flex-row items-center justify-between gap-4 text-[11px] text-slate-400">
           <div>
-            © {new Date().getFullYear()} LitasDark. Client-side local browser processing utility.
+            © 2024–2026 LitasDark. Client-side local browser processing utility.
           </div>
           <div className="flex items-center gap-4">
             <Link to="/terms" className="hover:underline text-slate-400">Terms</Link>

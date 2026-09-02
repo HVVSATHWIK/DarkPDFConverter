@@ -14,8 +14,8 @@ export function PrivacyBadges() {
     },
     {
       icon: ShieldCheckIcon,
-      title: 'Privacy-Aligned Design',
-      description: 'Designed for HIPAA & GDPR alignment with zero server data retention or external transmission.',
+      title: 'Zero Data Transmission',
+      description: 'Files remain in local volatile device memory without external server transmission.',
     },
     {
       icon: CheckBadgeIcon,

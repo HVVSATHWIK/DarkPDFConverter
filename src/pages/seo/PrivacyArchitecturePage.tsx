@@ -38,8 +38,8 @@ export default function PrivacyArchitecturePage() {
             Why Zero-Upload Architecture is the Only Truly Secure Way to Process PDFs
           </h1>
           <p className="text-slate-300/85 max-w-3xl text-base md:text-lg leading-relaxed">
-            Discover how LitasDark completely decouples PDF manipulation from remote cloud servers, guaranteeing 100% data
-            privacy, instantaneous speed, and effortless GDPR &amp; HIPAA compliance.
+            Discover how LitasDark completely decouples PDF manipulation from remote cloud servers, ensuring zero external
+            data transmission, fast local execution, and strict client-side document isolation.
           </p>
         </section>
 
@@ -55,8 +55,8 @@ export default function PrivacyArchitecturePage() {
             <h2 className="text-lg font-bold text-slate-100">1. Zero In-Transit &amp; At-Rest Cloud Data</h2>
             <p className="text-xs text-slate-300/80 leading-relaxed">
               When you load a document into LitasDark, the binary byte array is read directly via the standard browser
-              FileReader / Blob API into volatile device RAM. Not a single packet or telemetry ping is sent across the
-              network.
+              FileReader / Blob API into volatile device RAM. Not a single document byte or telemetry ping is sent across
+              the network.
             </p>
           </div>
 
@@ -67,7 +67,7 @@ export default function PrivacyArchitecturePage() {
             <h2 className="text-lg font-bold text-slate-100">2. Sandboxed WebAssembly Execution</h2>
             <p className="text-xs text-slate-300/80 leading-relaxed">
               PDF parsing, byte manipulation, color matrix inversion, and cross-reference streams run within a strictly
-              sandboxed WebAssembly environment. The code executes at near-native C/Rust speed without browser security
+              sandboxed WebAssembly environment. The code executes at near-native speed without browser security
               compromise.
             </p>
           </div>
@@ -76,11 +76,10 @@ export default function PrivacyArchitecturePage() {
             <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
               <DocumentCheckIcon className="w-5 h-5" />
             </div>
-            <h2 className="text-lg font-bold text-slate-100">3. Native GDPR &amp; HIPAA Harmony</h2>
+            <h2 className="text-lg font-bold text-slate-100">3. Zero Server Data Retention</h2>
             <p className="text-xs text-slate-300/80 leading-relaxed">
-              Because LitasDark never acts as a Data Processor or Data Controller for your documents, there is no risk of
-              data leaks, unauthorized third-party access, or accidental retention of sensitive healthcare and financial
-              records.
+              Because LitasDark operates as local client-side software, we never receive, process, or retain your documents
+              on remote infrastructure. This eliminates third-party data breach vectors and server storage retention risks.
             </p>
           </div>
         </section>

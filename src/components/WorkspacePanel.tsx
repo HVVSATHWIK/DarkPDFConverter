@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
+import { ArrowUturnLeftIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 import { Tool } from '../types';
 import PDFProcessorWithErrorBoundary from './PDFProcessor';
 import DarkModeControls from './tools/DarkModeControls';
@@ -14,6 +14,10 @@ import { ExtractOptions } from '@/hooks/useExtractPages';
 import ImagesToPDFControls from './tools/ImagesToPDFControls';
 import { ImageToPdfOptions } from '@/hooks/useImagesToPdf';
 import PDFPreview from './common/PDFPreview';
+import ToolContentSection from './tools/ToolContentSection';
+import { getToolGuideById, getToolGuideBySlug } from '@/config/toolGuides';
+import { SEO } from './common/SEO';
+import { Breadcrumbs } from './seo/Breadcrumbs';
 
 interface ToolPageProps {
   activeTool: Tool;
@@ -46,6 +50,9 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
     pageSize: 'fit',
     margin: 0,
   });
+
+  const slug = location.pathname.replace(/^\//, '');
+  const guide = getToolGuideBySlug(slug) || getToolGuideById(activeTool.id);
 
   useEffect(() => {
     setProcessedData(null);
@@ -81,12 +88,9 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
   }, [activeTool.id]);
 
   const handleComplete = (result: any) => {
-    console.log(`Processing complete for ${activeTool?.name}:`, result);
-
-    if (result.processedPdf && !(result.processedPdf instanceof Blob)) {
+    if (result?.processedPdf && !(result.processedPdf instanceof Blob)) {
       result.processedPdf = new Blob([result.processedPdf], { type: 'application/pdf' });
     }
-
     setProcessedData(result);
     setPreviewTab('output');
   };
@@ -232,7 +236,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
             processActionName="Sanitize & Scrub Metadata"
             autoProcess
             autoProcessOnSelect
-            trustLabel="Strips internal computer paths, author tags, creation timestamps, and hidden layer metadata."
+            trustLabel="Strips author tags, software creator signatures, and timestamps in memory."
           />
         );
 
@@ -248,7 +252,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
               onSelectionChange={setSelectedFilesForPreview}
               processActionName="Compile Images to PDF"
               imageToPdfOptions={imageToPdfSettings}
-              trustLabel="Lossless in-browser compiler. Compiles high-res PNG & JPG photos into a single PDF without downsampling."
+              trustLabel="In-browser compiler. Embeds PNG & JPG photos into PDF pages at native resolution."
             />
             <ImagesToPDFControls
               currentOptions={imageToPdfSettings}
@@ -268,120 +272,159 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
   const backUrl = isFromLabs ? '/explore' : '/tools';
   const backLabel = isFromLabs ? 'Labs 3D' : 'All Tools';
 
-  const showTrustLine = location.pathname !== '/';
-
   return (
-    <div className="w-full h-[calc(100vh-64px)] overflow-hidden bg-black">
-      <div className="flex h-full">
-        {/* Sidebar: Controls & Input */}
-        <aside className="w-full md:w-[360px] shrink-0 border-r border-white/10 flex flex-col bg-[#050505] overflow-y-auto">
-          <div className="p-5 space-y-6">
-            {/* Header / Nav Back */}
-            <div className="flex items-center justify-between">
-              <Link
-                to={backUrl}
-                className="group flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-white transition-colors"
-                aria-label={`Back to ${backLabel}`}
-              >
-                <ArrowUturnLeftIcon className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-                <span>{backLabel}</span>
-              </Link>
-              <div className="text-xs font-semibold px-2 py-1 rounded bg-white/5 text-slate-400 border border-white/5">
-                {activeTool.name}
+    <div className="w-full min-h-screen bg-[#050505] text-slate-100 flex flex-col">
+      <SEO
+        title={guide?.title}
+        description={guide?.metaDescription}
+        keywords={guide?.metaKeywords}
+        canonicalPath={`/${guide?.slug || ''}`}
+        faqList={guide?.faqs}
+        steps={guide?.steps}
+      />
+
+      {/* 1. Top Bar: Breadcrumbs, H1, and Short Description */}
+      <header className="w-full border-b border-white/10 bg-slate-950/80 px-4 py-6 md:px-8">
+        <div className="max-w-7xl mx-auto space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <Breadcrumbs
+              items={[
+                { name: 'Tools', path: '/tools' },
+                { name: guide?.h1 || activeTool.name },
+              ]}
+            />
+            <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+              <ShieldCheckIcon className="w-3.5 h-3.5" />
+              <span>100% In-Browser RAM Processing &bull; Zero Server Uploads</span>
+            </div>
+          </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+              {guide?.h1 || activeTool.name}
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-3xl leading-relaxed">
+              {guide?.subtitle || activeTool.description}
+            </p>
+          </div>
+        </div>
+      </header>
+
+      {/* 2. Interactive Tool Workspace Area */}
+      <section className="w-full border-b border-white/10 bg-[#080808]">
+        <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row min-h-[620px]">
+          {/* Sidebar: Controls & Input */}
+          <aside className="w-full lg:w-[380px] shrink-0 border-b lg:border-b-0 lg:border-r border-white/10 flex flex-col bg-[#050505] overflow-y-auto">
+            <div className="p-5 space-y-6">
+              <div className="flex items-center justify-between">
+                <Link
+                  to={backUrl}
+                  className="group flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-white transition-colors"
+                  aria-label={`Back to ${backLabel}`}
+                >
+                  <ArrowUturnLeftIcon className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" />
+                  <span>{backLabel}</span>
+                </Link>
+                <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                  {activeTool.name}
+                </span>
               </div>
-            </div>
 
-            {/* Main Tool UI */}
-            <div className="space-y-6">
-              {renderToolSpecificUI()}
-            </div>
+              {/* Main Tool UI */}
+              <div className="space-y-6">{renderToolSpecificUI()}</div>
 
-            {/* Trust Footer */}
-            {showTrustLine && (
               <div className="pt-4 border-t border-white/5">
-                <p className="text-[10px] text-slate-500 text-center leading-relaxed">
-                  Files processed locally in browser.<br />
-                  No uploads to server.
+                <p className="text-[11px] text-slate-500 text-center leading-relaxed">
+                  Files processed locally in browser RAM.<br />
+                  Zero external server transmission.
                 </p>
               </div>
-            )}
-          </div>
-        </aside>
+            </div>
+          </aside>
 
-        {/* Main Area: Preview */}
-        <main className="flex-1 bg-[#0A0A0A] relative flex flex-col min-w-0">
-          {/* Preview Toolbar */}
-          <div className="h-14 border-b border-white/5 flex items-center justify-between px-6 shrink-0 bg-black/20 backdrop-blur-sm z-10">
-            <h2 className="text-sm font-semibold text-slate-300">Preview</h2>
+          {/* Main Area: Preview */}
+          <div className="flex-1 bg-[#0A0A0A] relative flex flex-col min-w-0">
+            {/* Preview Toolbar */}
+            <div className="h-12 border-b border-white/5 flex items-center justify-between px-6 shrink-0 bg-black/40 backdrop-blur-sm z-10">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Document Preview
+              </h2>
 
-            {processedData && selectedFilesForPreview.length > 0 && (
-              <div className="flex bg-black/40 rounded-lg p-0.5 border border-white/5">
-                <button
-                  onClick={() => setPreviewTab('input')}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                    previewTab === 'input'
-                      ? 'bg-white/10 text-white shadow-sm'
-                      : 'text-slate-500 hover:text-slate-300'
-                  }`}
-                >
-                  Original
-                </button>
-                <button
-                  onClick={() => setPreviewTab('output')}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                    previewTab === 'output'
-                      ? 'bg-indigo-500/20 text-indigo-200 shadow-sm ring-1 ring-inset ring-indigo-500/20'
-                      : 'text-slate-500 hover:text-slate-300'
-                  }`}
-                >
-                  Output
-                </button>
-              </div>
-            )}
-          </div>
+              {processedData && selectedFilesForPreview.length > 0 && (
+                <div className="flex bg-black/60 rounded-lg p-0.5 border border-white/10">
+                  <button
+                    onClick={() => setPreviewTab('input')}
+                    className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                      previewTab === 'input'
+                        ? 'bg-white/10 text-white shadow-sm'
+                        : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    Original
+                  </button>
+                  <button
+                    onClick={() => setPreviewTab('output')}
+                    className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                      previewTab === 'output'
+                        ? 'bg-cyan-500/20 text-cyan-300 shadow-sm ring-1 ring-inset ring-cyan-500/30'
+                        : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    Output Result
+                  </button>
+                </div>
+              )}
+            </div>
 
-          {/* Preview Canvas */}
-          <div className="flex-1 min-h-0 w-full p-4 sm:p-6 flex items-center justify-center relative bg-[radial-gradient(#1a1a1a_1px,transparent_1px)] [background-size:20px_20px] overflow-hidden">
-            {processedData ? (
-              <div className="w-full h-full max-w-5xl flex flex-col items-center justify-center relative shadow-2xl shadow-black/70 rounded-2xl overflow-hidden border border-white/10 bg-slate-950/80 backdrop-blur-sm">
-                {previewTab === 'output' &&
-                  (processedData.processedPdf ||
-                    processedData instanceof Uint8Array ||
-                    processedData instanceof Blob) && (
-                    <PDFPreview file={processedData.processedPdf || processedData} />
+            {/* Preview Canvas */}
+            <div className="flex-1 min-h-[460px] w-full p-4 sm:p-6 flex items-center justify-center relative bg-[radial-gradient(#1a1a1a_1px,transparent_1px)] [background-size:20px_20px] overflow-hidden">
+              {processedData ? (
+                <div className="w-full h-full max-w-4xl flex flex-col items-center justify-center relative shadow-2xl shadow-black/70 rounded-2xl overflow-hidden border border-white/10 bg-slate-950/90 backdrop-blur-sm">
+                  {previewTab === 'output' &&
+                    (processedData.processedPdf ||
+                      processedData instanceof Uint8Array ||
+                      processedData instanceof Blob) && (
+                      <PDFPreview file={processedData.processedPdf || processedData} />
+                    )}
+                  {previewTab === 'input' && selectedFilesForPreview[0] && (
+                    <PDFPreview file={selectedFilesForPreview[0]} />
                   )}
-                {previewTab === 'input' && selectedFilesForPreview[0] && (
-                  <PDFPreview file={selectedFilesForPreview[0]} />
-                )}
 
-                {/* Error Overlay */}
-                {processedData.error && (
-                  <div className="absolute inset-0 bg-black/80 flex items-center justify-center p-8 backdrop-blur-sm z-30">
-                    <div className="bg-rose-950/30 border border-rose-500/30 p-4 rounded-xl text-rose-200 text-center max-w-md">
-                      <p className="font-semibold mb-1">Error Processing PDF</p>
-                      <p className="text-sm opacity-80">{processedData.error}</p>
+                  {/* Error Overlay */}
+                  {processedData.error && (
+                    <div className="absolute inset-0 bg-black/80 flex items-center justify-center p-8 backdrop-blur-sm z-30">
+                      <div className="bg-rose-950/40 border border-rose-500/40 p-4 rounded-xl text-rose-200 text-center max-w-md">
+                        <p className="font-semibold mb-1">Error Processing PDF</p>
+                        <p className="text-xs opacity-80">{processedData.error}</p>
+                      </div>
                     </div>
+                  )}
+                </div>
+              ) : selectedFilesForPreview.length > 0 ? (
+                <div className="w-full h-full max-w-4xl flex flex-col items-center justify-center relative shadow-xl shadow-black/50 rounded-2xl overflow-hidden border border-white/10 bg-slate-950/90 backdrop-blur-sm">
+                  <div className="absolute top-3 left-3 z-30 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-md text-[10px] font-mono text-slate-300 border border-white/10">
+                    LOADED INPUT
                   </div>
-                )}
-              </div>
-            ) : selectedFilesForPreview.length > 0 ? (
-              <div className="w-full h-full max-w-5xl flex flex-col items-center justify-center relative shadow-xl shadow-black/50 rounded-2xl overflow-hidden border border-white/10 bg-slate-950/80 backdrop-blur-sm">
-                <div className="absolute top-3 left-3 z-30 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-md text-[10px] font-mono text-slate-300 border border-white/10">
-                  ORIGINAL
+                  <PDFPreview file={selectedFilesForPreview[0]} />
                 </div>
-                <PDFPreview file={selectedFilesForPreview[0]} />
-              </div>
-            ) : (
-              <div className="text-center space-y-4 opacity-40 select-none">
-                <div className="w-24 h-32 mx-auto border-2 border-dashed border-slate-600 rounded-xl flex items-center justify-center bg-white/[0.02]">
-                  <div className="w-12 h-1 bg-slate-700 rounded-full" />
+              ) : (
+                <div className="text-center space-y-3 opacity-40 select-none py-12">
+                  <div className="w-20 h-28 mx-auto border-2 border-dashed border-slate-600 rounded-xl flex items-center justify-center bg-white/[0.02]">
+                    <div className="w-8 h-0.5 bg-slate-600 rounded-full" />
+                  </div>
+                  <p className="text-xs font-medium text-slate-400">PDF Preview Canvas</p>
                 </div>
-                <p className="text-sm font-medium text-slate-400">PDF Preview Area</p>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </main>
-      </div>
+        </div>
+      </section>
+
+      {/* 3. Comprehensive Informational, Technical & FAQ Guide Section */}
+      {guide && (
+        <section className="w-full bg-[#050505]">
+          <ToolContentSection guide={guide} />
+        </section>
+      )}
     </div>
   );
 }

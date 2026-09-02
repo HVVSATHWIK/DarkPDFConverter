@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { SEO } from '@/components/common/SEO';
+import { ToolsNav } from '@/components/layout/ToolsNav';
 import { PrivacyBadges } from '@/components/seo/PrivacyBadges';
 import { CompetitorComparisonTable } from '@/components/seo/CompetitorComparisonTable';
 import {
@@ -15,126 +17,197 @@ import {
   ArchiveBoxIcon,
   ArrowPathIcon,
   DocumentDuplicateIcon,
-  LockClosedIcon,
-  CheckCircleIcon,
   ShieldCheckIcon,
   PhotoIcon,
+  CpuChipIcon,
+  BoltIcon,
+  ServerIcon,
 } from '@heroicons/react/24/outline';
 
-const FAQS = [
+const TECHNICAL_PIPELINE = [
   {
-    q: 'How does in-browser processing work without uploading files?',
-    a: 'LitasDark loads a compiled WebAssembly binary into your browser once. When you open a PDF, it is parsed directly in your device’s local memory (RAM) using client-side Web Workers. Your files are never sent across the network to any server.',
+    step: '01',
+    title: 'Local Buffer Ingestion',
+    tech: 'FileReader / Blob API',
+    desc: 'The browser reads the raw binary byte stream into volatile client RAM. No server socket or upload payload is created.',
   },
   {
-    q: 'How do dark mode themes work on text and images?',
-    a: 'The engine reads the internal PDF vector layers and color palettes, calculating luminance and selectively inverting background and text color channels while preserving embedded image colors and chart readability.',
+    step: '02',
+    title: 'Worker Thread Isolation',
+    tech: 'Dedicated Web Workers',
+    desc: 'Intensive vector parsing and color transformations are offloaded from the UI main thread into background sandboxes.',
   },
   {
-    q: 'Are there any hidden file size or daily usage limits?',
-    a: 'No. Because all computation runs on your local machine rather than costly cloud servers, there are no subscriptions, no file size caps, no hourly wait queues, and no account requirements.',
+    step: '03',
+    title: 'WASM Stream Processing',
+    tech: 'WebAssembly Core',
+    desc: 'Direct cross-reference stream manipulation, matrix math for luminance calculation, and PDF object rewriting at near-native speed.',
   },
   {
-    q: 'How does LitasDark support privacy-conscious workflows?',
-    a: 'Because zero bytes of document content or metadata leave your local computer, there is no external cloud transmission, helping professionals handle confidential files without third-party exposure.',
-  },
-  {
-    q: 'Can I scrub sensitive metadata and author traces from legal documents?',
-    a: 'Yes. The Cleanse Metadata tool purges author names, company network paths, creation timestamps, and hidden layer metadata locally in device RAM before saving.',
-  },
-  {
-    q: 'How does lossless image compilation work?',
-    a: 'The Images to PDF compiler embeds high-resolution PNG and JPG images directly into standardized PDF streams at native resolution without aggressive server downsampling.',
+    step: '04',
+    title: 'Instant Local Serialization',
+    tech: 'Memory Blob URL',
+    desc: 'The resulting PDF is compiled into a local object URL for direct browser saving. The working buffer is discarded upon session end.',
   },
 ];
 
 const CORE_TOOLS = [
   {
     title: 'Dark Mode Inverter',
-    desc: 'Transform blinding white documents into OLED black, slate, or sepia reading themes with smart contrast preservation.',
+    desc: 'Selectively inverts background canvas and text luminescence while preserving embedded imagery and charts for comfortable night reading.',
     icon: MoonIcon,
     path: '/dark-mode-pdf',
-    spec: 'Multi-Theme Color Engine',
-  },
-  {
-    title: 'PDF Merger',
-    desc: 'Combine multiple PDF documents and chapters into a single file with preserved bookmarks and vector fidelity.',
-    icon: Square2StackIcon,
-    path: '/merge-pdf',
-    spec: 'High-Fidelity Memory Stream',
-  },
-  {
-    title: 'PDF Splitter',
-    desc: 'Extract discrete page ranges or split large documents into separate chapters in seconds.',
-    icon: ScissorsIcon,
-    path: '/split-pdf',
-    spec: 'Instant Range Parser',
+    category: 'Visual & Reading',
+    format: 'PDF → Dark PDF',
+    latency: '< 300ms',
   },
   {
     title: 'Cleanse Metadata',
-    desc: 'Purge author tags, company file paths, creation timestamps, and hidden metadata before sharing.',
+    desc: 'Purges author identities, editing software signatures, local network paths, and creation timestamps directly in browser RAM.',
     icon: ShieldCheckIcon,
     path: '/cleanse-metadata',
-    spec: 'Forensic Metadata Scrubber',
+    category: 'Privacy & Security',
+    format: 'PDF → Sanitized PDF',
+    latency: '< 100ms',
   },
   {
     title: 'Images to PDF',
-    desc: 'Compile high-res PNG and JPG images into clean, lossless PDF documents without server downsampling.',
+    desc: 'Embeds high-resolution PNG, JPG, and WebP images into standardized PDF streams at native dimensions with no lossy server downsampling.',
     icon: PhotoIcon,
     path: '/images-to-pdf',
-    spec: 'Lossless Image Compiler',
+    category: 'Compilation',
+    format: 'PNG / JPG → PDF',
+    latency: '< 500ms',
+  },
+  {
+    title: 'PDF Merger',
+    desc: 'Combines multiple PDF files, chapters, and appendices into a single contiguous document with preserved internal bookmarks and fonts.',
+    icon: Square2StackIcon,
+    path: '/merge-pdf',
+    category: 'Structure',
+    format: 'Multi-PDF → Single PDF',
+    latency: '< 400ms',
+  },
+  {
+    title: 'PDF Splitter',
+    desc: 'Extracts discrete page intervals or decomposes large documents into individual target chapters in a single memory pass.',
+    icon: ScissorsIcon,
+    path: '/split-pdf',
+    category: 'Structure',
+    format: 'PDF → Page Segments',
+    latency: '< 200ms',
   },
   {
     title: 'Document Compressor',
-    desc: 'Optimize internal streams, remove redundant objects, and decrease payload sizes without server queues.',
+    desc: 'Optimizes internal PDF streams, removes duplicate font definitions, and deflates object tables without external queue delays.',
     icon: ArchiveBoxIcon,
     path: '/compress-pdf',
-    spec: 'In-Memory Stream Deflation',
+    category: 'Optimization',
+    format: 'PDF → Optimized PDF',
+    latency: '< 600ms',
   },
   {
     title: 'Page Rotator',
-    desc: 'Reorient individual pages or entire documents with permanent 90°, 180°, or 270° orientation fixes.',
+    desc: 'Applies permanent orientation corrections (90°, 180°, 270°) across specific pages or the entire document via direct metadata patching.',
     icon: ArrowPathIcon,
     path: '/rotate-pdf',
-    spec: 'Metadata Angle Patching',
+    category: 'Layout',
+    format: 'PDF → Reoriented PDF',
+    latency: '< 150ms',
   },
   {
     title: 'Page Extractor',
-    desc: 'Select and export individual target pages into standalone clean PDF documents without quality loss.',
+    desc: 'Selects target pages from complex multi-page files and generates an independent, standalone PDF without cross-stream artifacts.',
     icon: DocumentDuplicateIcon,
     path: '/extract-pdf',
-    spec: 'Direct Stream Extraction',
+    category: 'Structure',
+    format: 'PDF → Extracted Pages',
+    latency: '< 200ms',
+  },
+];
+
+const ARCHITECTURAL_METRICS = [
+  {
+    label: 'Outbound Network Payload',
+    value: '0 KB',
+    sub: 'Zero document data transmitted',
+    icon: ServerIcon,
+  },
+  {
+    label: 'Execution Environment',
+    value: 'Client WASM',
+    sub: 'Isolated within browser RAM',
+    icon: CpuChipIcon,
+  },
+  {
+    label: 'Processing Latency',
+    value: 'Sub-Second',
+    sub: 'Zero cloud queue or upload wait',
+    icon: BoltIcon,
+  },
+  {
+    label: 'Document Retention',
+    value: '0 Seconds',
+    sub: 'Wiped when tab is closed',
+    icon: ShieldCheckIcon,
   },
 ];
 
 const INDUSTRIES = [
   {
     id: 'legal-professionals',
-    title: 'Legal & Law Firms',
-    desc: 'Confidential client document handling with strict zero-cloud exposure and metadata purging.',
+    title: 'Legal Practice & Discovery',
+    desc: 'Sanitize document metadata, scrub internal drafting traces, and combine litigation exhibits without cloud repository risks.',
     icon: ScaleIcon,
-    badge: 'Confidential',
+    badge: 'Confidentiality',
   },
   {
     id: 'healthcare',
-    title: 'Healthcare & Clinical',
-    desc: 'Patient charts and clinical reports processed entirely in local browser memory.',
+    title: 'Healthcare & Clinical Records',
+    desc: 'Review patient records and diagnostics with dark mode eye comfort while maintaining complete client-side data isolation.',
     icon: HeartIcon,
-    badge: 'In-Browser Isolation',
+    badge: 'Data Isolation',
   },
   {
     id: 'students-researchers',
-    title: 'Academic Research',
-    desc: 'Invert bright textbook PDFs for late-night study and assemble multi-part thesis files.',
+    title: 'Academic Research & Literature',
+    desc: 'Invert bright scientific journal papers for prolonged screen reading and merge multi-chapter research dissertations locally.',
     icon: AcademicCapIcon,
-    badge: 'Eye Comfort',
+    badge: 'Visual Ergonomics',
   },
   {
     id: 'developers',
-    title: 'Software Engineers',
-    desc: 'Hardware-accelerated Rust/WASM toolkit running in decoupled Web Workers.',
+    title: 'Software & Systems Engineering',
+    desc: 'High-throughput local document manipulation driven by WebAssembly workers without external API keys or vendor dependencies.',
     icon: CommandLineIcon,
-    badge: 'WASM Speed',
+    badge: 'Local WASM',
+  },
+];
+
+const FAQS = [
+  {
+    q: 'How does client-side PDF processing differ from traditional online PDF tools?',
+    a: 'Traditional services transmit your document over the internet to remote servers for processing, which introduces security risks, transfer delays, and potential server-side data retention. LitasDark executes compiled WebAssembly code directly within your web browser. Your document never leaves your device.',
+  },
+  {
+    q: 'How does the Dark Mode Inverter preserve diagrams and images?',
+    a: 'The engine parses the internal vector drawing instructions and page color palettes. It calculates perceptual luminance to invert bright backgrounds and text colors to high-contrast dark tones while leaving embedded bitmap photographs, figures, and charts unaffected.',
+  },
+  {
+    q: 'Are there any limits on file size, page count, or daily usage?',
+    a: 'No artificial caps or metered usage limits are enforced. Because operations utilize your local device processing power and RAM rather than remote server resources, you can process documents freely without subscriptions, wait queues, or account registration.',
+  },
+  {
+    q: 'What specific metadata is removed during the Cleanse Metadata operation?',
+    a: 'The sanitizer parses the PDF Info dictionary and XMP metadata stream, stripping author names, creator tools, producer software version signatures, creation and modification timestamps, and hidden file path traces.',
+  },
+  {
+    q: 'Does LitasDark require an active internet connection after loading?',
+    a: 'Once the application and its WebAssembly modules are loaded in your browser cache, document manipulation operations execute entirely locally within your browser sandbox.',
+  },
+  {
+    q: 'How does the Images to PDF compiler maintain source image quality?',
+    a: 'The tool reads binary image streams directly and encapsulates them within standard PDF XObject image dictionaries at their original resolution, avoiding lossy re-encoding or cloud-side downsampling.',
   },
 ];
 
@@ -142,40 +215,45 @@ export default function HomePage() {
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
 
   return (
-    <div className="w-full">
-      <div className="mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-14 space-y-16">
-        {/* Clean, Human-Crafted Hero Section */}
-        <section className="max-w-4xl mx-auto text-center space-y-6 pt-2">
-          {/* Engineering Metadata Banner */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs text-slate-300 bg-slate-900/80 border border-slate-800">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-            <span>Client-Side In-Memory Processing</span>
-            <span className="text-slate-600">•</span>
-            <span className="text-slate-400">Zero Server Uploads</span>
+    <div className="w-full bg-[#050505] text-slate-100 min-h-screen flex flex-col">
+      <SEO faqList={FAQS} />
+      {/* Physically Separated Quick Tools Sub-Navbar */}
+      <ToolsNav className="border-b border-white/10" />
+
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:py-12 md:px-6 space-y-20 flex-1 w-full">
+        {/* Editorial Text-First Hero Section */}
+        <section className="max-w-4xl mx-auto text-center space-y-6 pt-4">
+          {/* Engineering Indicator Pill */}
+          <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full text-xs font-mono bg-slate-900 border border-slate-800 text-slate-300">
+            <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>Client-Side WebAssembly Architecture</span>
+            <span className="text-slate-600">/</span>
+            <span className="text-cyan-400">Zero Server Data Transit</span>
           </div>
 
-          {/* Crisp, High-Contrast Typography */}
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-tight">
-            Fast, private PDF tools that run entirely in your browser.
-          </h1>
+          {/* Primary Typography Hierarchy */}
+          <div className="space-y-4">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white leading-[1.12]">
+              In-Browser PDF Suite with Zero Server Uploads.
+            </h1>
+            <p className="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed font-normal">
+              A private, client-side toolkit for document reading and transformation. Convert PDFs to dark mode, sanitize metadata, merge, split, compress, and compile images directly inside browser RAM.
+            </p>
+          </div>
 
-          <p className="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-            Invert colors for night reading, merge multi-part documents, scrub sensitive metadata, compile images, split, rotate, and optimize PDFs locally with zero telemetry and no server uploads.
-          </p>
-
-          {/* Action CTAs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          {/* Action Navigation */}
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <Link
               to="/tools"
-              className="w-full sm:w-auto px-6 py-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-sm transition-colors flex items-center justify-center gap-2"
+              className="px-6 py-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-xs sm:text-sm transition-colors flex items-center justify-center gap-2 shadow-sm"
             >
-              <span>Explore All PDF Tools</span>
+              <span>Explore All Tools</span>
               <ArrowRightIcon className="w-4 h-4" />
             </Link>
 
             <Link
               to="/dark-mode-pdf"
-              className="w-full sm:w-auto px-5 py-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-800 font-medium text-sm transition-colors flex items-center justify-center gap-2"
+              className="px-5 py-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-800 font-medium text-xs sm:text-sm transition-colors flex items-center justify-center gap-2"
             >
               <MoonIcon className="w-4 h-4 text-cyan-400" />
               <span>Dark Mode Inverter</span>
@@ -183,7 +261,7 @@ export default function HomePage() {
 
             <Link
               to="/cleanse-metadata"
-              className="w-full sm:w-auto px-4 py-3 rounded-lg bg-slate-900/60 hover:bg-slate-800/80 text-slate-400 hover:text-slate-200 border border-slate-800/80 font-medium text-sm transition-colors flex items-center justify-center gap-1.5"
+              className="px-5 py-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 font-medium text-xs sm:text-sm transition-colors flex items-center justify-center gap-2"
             >
               <ShieldCheckIcon className="w-4 h-4 text-emerald-400" />
               <span>Cleanse Metadata</span>
@@ -191,20 +269,48 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Featured Tools Grid */}
+        {/* Technical Architecture Metric Cards */}
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          {ARCHITECTURAL_METRICS.map((metric, idx) => {
+            const Icon = metric.icon;
+            return (
+              <div
+                key={idx}
+                className="p-4 sm:p-5 rounded-xl bg-slate-900/40 border border-slate-800 space-y-2"
+              >
+                <div className="flex items-center justify-between text-slate-400">
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400">
+                    {metric.label}
+                  </span>
+                  <Icon className="w-4 h-4 text-cyan-400" />
+                </div>
+                <div className="text-xl sm:text-2xl font-bold font-mono text-white">
+                  {metric.value}
+                </div>
+                <div className="text-xs text-slate-400">
+                  {metric.sub}
+                </div>
+              </div>
+            );
+          })}
+        </section>
+
+        {/* Core Tool Catalog */}
         <section className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-slate-800/80 pb-4">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Available Utilities</h2>
-              <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-                Hardware-accelerated processing executed inside browser WebAssembly memory.
-              </p>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-slate-800 pb-4">
+            <div className="space-y-1">
+              <div className="text-xs font-mono text-cyan-400 uppercase tracking-wider">
+                Functional Suite
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                Available Document Utilities
+              </h2>
             </div>
             <Link
               to="/tools"
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors"
             >
-              <span>View full workspace</span>
+              <span>View complete directory</span>
               <ArrowRightIcon className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -216,7 +322,7 @@ export default function HomePage() {
                 <Link
                   key={idx}
                   to={tool.path}
-                  className="p-5 rounded-xl bg-slate-900/50 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all flex flex-col justify-between space-y-4 group"
+                  className="p-5 rounded-xl bg-slate-900/30 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all flex flex-col justify-between space-y-4 group"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
@@ -224,23 +330,25 @@ export default function HomePage() {
                         <Icon className="w-4 h-4" />
                       </div>
                       <span className="text-[10px] font-mono text-slate-400 px-2 py-0.5 rounded bg-slate-950 border border-slate-800">
-                        {tool.spec}
+                        {tool.latency}
                       </span>
                     </div>
 
-                    <div>
-                      <div className="text-base font-semibold text-slate-100 group-hover:text-white transition-colors">
+                    <div className="space-y-1.5">
+                      <div className="text-sm font-semibold text-slate-100 group-hover:text-white transition-colors">
                         {tool.title}
                       </div>
-                      <p className="text-xs text-slate-400 leading-relaxed mt-1.5">
+                      <p className="text-xs text-slate-400 leading-relaxed">
                         {tool.desc}
                       </p>
                     </div>
                   </div>
 
-                  <div className="text-xs font-medium text-cyan-400 flex items-center gap-1 pt-2 border-t border-slate-800/60">
-                    <span>Launch tool</span>
-                    <ArrowRightIcon className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                  <div className="pt-3 border-t border-slate-800/60 flex items-center justify-between text-[11px] font-mono text-slate-400">
+                    <span>{tool.format}</span>
+                    <span className="text-cyan-400 group-hover:translate-x-0.5 transition-transform">
+                      &rarr;
+                    </span>
                   </div>
                 </Link>
               );
@@ -248,75 +356,87 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Technical Architecture Comparison */}
-        <section className="p-6 sm:p-8 rounded-2xl bg-slate-900/40 border border-slate-800 space-y-6">
+        {/* Text-Based Architecture Schematic Pipeline */}
+        <section className="p-6 sm:p-8 rounded-2xl bg-slate-900/30 border border-slate-800 space-y-6">
           <div className="max-w-2xl space-y-1.5">
-            <span className="text-xs font-mono font-medium text-cyan-400 uppercase tracking-wider">
-              Local Execution Architecture
-            </span>
+            <div className="text-xs font-mono text-cyan-400 uppercase tracking-wider">
+              Execution Lifecycle
+            </div>
             <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-              Why In-Browser WASM is safer than cloud uploads
+              In-Memory WebAssembly Pipeline
             </h2>
             <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-              Standard PDF websites upload your files to remote cloud storage. LitasDark executes locally via compiled WebAssembly with zero data transmission.
+              Every operation follows a strictly localized execution model inside the user agent sandbox.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-            {/* Cloud Services */}
-            <div className="p-5 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-3">
-              <div className="flex items-center gap-2 text-slate-300 font-semibold text-sm">
-                <LockClosedIcon className="w-4 h-4 text-rose-400" />
-                <span>Traditional Cloud PDF Services</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {TECHNICAL_PIPELINE.map((pipe, idx) => (
+              <div
+                key={idx}
+                className="p-5 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-3 flex flex-col justify-between"
+              >
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="text-cyan-400 font-bold">{pipe.step}</span>
+                    <span className="text-slate-400 px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px]">
+                      {pipe.tech}
+                    </span>
+                  </div>
+                  <div className="text-sm font-semibold text-slate-200">
+                    {pipe.title}
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    {pipe.desc}
+                  </p>
+                </div>
               </div>
-              <ul className="space-y-2 text-xs text-slate-400">
-                <li className="flex items-start gap-2">
-                  <span className="text-rose-400 font-bold">✕</span>
-                  <span>Uploads raw document bytes to remote third-party cloud servers</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-rose-400 font-bold">✕</span>
-                  <span>Network latency, server queues, and bandwidth upload limits</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-rose-400 font-bold">✕</span>
-                  <span>Enforces daily task caps and recurring subscriptions</span>
-                </li>
-              </ul>
-            </div>
+            ))}
+          </div>
 
-            {/* LitasDark Architecture */}
-            <div className="p-5 rounded-xl bg-cyan-950/20 border border-cyan-500/30 space-y-3">
-              <div className="flex items-center gap-2 text-cyan-200 font-semibold text-sm">
-                <CheckCircleIcon className="w-4 h-4 text-emerald-400" />
-                <span>LitasDark (Client-Side WASM Engine)</span>
-              </div>
-              <ul className="space-y-2 text-xs text-slate-300">
-                <li className="flex items-start gap-2">
-                  <span className="text-emerald-400 font-bold">✓</span>
-                  <span>Computed locally in device memory using WebAssembly &amp; Web Workers</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-emerald-400 font-bold">✓</span>
-                  <span>Zero network transit: confidential documents never leave your computer</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-emerald-400 font-bold">✓</span>
-                  <span>Unmetered and free to use with no file size caps or subscriptions</span>
-                </li>
-              </ul>
+          <div className="p-4 rounded-xl bg-slate-950 border border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-400">
+            <div className="flex items-center gap-2">
+              <ShieldCheckIcon className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Document bytes are held exclusively in volatile RAM and freed on demand.</span>
             </div>
+            <Link
+              to="/privacy-architecture"
+              className="text-cyan-400 hover:text-cyan-300 font-medium inline-flex items-center gap-1 shrink-0"
+            >
+              <span>Read Architecture Whitepaper</span>
+              <ArrowRightIcon className="w-3 h-3" />
+            </Link>
           </div>
         </section>
 
-        {/* Industry Persona Cards */}
+        {/* Structured Technical Comparison Table */}
         <section className="space-y-6">
-          <div className="border-b border-slate-800/80 pb-4">
+          <div className="border-b border-slate-800 pb-4">
+            <div className="text-xs font-mono text-cyan-400 uppercase tracking-wider">
+              Architecture Evaluation
+            </div>
             <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-              Designed for Privacy-Sensitive Workflows
+              Client-Side WASM vs. Remote Cloud Services
             </h2>
             <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-              Secure document operations aligned with confidential industry standards.
+              A direct comparison of operational characteristics, data boundaries, and performance.
+            </p>
+          </div>
+
+          <CompetitorComparisonTable />
+        </section>
+
+        {/* Industry Workflows */}
+        <section className="space-y-6">
+          <div className="border-b border-slate-800 pb-4">
+            <div className="text-xs font-mono text-cyan-400 uppercase tracking-wider">
+              Workflows &amp; Use Cases
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+              Engineered for Confidential Environments
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+              Tailored document processing configurations for regulated and data-sensitive sectors.
             </p>
           </div>
 
@@ -327,7 +447,7 @@ export default function HomePage() {
                 <Link
                   key={ind.id}
                   to={`/tools-for/${ind.id}`}
-                  className="p-5 rounded-xl bg-slate-900/40 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all flex flex-col justify-between space-y-4 group"
+                  className="p-5 rounded-xl bg-slate-900/30 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all flex flex-col justify-between space-y-4 group"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
@@ -359,32 +479,22 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Competitor Comparison Matrix */}
-        <section className="space-y-6">
-          <div className="border-b border-slate-800/80 pb-4">
-            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-              Feature &amp; Privacy Comparison
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-              How client-side architecture compares to legacy cloud alternatives.
-            </p>
-          </div>
-          <CompetitorComparisonTable />
-        </section>
-
-        {/* Privacy Badges */}
+        {/* Privacy & Security Guarantees */}
         <section>
           <PrivacyBadges />
         </section>
 
-        {/* FAQ Section */}
+        {/* Systematic FAQ Section */}
         <section className="space-y-6">
-          <div className="border-b border-slate-800/80 pb-4">
+          <div className="border-b border-slate-800 pb-4">
+            <div className="text-xs font-mono text-cyan-400 uppercase tracking-wider">
+              Technical Documentation
+            </div>
             <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
               Frequently Asked Questions
             </h2>
             <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-              Technical specifics about our local WebAssembly engine and privacy architecture.
+              Specifics regarding memory limits, WebAssembly execution, and metadata sanitization.
             </p>
           </div>
 
@@ -394,11 +504,12 @@ export default function HomePage() {
               return (
                 <div
                   key={idx}
-                  className="rounded-xl border border-slate-800 bg-slate-900/40 overflow-hidden transition-colors"
+                  className="rounded-xl border border-slate-800 bg-slate-900/30 overflow-hidden transition-colors"
                 >
                   <button
                     onClick={() => setExpandedFaq(isOpen ? null : idx)}
                     className="w-full p-4 text-left flex items-center justify-between gap-4 text-slate-200 hover:text-white transition-colors"
+                    aria-expanded={isOpen}
                   >
                     <span className="text-sm font-semibold">{faq.q}</span>
                     <ChevronDownIcon
@@ -408,7 +519,7 @@ export default function HomePage() {
                     />
                   </button>
                   {isOpen && (
-                    <div className="px-4 pb-4 pt-1 text-xs sm:text-sm text-slate-400 border-t border-slate-800/60 leading-relaxed bg-slate-950/30">
+                    <div className="px-4 pb-4 pt-1 text-xs sm:text-sm text-slate-400 border-t border-slate-800/60 leading-relaxed bg-slate-950/40">
                       {faq.a}
                     </div>
                   )}
