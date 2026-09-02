@@ -90,11 +90,11 @@ export function MainApplication() {
 
   return (
     <div
-      className="w-full h-full relative select-none"
+      className="w-full h-full relative select-none bg-slate-950"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      <div className="fixed inset-0">
+      <div className="absolute inset-0 z-0">
         <Canvas
           camera={{ position: [0, 0, 16], fov: 45 }}
           gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
@@ -155,23 +155,20 @@ export function MainApplication() {
             <pointLight position={[0, 0, 6]} intensity={0.6} color="#ffffff" />
           </Suspense>
         </Canvas>
-
-        {/* 2D aurora overlay */}
-        <div className="bg-aurora" aria-hidden="true" />
       </div>
 
       {/* Visual Carousel Navigation Arrows */}
       {!isAnyToolProcessActive && !activeTool && (
         <>
           <button
-            className="fixed left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 p-3 sm:p-4 rounded-full bg-slate-900/60 hover:bg-slate-800/80 text-cyan-300 hover:text-white transition-all backdrop-blur-md border border-cyan-500/20 hover:border-cyan-400/50 shadow-[0_0_20px_rgba(6,182,212,0.2)] active:scale-95"
+            className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 p-3 sm:p-4 rounded-full bg-slate-900/80 hover:bg-slate-800 text-cyan-300 hover:text-white transition-all backdrop-blur-md border border-cyan-500/30 hover:border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.25)] active:scale-95 cursor-pointer"
             onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }))}
             aria-label="Rotate Left"
           >
             <ChevronLeftIcon className="w-6 h-6 sm:w-8 sm:h-8" />
           </button>
           <button
-            className="fixed right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 p-3 sm:p-4 rounded-full bg-slate-900/60 hover:bg-slate-800/80 text-cyan-300 hover:text-white transition-all backdrop-blur-md border border-cyan-500/20 hover:border-cyan-400/50 shadow-[0_0_20px_rgba(6,182,212,0.2)] active:scale-95"
+            className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 p-3 sm:p-4 rounded-full bg-slate-900/80 hover:bg-slate-800 text-cyan-300 hover:text-white transition-all backdrop-blur-md border border-cyan-500/30 hover:border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.25)] active:scale-95 cursor-pointer"
             onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }))}
             aria-label="Rotate Right"
           >
@@ -182,13 +179,13 @@ export function MainApplication() {
 
       {/* Quick Access Tool Pills at Bottom */}
       {!isAnyToolProcessActive && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 max-w-[95vw]">
-          <div className="flex items-center gap-1.5 p-1.5 rounded-full bg-slate-950/70 backdrop-blur-md border border-white/10 shadow-2xl overflow-x-auto max-w-full">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 max-w-[95vw]">
+          <div className="flex items-center gap-1.5 p-2 rounded-full bg-slate-900/90 backdrop-blur-lg border border-cyan-500/20 shadow-2xl overflow-x-auto max-w-full">
             {TOOL_DEFINITIONS.map((tool) => (
               <button
                 key={tool.id}
                 onClick={() => handleToolSelect(tool)}
-                className="px-3 py-1.5 rounded-full text-xs font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-all flex items-center gap-1.5 whitespace-nowrap active:scale-95"
+                className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-200 hover:text-white hover:bg-cyan-500/20 hover:border-cyan-400/40 border border-transparent transition-all flex items-center gap-1.5 whitespace-nowrap active:scale-95 cursor-pointer"
               >
                 <span className="w-4 h-4 text-cyan-400 flex items-center justify-center">
                   {tool.icon}
@@ -197,8 +194,8 @@ export function MainApplication() {
               </button>
             ))}
           </div>
-          <p className="text-[10px] tracking-[0.2em] font-mono text-cyan-300/70 uppercase">
-            Touch or click card to open • Swipe or arrow keys to rotate
+          <p className="text-[11px] tracking-[0.2em] font-mono text-cyan-300/80 uppercase bg-slate-900/60 px-3 py-0.5 rounded-full backdrop-blur-sm border border-white/5">
+            Click card to open • Swipe or arrow keys to rotate
           </p>
         </div>
       )}

@@ -10,5 +10,9 @@ export default function ExplorePage() {
     }
   }, []);
 
-  return <MainApplication />;
+  return (
+    <div className="w-full h-[calc(100vh-64px)] relative overflow-hidden bg-slate-950">
+      <MainApplication />
+    </div>
+  );
 }

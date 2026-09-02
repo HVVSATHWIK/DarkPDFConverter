@@ -154,12 +154,36 @@ export function SEO({
     const ogUrl = document.querySelector('meta[property="og:url"]');
     if (ogUrl) ogUrl.setAttribute('content', finalCanonical);
 
+    let ogImage = document.querySelector('meta[property="og:image"]');
+    if (!ogImage) {
+      ogImage = document.createElement('meta');
+      ogImage.setAttribute('property', 'og:image');
+      document.head.appendChild(ogImage);
+    }
+    ogImage.setAttribute('content', 'https://litasdark.vercel.app/og-image.jpg?v=2');
+
+    let ogImageSecure = document.querySelector('meta[property="og:image:secure_url"]');
+    if (!ogImageSecure) {
+      ogImageSecure = document.createElement('meta');
+      ogImageSecure.setAttribute('property', 'og:image:secure_url');
+      document.head.appendChild(ogImageSecure);
+    }
+    ogImageSecure.setAttribute('content', 'https://litasdark.vercel.app/og-image.jpg?v=2');
+
     // 7. Twitter
     const twTitle = document.querySelector('meta[name="twitter:title"]');
     if (twTitle) twTitle.setAttribute('content', finalTitle);
 
     const twDesc = document.querySelector('meta[name="twitter:description"]');
     if (twDesc) twDesc.setAttribute('content', finalDescription);
+
+    let twImage = document.querySelector('meta[name="twitter:image"]');
+    if (!twImage) {
+      twImage = document.createElement('meta');
+      twImage.setAttribute('name', 'twitter:image');
+      document.head.appendChild(twImage);
+    }
+    twImage.setAttribute('content', 'https://litasdark.vercel.app/og-image.jpg?v=2');
 
     // 8. Inject Page-Specific Structured Data Graph (JSON-LD)
     const schemaId = 'litasdark-json-ld';

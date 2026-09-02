@@ -38,7 +38,6 @@
     "@types/lodash": "^4.17.16",
     "@types/react-window": "^1.8.8",
     "autoprefixer": "^10.4.17",
-    "firebase": "^12.3.0",
     "framer-motion": "^11.0.5",
     "gl-react": "^5.2.0",
     "gl-react-dom": "^5.2.1",

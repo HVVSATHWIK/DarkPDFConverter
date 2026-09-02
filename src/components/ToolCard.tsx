@@ -340,7 +340,6 @@ export default function ToolCard({
             anchorX="center"
             anchorY="middle"
             maxWidth={1.8}
-            font="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hjp-Ek-_EeA.woff"
           >
             {tool.name}
           </Text>
