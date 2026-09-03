@@ -127,27 +127,27 @@ const USE_CASES = [
 const FAQS = [
   {
     q: 'Are my PDF files uploaded to a server?',
-    a: 'No. All PDF processing takes place entirely inside your web browser using JavaScript and WebAssembly. Your files, document text, images, and processed results remain in local browser memory and are never transmitted to any server or remote service.',
+    a: 'No. PDF processing takes place locally in your browser using JavaScript and WebAssembly. The application does not send your PDF contents to a server or remote PDF-processing service.',
   },
   {
     q: 'What PDF tools are available on LitasDark?',
-    a: 'LitasDark includes 8 browser-based tools: Dark Mode PDF (color inverter for night reading), Merge PDFs, Split PDF, Rotate PDF, Extract Pages, Optimize PDF, Images to PDF, and Cleanse Metadata.',
+    a: 'LitasDark currently provides 8 browser-based PDF tools: Dark Mode PDF, Merge PDFs, Split PDF, Rotate PDF, Extract Pages, Optimize PDF, Images to PDF, and Cleanse Metadata.',
   },
   {
     q: 'Is LitasDark private when processing PDFs?',
-    a: 'Yes. Because all processing executes locally on your device inside your browser sandbox, no third party—including LitasDark—can access, view, or store your documents.',
+    a: 'Yes. PDF processing happens locally in your browser, so your document contents do not need to be uploaded to a remote PDF-processing service.',
   },
   {
     q: 'Are there any file-size or usage limits?',
-    a: 'LitasDark does not enforce file-size limits, page counts, or usage quotas. Processing capacity depends on your device’s available memory (RAM) and browser performance.',
+    a: 'LitasDark does not currently enforce a fixed file-size, page-count, or usage quota. However, very large or complex PDFs may require substantial memory and processing power from your device.',
   },
   {
-    q: 'What does Clean Metadata remove?',
-    a: 'The Cleanse Metadata tool creates a clean document copy that resets or clears standard document information fields—including Title, Author, Subject, Keywords, Creation Date, and Modification Date—while updating Creator and Producer tags.',
+    q: 'What does Cleanse Metadata remove?',
+    a: 'Cleanse Metadata clears or resets standard PDF document information such as Title, Author, Subject, Keywords, Creation Date, and Modification Date. The resulting document also identifies LitasDark as the Creator and Producer. It does not claim to remove every possible type of embedded PDF data.',
   },
   {
     q: 'Can I use LitasDark without an internet connection?',
-    a: 'Once the web page and tool assets have loaded in your browser tab, PDF processing runs locally without requiring an internet connection. However, opening or refreshing the website requires an internet connection because LitasDark does not currently install an offline service worker.',
+    a: 'After the website and required tool assets have loaded, PDF processing itself runs locally in your browser and does not require an internet connection. However, LitasDark currently does not use a service worker for offline caching, so you need an internet connection to initially open or reload the website.',
   },
 ];
 
