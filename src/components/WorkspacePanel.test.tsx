@@ -212,7 +212,7 @@ describe('WorkspacePanel', () => {
         <WorkspacePanel activeTool={mockToolDarkMode} />
       </MemoryRouter>
     );
-    expect(screen.getByText(/Files processed locally in browser/i)).toBeInTheDocument();
+    expect(screen.getByText(/Files are processed locally in your browser/i)).toBeInTheDocument();
   });
 
   it('shows preview when a file is selected (before processing)', async () => {
@@ -256,8 +256,7 @@ describe('WorkspacePanel', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Complete' }));
     await waitFor(() => {
-
-      expect(screen.getByRole('button', { name: 'Output' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Output/i })).toBeInTheDocument();
     });
   });
 
@@ -269,7 +268,7 @@ describe('WorkspacePanel', () => {
     );
 
     expect(screen.getByTestId('processor-props').textContent).toContain('allowMultipleFiles: true');
-    expect(screen.getByTestId('processor-props').textContent).toContain('action: Merge Selected PDFs');
+    expect(screen.getByTestId('processor-props').textContent).toContain('action: Merge PDFs');
 
     fireEvent.click(screen.getByRole('button', { name: 'Select Files' }));
     await waitFor(() => {
@@ -278,7 +277,7 @@ describe('WorkspacePanel', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Complete' }));
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Output' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Output/i })).toBeInTheDocument();
     });
   });
 
@@ -307,7 +306,7 @@ describe('WorkspacePanel', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Complete' }));
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Output' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Output/i })).toBeInTheDocument();
     });
   });
 
@@ -336,7 +335,7 @@ describe('WorkspacePanel', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Complete' }));
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Output' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Output/i })).toBeInTheDocument();
     });
   });
 
@@ -354,7 +353,7 @@ describe('WorkspacePanel', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Complete' }));
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Output' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Output/i })).toBeInTheDocument();
     });
   });
 });

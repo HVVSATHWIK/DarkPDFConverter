@@ -9,7 +9,7 @@ import PrivacyArchitecturePage from '@/pages/seo/PrivacyArchitecturePage';
 import TermsPage from '@/pages/TermsPage';
 import PrivacyPage from '@/pages/PrivacyPage';
 import NotFoundPage from '@/pages/NotFoundPage';
-import { TOOL_DEFINITIONS } from '@/config/tools';
+import { getToolByPath } from '@/config/tools';
 import { SEO } from '@/components/common/SEO';
 
 export function AppRoutes() {
@@ -26,14 +26,14 @@ export function AppRoutes() {
         <Route path="/explore" element={<ExplorePage />} />
 
         {/* Primary Tool Canonical Workspaces */}
-        <Route path="/dark-mode-pdf" element={<WorkspacePanel activeTool={TOOL_DEFINITIONS[0]} />} />
-        <Route path="/merge-pdf" element={<WorkspacePanel activeTool={TOOL_DEFINITIONS[1]} />} />
-        <Route path="/split-pdf" element={<WorkspacePanel activeTool={TOOL_DEFINITIONS[2]} />} />
-        <Route path="/rotate-pdf" element={<WorkspacePanel activeTool={TOOL_DEFINITIONS[3]} />} />
-        <Route path="/compress-pdf" element={<WorkspacePanel activeTool={TOOL_DEFINITIONS[4]} />} />
-        <Route path="/extract-pdf" element={<WorkspacePanel activeTool={TOOL_DEFINITIONS[5]} />} />
-        <Route path="/cleanse-metadata" element={<WorkspacePanel activeTool={TOOL_DEFINITIONS[6]} />} />
-        <Route path="/images-to-pdf" element={<WorkspacePanel activeTool={TOOL_DEFINITIONS[7]} />} />
+        <Route path="/dark-mode-pdf" element={<WorkspacePanel activeTool={getToolByPath('/dark-mode-pdf')!} />} />
+        <Route path="/merge-pdf" element={<WorkspacePanel activeTool={getToolByPath('/merge-pdf')!} />} />
+        <Route path="/split-pdf" element={<WorkspacePanel activeTool={getToolByPath('/split-pdf')!} />} />
+        <Route path="/rotate-pdf" element={<WorkspacePanel activeTool={getToolByPath('/rotate-pdf')!} />} />
+        <Route path="/compress-pdf" element={<WorkspacePanel activeTool={getToolByPath('/compress-pdf')!} />} />
+        <Route path="/extract-pdf" element={<WorkspacePanel activeTool={getToolByPath('/extract-pdf')!} />} />
+        <Route path="/cleanse-metadata" element={<WorkspacePanel activeTool={getToolByPath('/cleanse-metadata')!} />} />
+        <Route path="/images-to-pdf" element={<WorkspacePanel activeTool={getToolByPath('/images-to-pdf')!} />} />
 
         {/* Alias Redirects to Strict Canonical Routes */}
         <Route path="/dark-mode" element={<Navigate to="/dark-mode-pdf" replace />} />

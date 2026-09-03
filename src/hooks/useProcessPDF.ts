@@ -113,7 +113,7 @@ export function useProcessPDF() {
         let processedPdf: Uint8Array | null = null;
         let titlePrefix = '';
 
-        if (options.activeToolName === 'Dark Mode') {
+        if (options.activeToolName === 'Dark Mode' || options.activeToolName === 'Dark Mode PDF') {
           titlePrefix = 'Dark Mode';
           const arrayBuffer = await file.arrayBuffer();
           let pdfDoc = await PDFDocument.load(arrayBuffer);

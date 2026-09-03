@@ -57,7 +57,9 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
   useEffect(() => {
     setProcessedData(null);
     setSelectedFilesForPreview([]);
-    if (activeTool.name !== 'Dark Mode') setDarkModeSettings({ theme: 'dark' });
+    if (activeTool.name !== 'Dark Mode PDF' && activeTool.name !== 'Dark Mode') {
+      setDarkModeSettings({ theme: 'dark' });
+    }
     if (activeTool.name === 'Split PDF') {
       setSplitPdfSettings((prev) => prev ?? { startPage: 1, endPage: 1 });
     } else {
@@ -102,6 +104,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
 
   const renderToolSpecificUI = () => {
     switch (activeTool.name) {
+      case 'Dark Mode PDF':
       case 'Dark Mode':
         return (
           <PDFProcessorWithErrorBoundary
@@ -111,7 +114,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
             onComplete={handleComplete}
             onError={handleError}
             onSelectionChange={setSelectedFilesForPreview}
-            processActionName="Apply Theme"
+            processActionName="Apply Dark Mode"
             darkModePreviewOptions={darkModeSettings}
             autoProcess
             autoProcessOnSelect
@@ -125,7 +128,6 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
               />
             }
             controlsLabel="Theme & Mode"
-            trustLabel="Processed locally in your browser — your files stay on your device."
           />
         );
 
@@ -161,7 +163,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
             onComplete={handleComplete}
             onError={handleError}
             onSelectionChange={setSelectedFilesForPreview}
-            processActionName="Merge Selected PDFs"
+            processActionName="Merge PDFs"
           />
         );
 
@@ -233,10 +235,9 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
             onComplete={handleComplete}
             onError={handleError}
             onSelectionChange={setSelectedFilesForPreview}
-            processActionName="Sanitize & Scrub Metadata"
+            processActionName="Cleanse Metadata"
             autoProcess
             autoProcessOnSelect
-            trustLabel="Strips author tags, software creator signatures, and timestamps in memory."
           />
         );
 
@@ -250,9 +251,8 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
               onComplete={handleComplete}
               onError={handleError}
               onSelectionChange={setSelectedFilesForPreview}
-              processActionName="Compile Images to PDF"
+              processActionName="Convert to PDF"
               imageToPdfOptions={imageToPdfSettings}
-              trustLabel="In-browser compiler. Embeds PNG & JPG photos into PDF pages at native resolution."
             />
             <ImagesToPDFControls
               currentOptions={imageToPdfSettings}
@@ -262,7 +262,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
         );
 
       default:
-        return <p className="text-gray-400">Tool UI for '{activeTool.name}' not implemented yet.</p>;
+        return <p className="text-slate-400">Tool UI for '{activeTool.name}' not implemented yet.</p>;
     }
   };
 
@@ -283,24 +283,24 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
         steps={guide?.steps}
       />
 
-      {/* 1. Top Bar: Breadcrumbs, H1, and Short Description */}
-      <header className="w-full border-b border-white/10 bg-slate-950/80 px-4 py-6 md:px-8">
-        <div className="max-w-7xl mx-auto space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+      {/* 1. Header & Top Bar */}
+      <header className="w-full border-b border-slate-800/80 bg-slate-950/80 px-4 py-5 md:px-8">
+        <div className="max-w-7xl mx-auto space-y-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <Breadcrumbs
               items={[
                 { name: 'Tools', path: '/tools' },
-                { name: guide?.h1 || activeTool.name },
+                { name: activeTool.name },
               ]}
             />
-            <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
-              <ShieldCheckIcon className="w-3.5 h-3.5" />
-              <span>100% In-Browser RAM Processing &bull; Zero Server Uploads</span>
+            <div className="flex items-center gap-1.5 text-[11px] text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1 rounded-full font-medium">
+              <ShieldCheckIcon className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Files are processed locally in your browser</span>
             </div>
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-              {guide?.h1 || activeTool.name}
+              {activeTool.name}
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-3xl leading-relaxed">
               {guide?.subtitle || activeTool.description}
@@ -309,53 +309,46 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
         </div>
       </header>
 
-      {/* 2. Interactive Tool Workspace Area */}
-      <section className="w-full border-b border-white/10 bg-[#080808]">
-        <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row min-h-[620px]">
-          {/* Sidebar: Controls & Input */}
-          <aside className="w-full lg:w-[380px] shrink-0 border-b lg:border-b-0 lg:border-r border-white/10 flex flex-col bg-[#050505] overflow-y-auto">
-            <div className="p-5 space-y-6">
-              <div className="flex items-center justify-between">
+      {/* 2. Interactive Tool Workspace */}
+      <section className="w-full border-b border-slate-800/80 bg-[#080808]">
+        <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row min-h-[580px]">
+          {/* Workspace Panel: Upload & Controls */}
+          <aside className="w-full lg:w-[440px] shrink-0 border-b lg:border-b-0 lg:border-r border-slate-800/80 flex flex-col bg-[#050505]">
+            <div className="p-5 space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-800/60">
                 <Link
                   to={backUrl}
-                  className="group flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-white transition-colors"
+                  className="group flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors"
                   aria-label={`Back to ${backLabel}`}
                 >
-                  <ArrowUturnLeftIcon className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" />
+                  <ArrowUturnLeftIcon className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
                   <span>{backLabel}</span>
                 </Link>
-                <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                  {activeTool.name}
+                <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                  {activeTool.categoryLabel || 'PDF Utility'}
                 </span>
               </div>
 
-              {/* Main Tool UI */}
-              <div className="space-y-6">{renderToolSpecificUI()}</div>
-
-              <div className="pt-4 border-t border-white/5">
-                <p className="text-[11px] text-slate-500 text-center leading-relaxed">
-                  Files processed locally in browser RAM.<br />
-                  Zero external server transmission.
-                </p>
-              </div>
+              {/* Main Tool Processor UI */}
+              <div className="space-y-4">{renderToolSpecificUI()}</div>
             </div>
           </aside>
 
-          {/* Main Area: Preview */}
+          {/* Main Workspace Area: Live Preview Canvas */}
           <div className="flex-1 bg-[#0A0A0A] relative flex flex-col min-w-0">
             {/* Preview Toolbar */}
-            <div className="h-12 border-b border-white/5 flex items-center justify-between px-6 shrink-0 bg-black/40 backdrop-blur-sm z-10">
+            <div className="h-12 border-b border-slate-800/80 flex items-center justify-between px-5 shrink-0 bg-black/40 backdrop-blur-sm z-10">
               <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                 Document Preview
               </h2>
 
               {processedData && selectedFilesForPreview.length > 0 && (
-                <div className="flex bg-black/60 rounded-lg p-0.5 border border-white/10">
+                <div className="flex bg-black/60 rounded-lg p-0.5 border border-slate-800">
                   <button
                     onClick={() => setPreviewTab('input')}
                     className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
                       previewTab === 'input'
-                        ? 'bg-white/10 text-white shadow-sm'
+                        ? 'bg-slate-800 text-white shadow-sm'
                         : 'text-slate-400 hover:text-slate-200'
                     }`}
                   >
@@ -369,16 +362,16 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
                         : 'text-slate-400 hover:text-slate-200'
                     }`}
                   >
-                    Output Result
+                    Result Output
                   </button>
                 </div>
               )}
             </div>
 
             {/* Preview Canvas */}
-            <div className="flex-1 min-h-[460px] w-full p-4 sm:p-6 flex items-center justify-center relative bg-[radial-gradient(#1a1a1a_1px,transparent_1px)] [background-size:20px_20px] overflow-hidden">
+            <div className="flex-1 min-h-[440px] w-full p-4 sm:p-6 flex items-center justify-center relative bg-[radial-gradient(#1a1a1a_1px,transparent_1px)] [background-size:20px_20px] overflow-hidden">
               {processedData ? (
-                <div className="w-full h-full max-w-4xl flex flex-col items-center justify-center relative shadow-2xl shadow-black/70 rounded-2xl overflow-hidden border border-white/10 bg-slate-950/90 backdrop-blur-sm">
+                <div className="w-full h-full max-w-4xl flex flex-col items-center justify-center relative shadow-2xl shadow-black/80 rounded-2xl overflow-hidden border border-slate-800 bg-slate-950/90 backdrop-blur-sm">
                   {previewTab === 'output' &&
                     (processedData.processedPdf ||
                       processedData instanceof Uint8Array ||
@@ -391,18 +384,18 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
 
                   {/* Error Overlay */}
                   {processedData.error && (
-                    <div className="absolute inset-0 bg-black/80 flex items-center justify-center p-8 backdrop-blur-sm z-30">
-                      <div className="bg-rose-950/40 border border-rose-500/40 p-4 rounded-xl text-rose-200 text-center max-w-md">
-                        <p className="font-semibold mb-1">Error Processing PDF</p>
+                    <div className="absolute inset-0 bg-black/80 flex items-center justify-center p-6 backdrop-blur-sm z-30">
+                      <div className="bg-rose-950/60 border border-rose-500/40 p-4 rounded-xl text-rose-200 text-center max-w-md space-y-2">
+                        <p className="font-semibold text-sm">Error Processing PDF</p>
                         <p className="text-xs opacity-80">{processedData.error}</p>
                       </div>
                     </div>
                   )}
                 </div>
               ) : selectedFilesForPreview.length > 0 ? (
-                <div className="w-full h-full max-w-4xl flex flex-col items-center justify-center relative shadow-xl shadow-black/50 rounded-2xl overflow-hidden border border-white/10 bg-slate-950/90 backdrop-blur-sm">
-                  <div className="absolute top-3 left-3 z-30 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-md text-[10px] font-mono text-slate-300 border border-white/10">
-                    LOADED INPUT
+                <div className="w-full h-full max-w-4xl flex flex-col items-center justify-center relative shadow-xl shadow-black/50 rounded-2xl overflow-hidden border border-slate-800 bg-slate-950/90 backdrop-blur-sm">
+                  <div className="absolute top-3 left-3 z-30 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-md text-[10px] font-mono text-cyan-300 border border-slate-800">
+                    LOADED INPUT PREVIEW
                   </div>
                   <PDFPreview file={selectedFilesForPreview[0]} />
                 </div>
@@ -419,7 +412,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
         </div>
       </section>
 
-      {/* 3. Comprehensive Informational, Technical & FAQ Guide Section */}
+      {/* 3. Guide & FAQ Section */}
       {guide && (
         <section className="w-full bg-[#050505]">
           <ToolContentSection guide={guide} />

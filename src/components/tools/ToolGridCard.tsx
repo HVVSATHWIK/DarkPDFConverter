@@ -1,63 +1,60 @@
 import { useRef, useState, MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { ToolDefinition } from '@/config/tools';
+import { ArrowRightIcon } from '@heroicons/react/24/outline';
 
 interface ToolGridCardProps {
-    tool: ToolDefinition;
+  tool: ToolDefinition;
 }
 
 export default function ToolGridCard({ tool }: ToolGridCardProps) {
-    const divRef = useRef<HTMLDivElement>(null);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
-    const handleMouseMove = (e: MouseEvent<HTMLAnchorElement>) => {
-        if (!divRef.current) return;
+  const divRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
 
-        const div = divRef.current;
-        const rect = div.getBoundingClientRect();
+  const handleMouseMove = (e: MouseEvent<HTMLAnchorElement>) => {
+    if (!divRef.current) return;
+    const rect = divRef.current.getBoundingClientRect();
+    setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  };
 
-        setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-    };
+  return (
+    <Link
+      to={tool.path}
+      onMouseMove={handleMouseMove}
+      className="group relative flex flex-col justify-between h-full rounded-xl border border-slate-800/90 bg-slate-900/50 p-5 sm:p-6 hover:bg-slate-900/90 hover:border-slate-700/80 transition-all duration-200 space-y-4 shadow-sm"
+    >
+      <div
+        ref={divRef}
+        className="pointer-events-none absolute -inset-px opacity-0 transition duration-300 group-hover:opacity-100 rounded-xl overflow-hidden"
+        style={{
+          background: `radial-gradient(350px circle at ${position.x}px ${position.y}px, rgba(6, 182, 212, 0.08), transparent 45%)`,
+        }}
+      />
 
+      <div className="space-y-3 relative z-10">
+        <div className="w-10 h-10 rounded-lg bg-slate-800/90 border border-slate-700/60 text-cyan-400 flex items-center justify-center group-hover:bg-cyan-500 group-hover:text-slate-950 group-hover:border-cyan-400 transition-colors shadow-sm shrink-0">
+          {tool.icon}
+        </div>
 
-    return (
-        <Link
-            to={tool.path}
-            onMouseMove={handleMouseMove}
-            className="group relative flex h-full items-center gap-3 overflow-hidden rounded-xl border border-white/5 bg-slate-900/50 p-5 hover:bg-slate-900/80 transition-colors"
-        >
-            <div
-                ref={divRef}
-                className="pointer-events-none absolute -inset-px opacity-0 transition duration-300 group-hover:opacity-100"
-                style={{
-                    background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, rgba(255,255,255,0.06), transparent 40%)`,
-                }}
-            />
-            {/* Spotlight Border */}
-            <div
-                className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition duration-300 group-hover:opacity-100"
-                style={{
-                    background: `radial-gradient(400px circle at ${position.x}px ${position.y}px, rgba(14, 165, 233, 0.3), transparent 40%)`,
-                    maskImage: 'linear-gradient(black, black), linear-gradient(black, black)',
-                    maskClip: 'content-box, border-box',
-                    maskComposite: 'exclude',
-                    padding: '1px',
-                    WebkitMaskImage: 'linear-gradient(black, black), linear-gradient(black, black)',
-                    WebkitMaskClip: 'content-box, border-box',
-                    WebkitMaskComposite: 'xor',
-                } as any}
-            />
+        <div className="space-y-1.5">
+          <h3 className="font-bold text-slate-100 group-hover:text-cyan-300 transition-colors text-base">
+            {tool.name}
+          </h3>
+          <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+            {tool.description}
+          </p>
+        </div>
+      </div>
 
-            <span className="relative z-10 text-indigo-300/80 p-2 bg-slate-800/50 rounded-lg ring-1 ring-white/10 group-hover:text-cyan-300 group-hover:bg-cyan-950/30 group-hover:ring-cyan-500/30 transition-all duration-500">
-                {tool.icon}
-            </span>
-            <div className="relative z-10 min-w-0">
-                <div className="font-semibold text-slate-200 group-hover:text-white transition-colors">
-                    {tool.name}
-                </div>
-                <div className="text-sm text-slate-400/70 truncate group-hover:text-slate-400 transition-colors">
-                    {tool.description}
-                </div>
-            </div>
-        </Link>
-    );
+      <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs relative z-10">
+        <span className="text-slate-400 font-medium text-[11px]">
+          {tool.categoryLabel || 'Utility'}
+        </span>
+        <span className="text-cyan-400 group-hover:text-cyan-300 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform font-semibold text-xs">
+          <span>Launch</span>
+          <ArrowRightIcon className="w-3.5 h-3.5" />
+        </span>
+      </div>
+    </Link>
+  );
 }

@@ -25,13 +25,13 @@ export default function ExtractPagesControls({ onSettingsChange, currentOptions 
 
             parts.forEach(part => {
                 if (part.includes('-')) {
-                    const [start, end] = part.split('-').map(Number);
-                    if (!isNaN(start) && !isNaN(end) && start < end) {
+                    const [start, end] = part.split('-').map(s => Number(s.trim()));
+                    if (!isNaN(start) && !isNaN(end) && start >= 1 && end >= start) {
                         for (let i = start; i <= end; i++) pages.push(i);
                     }
                 } else {
                     const num = Number(part);
-                    if (!isNaN(num)) pages.push(num);
+                    if (!isNaN(num) && num >= 1 && Number.isInteger(num)) pages.push(num);
                 }
             });
 

@@ -12,16 +12,12 @@ import {
   DocumentIcon,
 } from '@heroicons/react/24/outline';
 
-// Initialize PDF.js worker
+// Initialize PDF.js worker using local Vite asset URL
 if (typeof window !== 'undefined') {
-  try {
-    pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-      'pdfjs-dist/build/pdf.worker.min.mjs',
-      import.meta.url
-    ).toString();
-  } catch {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version || '5.4.296'}/build/pdf.worker.min.mjs`;
-  }
+  pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.min.mjs',
+    import.meta.url
+  ).toString();
 }
 
 interface PDFPreviewProps {

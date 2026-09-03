@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Logo } from '@/components/common/Logo';
 
 export function Footer() {
   return (
@@ -7,23 +8,16 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8">
           {/* Brand Col */}
           <div className="col-span-2 space-y-3">
-            <Link to="/" className="flex items-center gap-2 text-slate-100 font-bold tracking-tight text-base">
-              <img
-                src="/favicon.ico"
-                alt="Litas Logo"
-                className="w-6 h-6 object-contain"
-              />
-              <span>LitasDark</span>
-            </Link>
+            <Logo size="sm" />
             <p className="text-xs text-slate-400 max-w-sm leading-relaxed">
               Private, in-browser PDF suite powered by WebAssembly. No server uploads, zero remote data storage, and unmetered document tools.
             </p>
             <div className="flex items-center gap-2 pt-1">
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                ● In-Browser Privacy
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                In-Browser Privacy
               </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
-                ● Client-Side WASM
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+                Client-Side WASM
               </span>
             </div>
           </div>
@@ -39,7 +33,7 @@ export function Footer() {
               </li>
               <li>
                 <Link to="/dark-mode-pdf" className="hover:text-cyan-400 transition-colors">
-                  Dark Mode PDF Inverter
+                  Dark Mode PDF
                 </Link>
               </li>
               <li>
@@ -54,27 +48,27 @@ export function Footer() {
               </li>
               <li>
                 <Link to="/merge-pdf" className="hover:text-cyan-400 transition-colors">
-                  Merge PDF Free
+                  Merge PDFs
                 </Link>
               </li>
               <li>
                 <Link to="/split-pdf" className="hover:text-cyan-400 transition-colors">
-                  Split PDF Offline
+                  Split PDF
                 </Link>
               </li>
               <li>
                 <Link to="/rotate-pdf" className="hover:text-cyan-400 transition-colors">
-                  Rotate PDF Pages
+                  Rotate PDF
                 </Link>
               </li>
               <li>
                 <Link to="/compress-pdf" className="hover:text-cyan-400 transition-colors">
-                  Compress PDF Locally
+                  Optimize PDF
                 </Link>
               </li>
               <li>
                 <Link to="/extract-pdf" className="hover:text-cyan-400 transition-colors">
-                  Extract PDF Pages
+                  Extract Pages
                 </Link>
               </li>
             </ul>
@@ -133,6 +127,7 @@ export function Footer() {
               </li>
             </ul>
           </div>
+
           {/* Legal & Compliance Col */}
           <div className="space-y-2.5">
             <div className="font-bold text-slate-200 uppercase tracking-wider text-[11px]">Legal &amp; Privacy</div>
@@ -156,13 +151,13 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Mandatory Nominative Fair Use & Trademark Disclaimer */}
+        {/* Nominative Fair Use & Trademark Disclaimer */}
         <div className="pt-6 border-t border-slate-800/60 text-[11px] text-slate-500 leading-relaxed space-y-2">
           <p>
-            All product and company names, logos, and brands are trademarks™ or registered® trademarks of their respective holders. Use of them on this website is for identification and comparative purposes only under the doctrine of nominative fair use and does not imply any affiliation with, endorsement by, or sponsorship by them. iLovePDF, Smallpdf, and Sejda are trademarks of their respective owners. LitasDark is an independent, client-side utility software and is not associated with any traditional cloud-based PDF service providers.
+            All product and company names, logos, and brands are trademarks™ or registered® trademarks of their respective holders. Use of them on this website is for identification and comparative purposes only under the doctrine of nominative fair use and does not imply any affiliation with, endorsement by, or sponsorship by them. iLovePDF, Smallpdf, and Sejda are trademarks of their respective owners. LitasDark is an independent, client-side utility software.
           </p>
           <p>
-            Disclaimer: LitasDark operates strictly as a local software utility and does not act as a Data Processor or Business Associate. Users are solely responsible for ensuring their use of local software complies with their specific organizational policies, private confidentiality agreements, and applicable professional regulations.
+            Disclaimer: LitasDark operates strictly as a local software utility and does not act as a Data Processor or Business Associate. Users are solely responsible for ensuring their use of local software complies with their specific organizational policies and applicable regulations.
           </p>
         </div>
 

@@ -1,9 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
 import { motion } from 'framer-motion';
 import { useProcessPDF, ProcessOptions } from '../hooks/useProcessPDF';
-import { XCircleIcon, DocumentPlusIcon, ArrowUpOnSquareIcon } from '@heroicons/react/24/outline';
+import {
+  XCircleIcon,
+  DocumentPlusIcon,
+  ArrowDownTrayIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
+  CheckCircleIcon,
+  ArrowPathIcon,
+} from '@heroicons/react/24/outline';
 import { DarkModeOptions } from '@/hooks/useDarkMode';
 import { SplitOptions } from '@/hooks/useSplitPDF';
 import { RotateOptions } from '@/hooks/useRotatePDF';
@@ -38,6 +45,12 @@ export interface PDFProcessorProps {
   activeTool?: Tool | null;
 }
 
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 function PDFProcessor({
   onComplete,
   onError,
@@ -64,12 +77,14 @@ function PDFProcessor({
   const downloadUrlRef = useRef<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const addMoreInputRef = useRef<HTMLInputElement>(null);
   const idCounterRef = useRef(0);
   const lastAutoKeyRef = useRef<string>('');
   const didAutoOnceAfterSelectRef = useRef(false);
   const lastOptionsKeyRef = useRef<string>('');
 
   const isImageTool = activeTool?.name === 'Images to PDF';
+  const isMergeTool = activeTool?.name === 'Merge PDFs';
   const acceptedFileExtensions = isImageTool ? '.png,.jpg,.jpeg,.webp' : '.pdf';
 
   useEffect(() => {
@@ -92,15 +107,21 @@ function PDFProcessor({
 
   const isProcessDisabled = useCallback(() => {
     if (isProcessing) return true;
+    if (selectedFiles.length === 0) return true;
+    if (isMergeTool && selectedFiles.length < 2) return true;
     if (activeTool?.name === 'Split PDF' && !splitPdfOptions) return true;
     if (activeTool?.name === 'Rotate PDF' && !rotateOptions) return true;
     if (activeTool?.name === 'Extract Pages' && !extractOptions) return true;
     return false;
-  }, [activeTool?.name, extractOptions, isProcessing, rotateOptions, splitPdfOptions]);
+  }, [activeTool?.name, extractOptions, isMergeTool, isProcessing, rotateOptions, selectedFiles.length, splitPdfOptions]);
 
   const handleProcessClick = useCallback(async () => {
     if (selectedFiles.length === 0) {
       onError(new Error('No files selected.'));
+      return;
+    }
+    if (isMergeTool && selectedFiles.length < 2) {
+      onError(new Error('Please select at least 2 PDF files to merge.'));
       return;
     }
 
@@ -119,12 +140,11 @@ function PDFProcessor({
       };
 
       let result;
-      if ((activeTool?.name === 'Merge PDFs' || activeTool?.name === 'Images to PDF') && allowMultipleFiles) {
+      if ((isMergeTool || isImageTool) && allowMultipleFiles) {
         result = await processDocument(
           selectedFiles.map((s) => s.file),
-          (p, msg) => {
+          (p) => {
             setProgress(Math.round(p * 100));
-            console.log(`Progress: ${p * 100}%, Message: ${msg}`);
           },
           processOptions
         );
@@ -132,9 +152,8 @@ function PDFProcessor({
         const fileToProcess = selectedFiles[0].file;
         result = await processDocument(
           fileToProcess,
-          (p, msg) => {
+          (p) => {
             setProgress(Math.round(p * 100));
-            console.log(`Progress: ${p * 100}%, Message: ${msg}`);
           },
           processOptions
         );
@@ -164,6 +183,8 @@ function PDFProcessor({
     downloadUrl,
     extractOptions,
     imageToPdfOptions,
+    isImageTool,
+    isMergeTool,
     onComplete,
     onError,
     processDocument,
@@ -217,7 +238,7 @@ function PDFProcessor({
   ]);
 
   const handleFilesSelected = (files: FileList | null) => {
-    if (files) {
+    if (files && files.length > 0) {
       const newFiles = Array.from(files).map((file) => {
         const nextCounter = idCounterRef.current++;
         const id = `${file.name}:${file.lastModified}:${file.size}:${nextCounter}`;
@@ -248,6 +269,21 @@ function PDFProcessor({
 
   const removeFile = (id: string) => {
     setSelectedFiles((prev) => prev.filter((item) => item.id !== id));
+    if (downloadUrl) URL.revokeObjectURL(downloadUrl);
+    setDownloadUrl(null);
+  };
+
+  const moveFile = (index: number, direction: 'up' | 'down') => {
+    setSelectedFiles((prev) => {
+      const next = [...prev];
+      const targetIndex = direction === 'up' ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= next.length) return prev;
+      const [moved] = next.splice(index, 1);
+      next.splice(targetIndex, 0, moved);
+      return next;
+    });
+    if (downloadUrl) URL.revokeObjectURL(downloadUrl);
+    setDownloadUrl(null);
   };
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
@@ -264,13 +300,41 @@ function PDFProcessor({
     handleFilesSelected(event.dataTransfer.files);
   };
 
+  const defaultActionName = () => {
+    if (processActionName) return processActionName;
+    switch (activeTool?.name) {
+      case 'Merge PDFs':
+        return 'Merge PDFs';
+      case 'Split PDF':
+        return 'Split PDF';
+      case 'Rotate PDF':
+        return 'Rotate PDF';
+      case 'Extract Pages':
+        return 'Extract Pages';
+      case 'Optimize PDF':
+        return 'Optimize PDF';
+      case 'Dark Mode PDF':
+      case 'Dark Mode':
+        return 'Apply Dark Mode';
+      case 'Images to PDF':
+        return 'Convert to PDF';
+      case 'Cleanse Metadata':
+        return 'Cleanse Metadata';
+      default:
+        return 'Process PDF';
+    }
+  };
+
+  const downloadFileName = () => {
+    const slugName = (activeTool?.name || 'processed')
+      .toLowerCase()
+      .replace(/\s+/g, '-');
+    return `${slugName}-result.pdf`;
+  };
+
   return (
-    <div
-      role="region"
-      aria-label="PDF processing area"
-      className="space-y-6"
-    >
-      {/* File Uploader Section */}
+    <div role="region" aria-label="PDF processing workspace" className="space-y-5">
+      {/* 1. Uploader Drop Zone */}
       <div className="space-y-3">
         {selectedFiles.length === 0 ? (
           <div
@@ -278,13 +342,11 @@ function PDFProcessor({
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
-            className={`group flex flex-col items-center justify-center p-8 border border-dashed rounded-xl cursor-pointer
-                        ${
-                          isDragging
-                            ? 'border-indigo-400/80 bg-indigo-500/10'
-                            : 'border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10'
-                        }
-                        transition-all duration-200 ease-in-out`}
+            className={`group flex flex-col items-center justify-center p-8 sm:p-10 border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-200 ease-in-out text-center ${
+              isDragging
+                ? 'border-cyan-400 bg-cyan-500/10 shadow-lg shadow-cyan-500/10'
+                : 'border-slate-800 hover:border-slate-700 bg-slate-900/60 hover:bg-slate-900/90'
+            }`}
           >
             <input
               ref={fileInputRef}
@@ -296,181 +358,228 @@ function PDFProcessor({
               id={`pdf-upload-${toolId}`}
             />
             <div
-              className={`p-3 rounded-full mb-3 transition-colors ${
-                isDragging ? 'bg-indigo-500/20' : 'bg-white/5 group-hover:bg-white/10'
+              className={`w-12 h-12 rounded-xl mb-3 flex items-center justify-center transition-colors ${
+                isDragging
+                  ? 'bg-cyan-500/20 text-cyan-300'
+                  : 'bg-slate-800/80 text-cyan-400 group-hover:bg-cyan-500 group-hover:text-slate-950'
               }`}
             >
-              <DocumentPlusIcon
-                className={`w-6 h-6 ${isDragging ? 'text-indigo-300' : 'text-slate-400'}`}
-              />
+              <DocumentPlusIcon className="w-6 h-6 transition-transform group-hover:scale-110" />
             </div>
-            <p className="text-sm font-medium text-slate-300 group-hover:text-white">
+            <p className="text-sm font-bold text-slate-100 group-hover:text-white">
               {isImageTool
-                ? allowMultipleFiles
-                  ? 'Upload Images (PNG / JPG)'
-                  : 'Upload Image'
-                : allowMultipleFiles
-                ? 'Upload PDFs'
-                : 'Upload PDF'}
+                ? 'Drop images here or choose files from your device'
+                : 'Drop PDF files here or choose files from your device'}
             </p>
-            <p className="text-xs text-slate-500 mt-1">Drag &amp; drop or click to select</p>
+            <p className="text-xs text-slate-400 mt-1.5">
+              {isImageTool
+                ? 'Supports PNG, JPG, JPEG, WebP format'
+                : allowMultipleFiles
+                ? 'Select multiple PDF files to organize and merge'
+                : 'Select a PDF document to process'}
+            </p>
           </div>
         ) : (
+          /* 2. Selected File Workspace */
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Source</span>
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="text-xs text-indigo-300 hover:text-indigo-200 flex items-center gap-1"
-              >
-                <DocumentPlusIcon className="w-3 h-3" />
-                Add/Change
-              </button>
+            <div className="flex items-center justify-between pb-1 border-b border-slate-800/80">
+              <span className="text-xs font-semibold text-slate-300">
+                Selected {isImageTool ? 'Images' : 'Files'} ({selectedFiles.length})
+              </span>
+              <div className="flex items-center gap-2">
+                {allowMultipleFiles && (
+                  <>
+                    <input
+                      ref={addMoreInputRef}
+                      type="file"
+                      accept={acceptedFileExtensions}
+                      multiple
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => addMoreInputRef.current?.click()}
+                      className="text-xs text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1 transition-colors"
+                    >
+                      <DocumentPlusIcon className="w-3.5 h-3.5" />
+                      Add More
+                    </button>
+                  </>
+                )}
+                {selectedFiles.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={clearAllFiles}
+                    className="text-xs text-slate-500 hover:text-rose-400 transition-colors"
+                  >
+                    Clear All
+                  </button>
+                )}
+              </div>
             </div>
 
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept={acceptedFileExtensions}
-              multiple={allowMultipleFiles}
-              onChange={handleFileChange}
-              className="hidden"
-            />
-
-            <ul className="space-y-2">
-              {selectedFiles.map((item) => (
+            <ul className="space-y-2 max-h-72 overflow-y-auto pr-0.5">
+              {selectedFiles.map((item, index) => (
                 <li
                   key={item.id}
-                  className="group flex items-center justify-between gap-3 p-2.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/5 hover:border-white/10 transition-colors"
+                  className="group flex items-center justify-between gap-2.5 p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition-all"
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded bg-cyan-500/10 flex items-center justify-center shrink-0">
-                      <span className="text-[10px] font-bold text-cyan-400">
-                        {item.file.name.split('.').pop()?.toUpperCase() || 'FILE'}
-                      </span>
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <div className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700/60 text-cyan-400 flex items-center justify-center shrink-0 font-bold text-[10px]">
+                      {index + 1}
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-sm text-slate-200 truncate font-medium">{item.file.name}</p>
-                      <p className="text-[10px] text-slate-500">{(item.file.size / 1024).toFixed(1)} KB</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs sm:text-sm font-semibold text-slate-100 truncate">
+                        {item.file.name}
+                      </p>
+                      <p className="text-[10px] text-slate-400">
+                        {formatFileSize(item.file.size)}
+                      </p>
                     </div>
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeFile(item.id);
-                    }}
-                    className="p-1 text-slate-500 hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <XCircleIcon className="w-4 h-4" />
-                  </button>
+
+                  {/* Controls: Reorder buttons for multi-file tools */}
+                  <div className="flex items-center gap-1 shrink-0">
+                    {allowMultipleFiles && selectedFiles.length > 1 && (
+                      <div className="flex items-center gap-0.5 bg-slate-800/80 rounded-lg p-0.5 border border-slate-700/50">
+                        <button
+                          type="button"
+                          onClick={() => moveFile(index, 'up')}
+                          disabled={index === 0}
+                          title="Move Up"
+                          className="p-1 text-slate-400 hover:text-cyan-300 disabled:opacity-30 disabled:hover:text-slate-400 transition-colors"
+                        >
+                          <ChevronUpIcon className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveFile(index, 'down')}
+                          disabled={index === selectedFiles.length - 1}
+                          title="Move Down"
+                          className="p-1 text-slate-400 hover:text-cyan-300 disabled:opacity-30 disabled:hover:text-slate-400 transition-colors"
+                        >
+                          <ChevronDownIcon className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => removeFile(item.id)}
+                      title="Remove File"
+                      className="p-1 text-slate-400 hover:text-rose-400 transition-colors"
+                    >
+                      <XCircleIcon className="w-4 h-4" />
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
 
-            {allowMultipleFiles && selectedFiles.length > 1 && (
-              <button onClick={clearAllFiles} className="text-[10px] text-slate-500 hover:text-slate-300 underline">
-                Clear all
-              </button>
+            {/* Hint for Merge PDFs */}
+            {isMergeTool && selectedFiles.length === 1 && (
+              <p className="text-xs text-amber-400/90 bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded-lg text-center">
+                Add at least 1 more PDF file to perform a merge.
+              </p>
             )}
           </div>
         )}
-
-        {/* Interaction Zone Agreement Notice */}
-        <p className="text-[10px] text-slate-500 text-center leading-relaxed">
-          By selecting a file or utilizing this utility, you acknowledge that all processing occurs locally on your device and you agree to our{' '}
-          <Link to="/terms" className="text-slate-400 hover:text-cyan-400 underline">
-            Terms of Service
-          </Link>{' '}
-          and{' '}
-          <Link to="/privacy" className="text-slate-400 hover:text-cyan-400 underline">
-            Privacy Policy
-          </Link>
-          .
-        </p>
       </div>
 
-      {/* Controls Section */}
+      {/* 3. Tool Specific Controls */}
       {selectedFiles.length > 0 && controls && (
-        <div className="space-y-3 py-4 border-t border-white/5">
-          <div>{controls}</div>
+        <div className="py-2 border-t border-slate-800/80 space-y-2">
+          {controls}
         </div>
       )}
 
-      {/* Action Section (Apply / Download) */}
+      {/* 4. Primary CTA & Result State */}
       {selectedFiles.length > 0 && (
-        <div className="pt-4 border-t border-white/5 space-y-3">
-          {/* Processing Status */}
+        <div className="pt-2 border-t border-slate-800/80 space-y-3">
+          {/* Active Processing State */}
           {isProcessing && (
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-[10px] uppercase text-indigo-300 font-medium">
-                <span>Processing...</span>
+            <div className="p-4 rounded-xl bg-slate-900/90 border border-cyan-500/30 space-y-2">
+              <div className="flex items-center justify-between text-xs font-semibold text-cyan-300">
+                <span className="flex items-center gap-2">
+                  <ArrowPathIcon className="w-4 h-4 animate-spin text-cyan-400" />
+                  Processing document...
+                </span>
                 <span>{progress}%</span>
               </div>
-              <motion.div className="h-1 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
                 <motion.div
-                  className="h-full bg-indigo-500"
+                  className="h-full bg-cyan-500"
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
                 />
-              </motion.div>
+              </div>
             </div>
           )}
 
-          {/* Download Button (Success State) */}
+          {/* Download / Success State */}
           {downloadUrl && !isProcessing ? (
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="space-y-2"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="p-4 rounded-2xl bg-cyan-950/30 border border-cyan-500/40 space-y-3 text-center"
             >
+              <div className="flex items-center justify-center gap-2 text-cyan-400 font-bold text-sm">
+                <CheckCircleIcon className="w-5 h-5 text-cyan-400" />
+                <span>PDF Ready for Download</span>
+              </div>
+
               <a
                 href={downloadUrl}
-                download={`processed-${activeTool?.name || 'file'}.pdf`}
-                className="flex items-center justify-center gap-2 w-full p-3 bg-white text-black font-semibold rounded-lg hover:bg-slate-200 transition-colors shadow-lg shadow-white/5"
+                download={downloadFileName()}
+                className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl transition-colors shadow-lg shadow-cyan-500/20 text-sm"
               >
-                <ArrowUpOnSquareIcon className="w-4 h-4" />
-                Download Result
+                <ArrowDownTrayIcon className="w-4 h-4 stroke-[2.5]" />
+                <span>Download {isMergeTool ? 'Merged PDF' : 'Processed PDF'}</span>
               </a>
+
               <button
                 type="button"
-                onClick={handleProcessClick}
-                disabled={isProcessDisabled()}
-                className="w-full py-2 px-3 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-medium rounded-lg border border-white/10 transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                onClick={clearAllFiles}
+                className="w-full py-2 px-3 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold rounded-xl border border-slate-800 transition-colors"
               >
-                <span>{processActionName ? `Re-run ${processActionName}` : 'Re-apply Changes'}</span>
+                {isMergeTool ? 'Start Another Merge' : 'Process Another File'}
               </button>
-              <p className="text-center text-[10px] text-slate-500 mt-1">
-                Ready to save. {autoProcess ? 'Updated automatically on setting change.' : ''}
-              </p>
             </motion.div>
           ) : (
+            /* Primary CTA Button */
             !isProcessing && (
               <button
                 type="button"
                 onClick={handleProcessClick}
                 disabled={isProcessDisabled()}
-                className="w-full p-3 bg-white/10 hover:bg-white/20 text-white font-medium rounded-lg border border-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-3 px-4 bg-cyan-500 hover:bg-cyan-400 disabled:bg-slate-800 disabled:text-slate-500 disabled:border-slate-800 text-slate-950 font-bold rounded-xl transition-all shadow-md shadow-cyan-500/10 text-sm disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                {processActionName || (activeTool?.name === 'Merge PDFs' ? 'Merge Files' : 'Process PDF')}
+                <span>{defaultActionName()}</span>
               </button>
             )
           )}
         </div>
       )}
+
+      {/* 5. Short Factual Privacy Note */}
+      <p className="text-[11px] text-slate-400 text-center leading-normal">
+        Files are processed locally in your browser.
+      </p>
     </div>
   );
 }
 
 function ErrorFallback({ error, resetErrorBoundary }: any) {
   return (
-    <div role="alert" className="p-4 bg-rose-500/15 text-white rounded-xl shadow-md border border-rose-400/20">
-      <h2 className="text-lg font-semibold mb-2">Oops! Something went wrong.</h2>
-      <pre className="mt-2 text-sm bg-black/25 p-2 rounded-lg border border-white/10 overflow-auto">{error.message}</pre>
+    <div role="alert" className="p-4 bg-rose-950/40 text-white rounded-xl border border-rose-500/40 space-y-3">
+      <h3 className="text-sm font-bold text-rose-300">Processing Error</h3>
+      <p className="text-xs text-rose-200/90">{error.message}</p>
       <button
         onClick={resetErrorBoundary}
-        className="mt-4 px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/15 font-semibold border border-white/10"
+        className="px-3.5 py-1.5 bg-slate-900 text-xs font-semibold text-white rounded-lg border border-slate-700 hover:bg-slate-800"
       >
-        Try again
+        Try Again
       </button>
     </div>
   );

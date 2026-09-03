@@ -121,7 +121,7 @@ describe('PDFProcessor', () => {
     );
     await waitFor(() => {
         expect(global.URL.createObjectURL).toHaveBeenCalled();
-        expect(screen.getByRole('link', { name: /Download Result/i })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /Download/i })).toBeInTheDocument();
     });
   });
 
@@ -162,9 +162,9 @@ describe('PDFProcessor', () => {
     rerender(<PDFProcessorWithErrorBoundary {...defaultProps} />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Processing.../i)).toBeInTheDocument();
+      expect(screen.getByText(/Processing/i)).toBeInTheDocument();
 
-      const progressBarFill = document.querySelector('.h-full.bg-indigo-500');
+      const progressBarFill = document.querySelector('.h-full.bg-cyan-500');
       expect(progressBarFill).toHaveStyle({ width: '50%' });
     });
   });

@@ -37,11 +37,8 @@ const SplitPDFControls: React.FC<SplitPDFControlsProps> = ({ onSettingsChange, c
 
     if (!currentError && !isNaN(startNum) && !isNaN(endNum) && endPage !== '') {
       onSettingsChange({ startPage: startNum, endPage: endNum });
-    } else if (!currentError && !isNaN(startNum) && endPage === '') { // Allow valid start page if end page is empty
-      onSettingsChange(null); // Or some incomplete state
-    }
-     else {
-      onSettingsChange(null); // Invalid settings
+    } else {
+      onSettingsChange(null);
     }
   }, [endPage, onSettingsChange, startPage]);
 
