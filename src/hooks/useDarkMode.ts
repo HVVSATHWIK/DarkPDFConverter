@@ -108,6 +108,10 @@ async function rasterizeDarkMode(
     const srcCtx = srcCanvas.getContext('2d', { willReadFrequently: true });
     if (!srcCtx) throw new Error('Canvas 2D context not available');
 
+    // Fill source canvas with white background so PDF.js renders on opaque paper
+    srcCtx.fillStyle = '#ffffff';
+    srcCtx.fillRect(0, 0, srcCanvas.width, srcCanvas.height);
+
     // Render PDF page into source canvas
     await (page as any).render({ canvasContext: srcCtx, viewport }).promise;
 
@@ -141,6 +145,7 @@ async function rasterizeDarkMode(
         data[i] = Math.min(255, Math.max(0, Math.round(r * boost)));
         data[i + 1] = Math.min(255, Math.max(0, Math.round(g * boost)));
         data[i + 2] = Math.min(255, Math.max(0, Math.round(b * boost)));
+        data[i + 3] = 255;
       } else {
         // Grayscale / Text / Page background:
         // Original page brightness (0 = black ink, 1 = white paper)
@@ -159,6 +164,7 @@ async function rasterizeDarkMode(
         data[i] = Math.round(bgR + t * (fgR - bgR));
         data[i + 1] = Math.round(bgG + t * (fgG - bgG));
         data[i + 2] = Math.round(bgB + t * (fgB - bgB));
+        data[i + 3] = 255;
       }
     }
 

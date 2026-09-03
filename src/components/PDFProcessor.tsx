@@ -132,7 +132,10 @@ function PDFProcessor({
 
       const processOptions: ProcessOptions = {
         activeToolName: activeTool?.name,
-        darkModeOptions: activeTool?.name === 'Dark Mode' ? darkModePreviewOptions : undefined,
+        darkModeOptions:
+          activeTool?.name === 'Dark Mode' || activeTool?.name === 'Dark Mode PDF'
+            ? darkModePreviewOptions
+            : undefined,
         splitPdfOptions: activeTool?.name === 'Split PDF' ? splitPdfOptions : undefined,
         rotateOptions: activeTool?.name === 'Rotate PDF' ? rotateOptions : undefined,
         extractOptions: activeTool?.name === 'Extract Pages' ? extractOptions : undefined,
@@ -378,10 +381,36 @@ function PDFProcessor({
   };
 
   const downloadFileName = () => {
-    const slugName = (activeTool?.name || 'processed')
-      .toLowerCase()
-      .replace(/\s+/g, '-');
-    return `${slugName}-result.pdf`;
+    const firstFile = selectedFiles[0]?.file;
+    if (!firstFile) {
+      const slugName = (activeTool?.name || 'processed')
+        .toLowerCase()
+        .replace(/\s+/g, '-');
+      return `${slugName}-result.pdf`;
+    }
+
+    const baseName = firstFile.name.replace(/\.[^/.]+$/, '');
+    const toolName = activeTool?.name || '';
+
+    if (toolName === 'Dark Mode PDF' || toolName === 'Dark Mode') {
+      return `${baseName}_DarkMode.pdf`;
+    } else if (toolName === 'Merge PDFs') {
+      return `${baseName}_Merged.pdf`;
+    } else if (toolName === 'Split PDF') {
+      return `${baseName}_Split.pdf`;
+    } else if (toolName === 'Rotate PDF') {
+      return `${baseName}_Rotated.pdf`;
+    } else if (toolName === 'Extract Pages') {
+      return `${baseName}_Extracted.pdf`;
+    } else if (toolName === 'Optimize PDF') {
+      return `${baseName}_Optimized.pdf`;
+    } else if (toolName === 'Cleanse Metadata' || toolName === 'Clean Metadata') {
+      return `${baseName}_Cleaned.pdf`;
+    } else if (toolName === 'Images to PDF') {
+      return `${baseName}_Converted.pdf`;
+    }
+
+    return `${baseName}_Processed.pdf`;
   };
 
   return (
