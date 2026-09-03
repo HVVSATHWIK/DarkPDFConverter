@@ -3,6 +3,7 @@ import HomePage from '@/pages/HomePage';
 import ToolsPage from '@/pages/ToolsPage';
 import ExplorePage from '@/pages/ExplorePage';
 import WorkspacePanel from '@/components/WorkspacePanel';
+import ToolGuidePage from '@/pages/ToolGuidePage';
 import IndustryPage from '@/pages/seo/IndustryPage';
 import CompetitorAlternativePage from '@/pages/seo/CompetitorAlternativePage';
 import PrivacyArchitecturePage from '@/pages/seo/PrivacyArchitecturePage';
@@ -34,6 +35,28 @@ export function AppRoutes() {
         <Route path="/extract-pdf" element={<WorkspacePanel activeTool={getToolByPath('/extract-pdf')!} />} />
         <Route path="/cleanse-metadata" element={<WorkspacePanel activeTool={getToolByPath('/cleanse-metadata')!} />} />
         <Route path="/images-to-pdf" element={<WorkspacePanel activeTool={getToolByPath('/images-to-pdf')!} />} />
+
+        {/* Dedicated Full-Page Tool Guides */}
+        <Route path="/dark-mode-pdf/guide" element={<ToolGuidePage toolSlug="dark-mode-pdf" />} />
+        <Route path="/merge-pdf/guide" element={<ToolGuidePage toolSlug="merge-pdf" />} />
+        <Route path="/split-pdf/guide" element={<ToolGuidePage toolSlug="split-pdf" />} />
+        <Route path="/rotate-pdf/guide" element={<ToolGuidePage toolSlug="rotate-pdf" />} />
+        <Route path="/compress-pdf/guide" element={<ToolGuidePage toolSlug="compress-pdf" />} />
+        <Route path="/extract-pdf/guide" element={<ToolGuidePage toolSlug="extract-pdf" />} />
+        <Route path="/cleanse-metadata/guide" element={<ToolGuidePage toolSlug="cleanse-metadata" />} />
+        <Route path="/images-to-pdf/guide" element={<ToolGuidePage toolSlug="images-to-pdf" />} />
+
+        {/* Alias Guide Redirects */}
+        <Route path="/dark-mode/guide" element={<Navigate to="/dark-mode-pdf/guide" replace />} />
+        <Route path="/merge/guide" element={<Navigate to="/merge-pdf/guide" replace />} />
+        <Route path="/split/guide" element={<Navigate to="/split-pdf/guide" replace />} />
+        <Route path="/rotate/guide" element={<Navigate to="/rotate-pdf/guide" replace />} />
+        <Route path="/compress/guide" element={<Navigate to="/compress-pdf/guide" replace />} />
+        <Route path="/extract/guide" element={<Navigate to="/extract-pdf/guide" replace />} />
+        <Route path="/optimize/guide" element={<Navigate to="/compress-pdf/guide" replace />} />
+        <Route path="/scrub-metadata/guide" element={<Navigate to="/cleanse-metadata/guide" replace />} />
+        <Route path="/jpg-to-pdf/guide" element={<Navigate to="/images-to-pdf/guide" replace />} />
+        <Route path="/png-to-pdf/guide" element={<Navigate to="/images-to-pdf/guide" replace />} />
 
         {/* Alias Redirects to Strict Canonical Routes */}
         <Route path="/dark-mode" element={<Navigate to="/dark-mode-pdf" replace />} />

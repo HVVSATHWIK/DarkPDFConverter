@@ -14,10 +14,10 @@ import { ExtractOptions } from '@/hooks/useExtractPages';
 import ImagesToPDFControls from './tools/ImagesToPDFControls';
 import { ImageToPdfOptions } from '@/hooks/useImagesToPdf';
 import PDFPreview from './common/PDFPreview';
-import ToolContentSection from './tools/ToolContentSection';
 import { getToolGuideById, getToolGuideBySlug } from '@/config/toolGuides';
 import { SEO } from './common/SEO';
 import { Breadcrumbs } from './seo/Breadcrumbs';
+import { GuideInfoButton } from './tools/GuideInfoButton';
 
 interface ToolPageProps {
   activeTool: Tool;
@@ -53,8 +53,16 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
 
   const slug = location.pathname.replace(/^\//, '');
   const guide = getToolGuideBySlug(slug) || getToolGuideById(activeTool.id);
+  const toolPath = activeTool.path || (guide ? `/${guide.slug}` : `/${slug}`);
 
   useEffect(() => {
+    // Ensure route starts at scroll position 0, 0
+    window.scrollTo(0, 0);
+    const mainEl = document.querySelector('main');
+    if (mainEl) {
+      mainEl.scrollTop = 0;
+    }
+
     setProcessedData(null);
     setSelectedFilesForPreview([]);
     if (activeTool.name !== 'Dark Mode PDF' && activeTool.name !== 'Dark Mode') {
@@ -75,7 +83,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
     } else {
       setExtractSettings(null);
     }
-  }, [activeTool.id, activeTool.name]);
+  }, [activeTool.id, activeTool.name, location.pathname]);
 
   useEffect(() => {
     if (processedData) setPreviewTab('output');
@@ -284,7 +292,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
       />
 
       {/* 1. Header & Top Bar */}
-      <header className="w-full border-b border-slate-800/80 bg-slate-950/80 px-4 py-5 md:px-8">
+      <header className="w-full border-b border-slate-800/80 bg-slate-950/80 px-4 py-4 sm:py-5 md:px-8">
         <div className="max-w-7xl mx-auto space-y-2.5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Breadcrumbs
@@ -293,9 +301,13 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
                 { name: activeTool.name },
               ]}
             />
-            <div className="flex items-center gap-1.5 text-[11px] text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1 rounded-full font-medium">
-              <ShieldCheckIcon className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Files are processed locally in your browser</span>
+            <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-1.5 text-[11px] text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1 rounded-full font-medium">
+                <ShieldCheckIcon className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <span className="hidden sm:inline">Files are processed locally in your browser</span>
+                <span className="sm:hidden">Local Processing</span>
+              </div>
+              {guide && <GuideInfoButton to={`${toolPath}/guide`} />}
             </div>
           </div>
           <div>
@@ -309,28 +321,43 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
         </div>
       </header>
 
-      {/* 2. Interactive Tool Workspace */}
-      <section className="w-full border-b border-slate-800/80 bg-[#080808]">
+      {/* 2. Primary Interactive Tool Workspace */}
+      <section className="w-full bg-[#080808] flex-1">
         <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row min-h-[580px]">
           {/* Workspace Panel: Upload & Controls */}
           <aside className="w-full lg:w-[440px] shrink-0 border-b lg:border-b-0 lg:border-r border-slate-800/80 flex flex-col bg-[#050505]">
-            <div className="p-5 space-y-5">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800/60">
-                <Link
-                  to={backUrl}
-                  className="group flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors"
-                  aria-label={`Back to ${backLabel}`}
-                >
-                  <ArrowUturnLeftIcon className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
-                  <span>{backLabel}</span>
-                </Link>
-                <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                  {activeTool.categoryLabel || 'PDF Utility'}
-                </span>
+            <div className="p-5 space-y-5 flex-1 flex flex-col justify-between">
+              <div className="space-y-5">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-800/60">
+                  <Link
+                    to={backUrl}
+                    className="group flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors"
+                    aria-label={`Back to ${backLabel}`}
+                  >
+                    <ArrowUturnLeftIcon className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
+                    <span>{backLabel}</span>
+                  </Link>
+                  <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                    {activeTool.categoryLabel || 'PDF Utility'}
+                  </span>
+                </div>
+
+                {/* Main Tool Processor UI */}
+                <div className="space-y-4">{renderToolSpecificUI()}</div>
               </div>
 
-              {/* Main Tool Processor UI */}
-              <div className="space-y-4">{renderToolSpecificUI()}</div>
+              {/* Bottom Quick Guide Access */}
+              {guide && (
+                <div className="pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs mt-4">
+                  <span className="text-slate-400 text-[11px]">Need step-by-step help or specs?</span>
+                  <Link
+                    to={`${toolPath}/guide`}
+                    className="inline-flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 font-semibold text-xs transition-colors cursor-pointer"
+                  >
+                    <span>How It Works &rarr;</span>
+                  </Link>
+                </div>
+              )}
             </div>
           </aside>
 
@@ -411,13 +438,6 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
           </div>
         </div>
       </section>
-
-      {/* 3. Guide & FAQ Section */}
-      {guide && (
-        <section className="w-full bg-[#050505]">
-          <ToolContentSection guide={guide} />
-        </section>
-      )}
     </div>
   );
 }

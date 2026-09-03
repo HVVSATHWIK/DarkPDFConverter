@@ -356,4 +356,16 @@ describe('WorkspacePanel', () => {
       expect(screen.getByRole('button', { name: /Output/i })).toBeInTheDocument();
     });
   });
+
+  it('renders Guide & Info link pointing to tool guide route', () => {
+    render(
+      <MemoryRouter initialEntries={['/dark-mode-pdf']}>
+        <WorkspacePanel activeTool={mockToolDarkMode} />
+      </MemoryRouter>
+    );
+
+    const guideLink = screen.getByRole('link', { name: /Guide/i });
+    expect(guideLink).toBeInTheDocument();
+    expect(guideLink).toHaveAttribute('href', '/dark-mode-pdf/guide');
+  });
 });

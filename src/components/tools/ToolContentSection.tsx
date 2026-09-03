@@ -16,20 +16,32 @@ import { TOOL_DEFINITIONS } from '@/config/tools';
 
 interface ToolContentSectionProps {
   guide: ToolGuideData;
+  toolPath?: string;
+  toolName?: string;
+  onClose?: () => void;
 }
 
-export default function ToolContentSection({ guide }: ToolContentSectionProps) {
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+export default function ToolContentSection({
+  guide,
+  toolPath,
+  toolName,
+  onClose,
+}: ToolContentSectionProps) {
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
   const toggleFaq = (index: number) => {
     setOpenFaqIndex((prev) => (prev === index ? null : index));
   };
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    const mainEl = document.querySelector('main');
-    if (mainEl) {
-      mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleReturnToWorkspace = () => {
+    if (onClose) {
+      onClose();
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const mainEl = document.querySelector('main');
+      if (mainEl) {
+        mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
   };
 
@@ -185,29 +197,44 @@ export default function ToolContentSection({ guide }: ToolContentSectionProps) {
         <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
           Questions About {guide.h1}
         </h3>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {guide.faqs.map((faq, index) => {
             const isOpen = openFaqIndex === index;
+            const faqId = `faq-answer-${index}`;
             return (
               <div
                 key={index}
-                className="rounded-2xl bg-slate-900/70 border border-slate-800 overflow-hidden transition-colors"
+                className="rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-cyan-500/30 transition-all duration-200 overflow-hidden shadow-sm hover:shadow-cyan-500/5"
               >
                 <button
                   type="button"
                   onClick={() => toggleFaq(index)}
-                  className="w-full px-6 py-4.5 text-left flex items-center justify-between gap-4 text-white hover:text-cyan-300 transition-colors"
+                  className="w-full px-6 py-5 text-left flex items-center justify-between gap-4 text-white hover:text-cyan-300 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/50 cursor-pointer group"
                   aria-expanded={isOpen}
+                  aria-controls={faqId}
                 >
-                  <span className="font-semibold text-sm sm:text-base">{faq.q}</span>
-                  <ChevronDownIcon
-                    className={`w-5 h-5 shrink-0 text-slate-400 transition-transform duration-200 ${
-                      isOpen ? 'rotate-180 text-cyan-400' : ''
+                  <span className="font-semibold text-base sm:text-lg tracking-tight text-white group-hover:text-cyan-200 transition-colors">
+                    {faq.q}
+                  </span>
+                  <div
+                    className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200 shrink-0 ${
+                      isOpen
+                        ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                        : 'bg-slate-800/80 text-slate-400 border border-slate-700/50 group-hover:border-cyan-500/30 group-hover:text-cyan-300'
                     }`}
-                  />
+                  >
+                    <ChevronDownIcon
+                      className={`w-5 h-5 transition-transform duration-200 ${
+                        isOpen ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </div>
                 </button>
                 {isOpen && (
-                  <div className="px-6 pb-5 pt-1 text-slate-300 text-xs sm:text-sm leading-relaxed border-t border-slate-800/60">
+                  <div
+                    id={faqId}
+                    className="px-6 pb-6 pt-3 text-slate-300 text-sm sm:text-base leading-relaxed border-t border-slate-800/60 bg-slate-950/40"
+                  >
                     {faq.a}
                   </div>
                 )}
@@ -222,45 +249,61 @@ export default function ToolContentSection({ guide }: ToolContentSectionProps) {
         <h3 className="text-lg font-bold text-white tracking-tight">
           Related Free Client-Side PDF Tools
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
           {relatedTools.map(({ guide: rGuide, def: rDef }) => (
             <Link
               key={rGuide.slug}
               to={`/${rGuide.slug}`}
-              className="p-4.5 rounded-2xl bg-slate-900/50 hover:bg-slate-900 border border-slate-800 hover:border-cyan-500/30 transition-all group flex flex-col justify-between space-y-3"
+              onClick={onClose}
+              className="p-4 sm:p-5 rounded-2xl bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-cyan-500/40 transition-all group flex flex-col justify-between space-y-3 min-w-0 min-h-[140px] shadow-sm hover:shadow-cyan-500/10 focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
             >
-              <div className="space-y-1.5">
-                <h4 className="text-sm font-semibold text-white group-hover:text-cyan-400 transition-colors flex items-center justify-between">
-                  <span>{rDef.name}</span>
-                  <ArrowRightIcon className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity text-cyan-400" />
-                </h4>
-                <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+              <div className="space-y-1.5 min-w-0">
+                <div className="flex items-center justify-between gap-2 min-w-0">
+                  <h4 className="text-sm font-semibold text-white group-hover:text-cyan-300 transition-colors truncate">
+                    {rDef.name}
+                  </h4>
+                  <ArrowRightIcon className="w-4 h-4 text-cyan-400 opacity-0 group-hover:opacity-100 transition-all shrink-0 -translate-x-1 group-hover:translate-x-0" />
+                </div>
+                <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed break-words">
                   {rDef.description}
                 </p>
               </div>
-              <span className="text-[11px] font-medium text-cyan-400/80 group-hover:text-cyan-300">
-                Launch Tool &rarr;
-              </span>
+              <div className="pt-2 border-t border-slate-800/50 flex items-center gap-1.5 text-xs font-semibold text-cyan-400 group-hover:text-cyan-300 transition-colors shrink-0">
+                <span>Launch Tool</span>
+                <span className="inline-block transition-transform group-hover:translate-x-1">&rarr;</span>
+              </div>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* 8. Jump to Top Action CTA */}
-      <section className="p-6 rounded-2xl bg-gradient-to-r from-cyan-950/40 via-slate-900/80 to-indigo-950/40 border border-cyan-500/20 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-        <div className="space-y-1">
-          <h4 className="text-base font-bold text-white">Ready to process your document?</h4>
-          <p className="text-xs text-slate-300">
-            Use the interactive workspace above with instant, zero-upload processing in your browser.
+      {/* 8. Return to Tool Action CTA */}
+      <section className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-cyan-950/40 via-slate-900/80 to-indigo-950/40 border border-cyan-500/20 flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left shadow-lg">
+        <div className="space-y-1.5">
+          <h4 className="text-base sm:text-lg font-bold text-white">
+            Ready to process your document?
+          </h4>
+          <p className="text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">
+            Open the interactive workspace to run instant, zero-upload PDF processing directly in your browser.
           </p>
         </div>
-        <button
-          onClick={scrollToTop}
-          className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-xs tracking-wide transition-all shadow-lg shadow-cyan-500/20 flex items-center gap-2 shrink-0"
-        >
-          <ArrowUpIcon className="w-4 h-4" />
-          <span>Back to Top Tool</span>
-        </button>
+        {toolPath ? (
+          <Link
+            to={toolPath}
+            className="px-6 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs sm:text-sm tracking-wide transition-all shadow-lg shadow-cyan-500/20 flex items-center gap-2 shrink-0 cursor-pointer"
+          >
+            <ArrowUpIcon className="w-4 h-4" />
+            <span>Back to {toolName || 'Tool'} Workspace</span>
+          </Link>
+        ) : (
+          <button
+            onClick={handleReturnToWorkspace}
+            className="px-6 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs sm:text-sm tracking-wide transition-all shadow-lg shadow-cyan-500/20 flex items-center gap-2 shrink-0 cursor-pointer"
+          >
+            <ArrowUpIcon className="w-4 h-4" />
+            <span>{onClose ? 'Back to Tool Workspace' : 'Back to Top Tool'}</span>
+          </button>
+        )}
       </section>
     </article>
   );

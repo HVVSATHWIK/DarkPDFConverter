@@ -6,4 +6,5 @@ export interface Tool {
   icon: ReactNode;
   description?: string;
   categoryLabel?: string;
+  path?: string;
 }

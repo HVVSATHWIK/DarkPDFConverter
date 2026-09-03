@@ -4,11 +4,13 @@ import { AppRoutes } from './AppRoutes';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { LiquidBackground } from '@/components/layout/LiquidBackground';
+import { ScrollToTop } from '@/components/common/ScrollToTop';
 import './index.css';
 
 function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <ScrollToTop />
       <div className="relative h-screen flex flex-col overflow-hidden">
         <LiquidBackground />
         <Header />
