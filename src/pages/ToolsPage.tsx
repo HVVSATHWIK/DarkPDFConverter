@@ -58,7 +58,7 @@ export default function ToolsPage() {
   }, [searchQuery, selectedCategory]);
 
   return (
-    <div className="w-full min-h-screen bg-[#050811] text-slate-100 flex flex-col font-sans">
+    <div className="w-full min-h-screen bg-transparent text-slate-100 flex flex-col font-sans">
       <SEO
         title="PDF Tools Directory - Complete Suite | LitasDark"
         description="Browse all 8 browser-based, client-side PDF tools. Invert dark mode, merge, split, rotate, compress, extract pages, cleanse metadata, and convert images locally."

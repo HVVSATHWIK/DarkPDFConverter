@@ -43,7 +43,7 @@ The user interface is built with a modern **Liquid Glass** aesthetic, featuring 
 ### 🛠️ PDF Tools
 -   **Dark Mode Conversion**: Intelligent color inversion for comfortable reading.
 -   **Merge & Split**: Combine multiple files or extract specific pages.
--   **Rotate & Organize**: Fix orientation issues instantly.
+-   **Rotate & Organize**: Fix orientation issues easily.
 -   **Dark/Light Theming**: Fully responsive system themes.
 
 ## 🏗️ Architecture
