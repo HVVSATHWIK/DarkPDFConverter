@@ -24,7 +24,7 @@ export function useRotatePDF() {
             return result;
         } catch (e) {
             console.error(e);
-            throw new Error("Engine Rotation Failed");
+            throw new Error(e instanceof Error ? e.message : "Engine Rotation Failed");
         }
     };
 

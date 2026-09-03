@@ -34,6 +34,10 @@ async function fileToEmbeddableBuffer(file: File): Promise<{ buffer: ArrayBuffer
         return;
       }
       ctx.drawImage(img, 0, 0);
+      if (canvas.width === 0 || canvas.height === 0) {
+        reject(new Error(`Invalid image dimensions (0x0) for ${file.name}`));
+        return;
+      }
       canvas.toBlob(async (blob) => {
         if (!blob) {
           reject(new Error(`Failed to process image ${file.name}`));
@@ -159,7 +163,7 @@ export function useImagesToPdf() {
       });
     }
 
-    onProgress?.(0.95, 'Finalizing lossless compilation...');
+    onProgress?.(0.95, 'Finalizing PDF compilation...');
     const pdfBytes = await pdfDoc.save({ useObjectStreams: true });
     onProgress?.(1.0, 'Compilation complete!');
 

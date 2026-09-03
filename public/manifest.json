@@ -1,7 +1,7 @@
 {
   "name": "LitasDark - Free Privacy-First PDF Tools & Dark Mode Converter",
   "short_name": "LitasDark PDF",
-  "description": "Free, 100% private, client-side PDF tools: Dark Mode PDF inverter, Merge PDFs, Split, Rotate, Compress & Extract. No server uploads, zero file limits.",
+  "description": "Free client-side PDF tools: Dark Mode PDF inverter, Merge PDFs, Split, Rotate, Compress & Extract. Local browser processing without server uploads.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#090d16",

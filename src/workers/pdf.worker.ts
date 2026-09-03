@@ -47,9 +47,9 @@ self.addEventListener('message', async (e: MessageEvent<WorkerMessage>) => {
         else if (type === 'EXTRACT') {
             const { file, pages } = e.data;
 
-            // Fix 6: Input Validation (Security/Stability)
-            if (!pages || !Array.isArray(pages) || pages.some(p => p < 1 || !Number.isInteger(p))) {
-                throw new Error("Invalid pages array. Pages must be positive integers.");
+            // Input Validation: pages are 0-based non-negative integer indices
+            if (!pages || !Array.isArray(pages) || pages.some(p => p < 0 || !Number.isInteger(p))) {
+                throw new Error("Invalid pages array. Pages must be non-negative integers.");
             }
 
             // Convert numbers to Uint32Array implicitly or explicitly? 

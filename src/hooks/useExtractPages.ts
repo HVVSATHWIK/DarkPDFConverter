@@ -21,14 +21,14 @@ export function useExtractPages() {
         const arrayBuffer = await file.arrayBuffer();
 
         try {
-            // 1-based index for backend (validated in worker)
-            const indices = options.pageNumbers;
-            const result = await workerExtract(new Uint8Array(arrayBuffer), indices);
+            // Convert 1-based page numbers to 0-based indices for the WASM engine
+            const zeroBasedIndices = options.pageNumbers.map(p => p - 1);
+            const result = await workerExtract(new Uint8Array(arrayBuffer), zeroBasedIndices);
             onProgress?.(1, "Done!");
             return result;
         } catch (e) {
             console.error(e);
-            throw new Error("Engine Extraction Failed");
+            throw new Error(e instanceof Error ? e.message : "Engine Extraction Failed");
         }
     };
 

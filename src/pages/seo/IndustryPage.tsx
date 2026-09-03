@@ -34,11 +34,11 @@ const INDUSTRY_MAP: Record<string, IndustryData> = {
     badge: 'Legal & Attorney Workflows',
     heading: 'Confidential PDF Processing with Zero Cloud Retention',
     description:
-      'Handle sensitive case files, contracts, discovery documents, and privileged client communications without violating NDAs or data protection regulations. 100% browser-side execution.',
+      'Handle sensitive case files, contracts, discovery documents, and privileged client communications with browser-side local processing designed for privacy-conscious workflows.',
     icon: ScaleIcon,
     keyPainPoints: [
       'Strict client confidentiality prevents uploading unredacted contracts to third-party cloud servers.',
-      'Court filing deadlines require instant document merging and page extraction without server queue delays.',
+      'Court filing deadlines require fast document merging and page extraction without server queue delays.',
       'Bates stamping and large PDF exhibits crash under cloud-based file size restrictions.',
     ],
     recommendedToolIds: [2, 3, 6, 1], // Merge, Split, Extract, Dark Mode
@@ -95,7 +95,7 @@ const INDUSTRY_MAP: Record<string, IndustryData> = {
     ],
     recommendedToolIds: [1, 2, 3, 5, 6], // Dark Mode, Merge, Split, Optimize, Extract
     complianceNotes:
-      '100% free and open to everyone. No credit card required, no student email verification, and unmetered operations 24/7.',
+      'Free and accessible to everyone. No credit card required, no student email verification, and unmetered local operations 24/7.',
     faq: [
       {
         q: 'How do I turn a white scanned textbook PDF into Dark Mode?',
@@ -125,7 +125,7 @@ const INDUSTRY_MAP: Record<string, IndustryData> = {
     faq: [
       {
         q: 'How does LitasDark achieve native processing speed in the browser?',
-        a: 'We compile native Rust algorithms to WebAssembly and execute all byte transformations in decoupled Web Workers for near-instant execution.',
+        a: 'We compile native Rust algorithms to WebAssembly and execute byte transformations in decoupled Web Workers for fast local execution.',
       },
       {
         q: 'Does LitasDark work offline without an internet connection?',
@@ -169,7 +169,7 @@ export default function IndustryPage() {
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
               <ShieldCheckIcon className="w-3.5 h-3.5" />
-              100% Client-Side Private
+              Client-Side Private
             </span>
           </div>
 

@@ -49,7 +49,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
     subtitle:
       'Invert bright white backgrounds into eye-friendly dark, OLED black, or sepia themes entirely in your browser memory.',
     metaDescription:
-      'Convert bright white PDFs into dark mode, OLED black, or sepia reading themes. Processed 100% locally in your browser without altering your original files.',
+      'Convert bright white PDFs into dark mode, OLED black, or sepia reading themes. Processed locally in your browser without altering your original files.',
     metaKeywords:
       'dark mode pdf converter, invert pdf colors, pdf dark theme, night reading pdf, black background pdf, oled dark pdf, sepia pdf',
     howItWorksOverview:
@@ -176,7 +176,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
         stepNumber: 3,
         title: 'Merge and Download',
         description:
-          'Click Merge Selected PDFs. The browser merges the document streams in RAM and provides an instant download link.',
+          'Click Merge Selected PDFs. The browser merges the document streams in RAM and provides a direct download link.',
       },
     ],
     features: [
@@ -259,7 +259,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
     subtitle:
       'Extract custom page ranges or divide large PDF documents into smaller files directly in your browser.',
     metaDescription:
-      'Extract page ranges or split a PDF into smaller documents in your browser. No server uploads, no file size limits, and instant local processing.',
+      'Extract page ranges or split a PDF into smaller documents in your browser. No server uploads, unconstrained by artificial server limits, and fast local processing.',
     metaKeywords:
       'split pdf, separate pdf pages, extract pages from pdf, cut pdf online free, split pdf without uploading, divide pdf',
     howItWorksOverview:
@@ -278,7 +278,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
       {
         stepNumber: 3,
         title: 'Split and Save',
-        description: 'Click Split PDF. The browser extracts the designated pages and provides an instant download.',
+        description: 'Click Split PDF. The browser extracts the designated pages and provides a direct download.',
       },
     ],
     features: [
@@ -287,7 +287,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
         description: 'Extract any continuous page range from a single page to hundreds of pages in one operation.',
       },
       {
-        title: 'Instant In-Memory Extraction',
+        title: 'In-Memory Extraction',
         description: 'Separates document pages in milliseconds using local WebAssembly without network latency.',
       },
       {
@@ -360,7 +360,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
     metaKeywords:
       'rotate pdf, rotate pdf online, flip pdf orientation, turn pdf pages 90 degrees, free pdf rotator, permanent pdf rotation',
     howItWorksOverview:
-      'The Rotate PDF tool adjusts the `/Rotate` attribute within the target PDF page dictionary objects. In the PDF specification, page rotation is defined as an integer angle (0, 90, 180, or 270 degrees clockwise). Because this operation only modifies orientation metadata, the underlying content streams, images, and fonts are preserved with 100% fidelity without re-rendering or compression degradation.',
+      'The Rotate PDF tool adjusts the `/Rotate` attribute within the target PDF page dictionary objects. In the PDF specification, page rotation is defined as an integer angle (0, 90, 180, or 270 degrees clockwise). Because this operation only modifies orientation metadata, the underlying content streams, images, and fonts are preserved with high fidelity without re-rendering or compression degradation.',
     steps: [
       {
         stepNumber: 1,
@@ -375,7 +375,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
       {
         stepNumber: 3,
         title: 'Apply and Download',
-        description: 'The browser updates the rotation metadata instantly. Click Download to save the corrected PDF.',
+        description: 'The browser updates the rotation metadata. Click Download to save the corrected PDF.',
       },
     ],
     features: [
@@ -392,7 +392,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
         description: 'Rotate all pages at once or adjust specific landscape/portrait orientation mismatches.',
       },
       {
-        title: '100% In-Browser Privacy',
+        title: 'In-Browser Local Privacy',
         description: 'No files are sent across the internet, protecting private scans and confidential forms.',
       },
     ],
@@ -438,7 +438,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
       },
       {
         q: 'How fast is the rotation process?',
-        a: 'Because it only updates dictionary metadata, rotation is virtually instantaneous, taking only a fraction of a second.',
+        a: 'Because it only updates dictionary metadata, rotation is fast, taking only a fraction of a second.',
       },
     ],
     relatedToolSlugs: ['merge-pdf', 'split-pdf', 'compress-pdf', 'cleanse-metadata'],
@@ -471,7 +471,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
       {
         stepNumber: 3,
         title: 'Review and Download',
-        description: 'Compare the resulting file size and download the optimized PDF document instantly.',
+        description: 'Compare the resulting file size and download the optimized PDF document directly.',
       },
     ],
     features: [
@@ -523,11 +523,11 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
       },
       {
         q: 'Will compressing my PDF make the text blurry?',
-        a: 'No. Vector text, true type fonts, and mathematical lines are preserved losslessly during structural optimization.',
+        a: 'No. Vector text, true type fonts, and mathematical lines are preserved with vector quality intact during structural optimization.',
       },
       {
         q: 'Are my files sent to an external server to be compressed?',
-        a: 'No. The optimization algorithm runs 100% locally on your computer inside your web browser.',
+        a: 'No. The optimization algorithm runs locally on your computer inside your web browser.',
       },
       {
         q: 'Is there a limit on how many PDFs I can compress per day?',
@@ -549,7 +549,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
     subtitle:
       'Select and export individual target pages or custom page lists into a clean, standalone PDF document.',
     metaDescription:
-      'Select and extract individual pages or custom ranges from any PDF into a new document. Processed 100% locally in your browser.',
+      'Select and extract individual pages or custom ranges from any PDF into a new document. Processed locally in your browser.',
     metaKeywords:
       'extract pdf pages, pull pages from pdf, save specific pages pdf, export pdf pages free, private pdf extractor',
     howItWorksOverview:
@@ -697,7 +697,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
     },
     useCases: [
       {
-        title: 'Anonymous Academic Peer Review',
+        title: 'Sanitized Academic Submissions',
         scenario: 'Remove author names, university paths, and editing timestamps from manuscripts before blind peer review submission.',
       },
       {
@@ -724,7 +724,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
       },
       {
         q: 'Are my sanitized files uploaded to any server?',
-        a: 'No. The metadata scrubbing executes 100% locally on your computer inside your web browser. No document data is ever transmitted.',
+        a: 'No. The metadata scrubbing executes locally on your computer inside your web browser. No document data is ever transmitted.',
       },
       {
         q: 'How can I verify that the metadata was removed?',
@@ -761,7 +761,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
       {
         stepNumber: 3,
         title: 'Compile and Download',
-        description: 'Click Compile Images to PDF. The browser constructs the PDF stream in RAM for instant download.',
+        description: 'Click Compile Images to PDF. The browser constructs the PDF stream in RAM for direct download.',
       },
     ],
     features: [
@@ -778,7 +778,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
         description: 'Supports PNG, JPG, JPEG, and WebP images with automatic in-memory format normalization.',
       },
       {
-        title: '100% Client-Side Privacy',
+        title: 'Client-Side Local Privacy',
         description: 'Convert sensitive identity cards, receipts, and personal photos without uploading them to remote cloud servers.',
       },
     ],
@@ -821,7 +821,7 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
       },
       {
         q: 'Are my personal photos uploaded to any server?',
-        a: 'No. The image compilation takes place 100% locally on your computer inside your web browser. No image data is transmitted across the internet.',
+        a: 'No. The image compilation takes place locally on your computer inside your web browser. No image data is transmitted across the internet.',
       },
       {
         q: 'Can I add multiple photos and arrange their order?',

@@ -136,7 +136,7 @@ export default function ToolContentSection({ guide }: ToolContentSectionProps) {
         <div className="p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
           <div className="flex items-center gap-2 text-emerald-400 font-semibold text-sm">
             <ShieldCheckIcon className="w-5 h-5" />
-            <span>Zero Server Transmission Guarantee</span>
+            <span>Zero Server Transmission Policy</span>
           </div>
           <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
             All document streams are processed exclusively in your device&apos;s local browser RAM.

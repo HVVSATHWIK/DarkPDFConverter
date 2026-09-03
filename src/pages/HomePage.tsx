@@ -51,7 +51,7 @@ const FEATURED_TOOLS = [
   {
     id: 'images-to-pdf',
     title: 'Images to PDF',
-    desc: 'Compiles PNG, JPG, and WebP images into standardized PDF documents instantly.',
+    desc: 'Compiles PNG, JPG, and WebP images into standardized PDF documents directly in your browser.',
     icon: PhotoIcon,
     path: '/images-to-pdf',
     badge: 'Conversion',
@@ -107,7 +107,7 @@ const USE_CASES = [
   {
     id: 'healthcare',
     title: 'Healthcare & Records',
-    desc: 'Review patient records in dark mode with complete HIPAA local privacy isolation.',
+    desc: 'Review medical documents in dark mode with local browser processing designed for privacy-sensitive workflows.',
     icon: HeartIcon,
   },
   {
@@ -178,7 +178,7 @@ export default function HomePage() {
           {/* Trust Badge */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-medium bg-slate-900 border border-slate-800 text-slate-300 shadow-sm">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="text-emerald-300 font-semibold">100% Client-Side Processing</span>
+            <span className="text-emerald-300 font-semibold">Client-Side Browser Processing</span>
             <span className="text-slate-600">•</span>
             <span className="text-cyan-400">Zero Server Uploads</span>
           </div>

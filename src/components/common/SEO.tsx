@@ -24,7 +24,7 @@ const STATIC_ROUTE_SEO: Record<string, { title: string; description: string; key
   '/': {
     title: 'LitasDark - Free In-Browser PDF Tools | Zero Server Uploads',
     description:
-      'Free, privacy-focused PDF tools running 100% locally in your browser memory via WebAssembly. Dark Mode Inverter, Merge, Split, Rotate, Compress, Extract, and Metadata Cleaner.',
+      'Free, privacy-focused PDF tools running locally in your browser memory via WebAssembly. Dark Mode Inverter, Merge, Split, Rotate, Compress, Extract, and Metadata Cleaner.',
     keywords:
       'pdf tools, free pdf editor, dark mode pdf, merge pdf online, split pdf free, rotate pdf, compress pdf locally, sanitize pdf metadata, images to pdf, client side pdf',
   },
@@ -57,7 +57,7 @@ const STATIC_ROUTE_SEO: Record<string, { title: string; description: string; key
   '/explore': {
     title: 'Interactive PDF Tools Gallery | LitasDark',
     description:
-      'Explore the full suite of client-side PDF manipulation tools with interactive visual previews and instant local processing.',
+      'Explore the full suite of client-side PDF manipulation tools with interactive visual previews and fast local processing.',
     keywords: 'interactive pdf tools, litasdark gallery, visual pdf suite',
   },
 };
@@ -228,17 +228,17 @@ export function SEO({
           availability: 'https://schema.org/InStock',
         },
         description:
-          'Free, 100% private in-browser PDF tools: Dark Mode PDF inverter, Cleanse Metadata, Images to PDF, Merge, Split, Rotate, Compress, and Extract without uploading files to any server.',
+          'Free private in-browser PDF tools: Dark Mode PDF inverter, Cleanse Metadata, Images to PDF, Merge, Split, Rotate, Compress, and Extract without uploading files to any server.',
         featureList: [
           'Smart Dark Mode Inversion for Eye Strain Relief',
-          'Local Forensic Metadata Sanitizer and Cleaner',
-          'Lossless In-Browser Image to PDF Compiler',
+          'Local Metadata Sanitizer and Cleaner',
+          'In-Browser Image to PDF Compiler',
           'Fast WebAssembly-Powered PDF Merge',
           'Granular PDF Page Splitting',
           'Multi-angle PDF Page Rotation',
           'PDF Structure Compression',
           'Selective Page Extraction',
-          '100% Client-Side Privacy with Zero Server Uploads',
+          'Client-Side Privacy with Zero Server Uploads',
         ],
         provider: {
           '@type': 'Organization',

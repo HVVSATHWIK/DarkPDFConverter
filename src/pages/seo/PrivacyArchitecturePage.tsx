@@ -87,7 +87,7 @@ export default function PrivacyArchitecturePage() {
         {/* Detailed Comparison Table */}
         <CompetitorComparisonTable
           title="Security Architecture Comparison: LitasDark vs. Traditional Cloud PDF Converters"
-          subtitle="A comprehensive breakdown of risk vectors, privacy guarantees, and data lifecycles."
+          subtitle="A comprehensive breakdown of risk vectors, privacy protections, and data lifecycles."
         />
 
         {/* Technical Flow Diagram / Explanation */}
@@ -115,7 +115,7 @@ export default function PrivacyArchitecturePage() {
             <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
               <div className="font-bold text-cyan-400">Step 3: Export</div>
               <div className="font-semibold text-slate-200">Direct Local Download</div>
-              <p className="text-slate-400">Generated Uint8Array is downloaded instantly to your disk via a local object URL.</p>
+              <p className="text-slate-400">Generated Uint8Array is downloaded directly to your disk via a local object URL.</p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">

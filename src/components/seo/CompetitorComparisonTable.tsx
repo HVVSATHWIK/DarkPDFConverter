@@ -53,7 +53,7 @@ export function CompetitorComparisonTable({
               <td className="py-3.5 px-3 bg-cyan-500/[0.06] border-x border-cyan-500/20 text-cyan-200 font-semibold">
                 <div className="flex items-center gap-1 text-emerald-400 font-bold">
                   <CheckCircleIcon className="w-4 h-4 shrink-0" />
-                  100% Local Browser
+                  Client-Side Browser
                 </div>
                 <span className="text-[11px] text-cyan-300/80 font-normal">Zero Server Uploads</span>
               </td>
@@ -162,7 +162,7 @@ export function CompetitorComparisonTable({
                   <CheckCircleIcon className="w-4 h-4 shrink-0" />
                   Advanced Multi-Theme
                 </div>
-                <span className="text-[11px] text-cyan-300/80 font-normal">Instant export &amp; reading</span>
+                <span className="text-[11px] text-cyan-300/80 font-normal">Local export &amp; reading</span>
               </td>
               <td className="py-3.5 px-3 text-slate-400">
                 <div className="flex items-center gap-1 text-slate-400 font-medium">

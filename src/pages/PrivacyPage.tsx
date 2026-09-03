@@ -18,7 +18,7 @@ export default function PrivacyPage() {
 
         {/* Core Privacy Principle */}
         <section className="p-5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
-          <h2 className="text-base font-semibold text-white">Zero Document Transmission Guarantee</h2>
+          <h2 className="text-base font-semibold text-white">Zero Document Transmission Policy</h2>
           <p className="text-xs text-slate-300 leading-relaxed">
             LitasDark is built from the ground up on a zero-upload client-side architecture. When you use any tool on this website—such as the Dark Mode Inverter, PDF Merger, Splitter, Compressor, or Rotator—your files are processed exclusively in your device&apos;s local browser memory (RAM) via WebAssembly and Web Workers.
           </p>

@@ -174,7 +174,13 @@ function PDFProcessor({
         });
       }
     } catch (error) {
-      onError(error as Error);
+      const err = error as Error;
+      const msg = err.message || '';
+      if (/encrypt|password|cipher/i.test(msg)) {
+        onError(new Error('This PDF is password-protected or encrypted. Please remove the password before processing.'));
+      } else {
+        onError(err);
+      }
     }
   }, [
     activeTool?.name,
@@ -239,19 +245,65 @@ function PDFProcessor({
 
   const handleFilesSelected = (files: FileList | null) => {
     if (files && files.length > 0) {
-      const newFiles = Array.from(files).map((file) => {
-        const nextCounter = idCounterRef.current++;
-        const id = `${file.name}:${file.lastModified}:${file.size}:${nextCounter}`;
-        return { id, file };
+      const validFiles: File[] = [];
+      const invalidFiles: string[] = [];
+      const emptyFiles: string[] = [];
+
+      Array.from(files).forEach((file) => {
+        if (file.size === 0) {
+          emptyFiles.push(file.name);
+          return;
+        }
+
+        if (isImageTool) {
+          const isValidType =
+            file.type.startsWith('image/') ||
+            /\.(jpg|jpeg|png|webp|gif|bmp|tiff)$/i.test(file.name);
+          if (isValidType) {
+            validFiles.push(file);
+          } else {
+            invalidFiles.push(file.name);
+          }
+        } else {
+          const isValidType =
+            file.type === 'application/pdf' ||
+            file.name.toLowerCase().endsWith('.pdf');
+          if (isValidType) {
+            validFiles.push(file);
+          } else {
+            invalidFiles.push(file.name);
+          }
+        }
       });
-      if (allowMultipleFiles) {
-        setSelectedFiles((prev) => [...prev, ...newFiles]);
-      } else {
-        setSelectedFiles(newFiles.length > 0 ? [newFiles[0]] : []);
+
+      if (invalidFiles.length > 0) {
+        const expected = isImageTool ? 'image files (JPG, PNG, WEBP)' : 'PDF files (.pdf)';
+        onError(
+          new Error(`Invalid file format: ${invalidFiles.join(', ')}. Please upload valid ${expected}.`)
+        );
       }
-      if (downloadUrl) URL.revokeObjectURL(downloadUrl);
-      setDownloadUrl(null);
-      setProgress(0);
+
+      if (emptyFiles.length > 0) {
+        onError(
+          new Error(`Empty file detected (0 bytes): ${emptyFiles.join(', ')}. Please select a valid document.`)
+        );
+      }
+
+      if (validFiles.length > 0) {
+        const newFiles = validFiles.map((file) => {
+          const nextCounter = idCounterRef.current++;
+          const id = `${file.name}:${file.lastModified}:${file.size}:${nextCounter}`;
+          return { id, file };
+        });
+        if (allowMultipleFiles) {
+          setSelectedFiles((prev) => [...prev, ...newFiles]);
+        } else {
+          setSelectedFiles(newFiles.length > 0 ? [newFiles[0]] : []);
+        }
+        if (downloadUrl) URL.revokeObjectURL(downloadUrl);
+        setDownloadUrl(null);
+        setProgress(0);
+      }
     }
   };
 

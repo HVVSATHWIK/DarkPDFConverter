@@ -182,7 +182,7 @@ export default function CompetitorAlternativePage() {
         <CompetitorComparisonTable
           highlightCompetitor={data.highlightKey}
           title={`LitasDark vs. ${data.name}: Head-to-Head Comparison`}
-          subtitle={`See why thousands of users are switching from ${data.name} to LitasDark's zero-upload WebAssembly engine.`}
+          subtitle={`Compare ${data.name} with LitasDark's zero-upload WebAssembly engine.`}
         />
 
         {/* Shortcomings Breakdown */}

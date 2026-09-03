@@ -147,6 +147,11 @@ export function Footer() {
                   Security Whitepaper
                 </Link>
               </li>
+              <li>
+                <a href="mailto:support@litasdark.org?subject=LitasDark%20Feedback%20or%20Bug%20Report" className="text-cyan-400/90 hover:text-cyan-300 font-medium transition-colors flex items-center gap-1">
+                  Report Bug / Contact
+                </a>
+              </li>
             </ul>
           </div>
         </div>
