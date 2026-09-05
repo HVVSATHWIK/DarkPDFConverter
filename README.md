@@ -1,21 +1,18 @@
-# Litas: Next‑Gen PDF Dark Mode Engine
+# LitasDark — Privacy-First In-Browser PDF Suite
 
 <div align="center">
-  <img src="public/favicon.ico" alt="Litas Logo" width="120" />
-  <br />
   <br />
   
   [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
   [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
   [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-  [![Rust](https://img.shields.io/badge/Rust-000000?style=for-the-badge&logo=rust&logoColor=white)](https://www.rust-lang.org/)
-  [![WebAssembly](https://img.shields.io/badge/WebAssembly-654FF0?style=for-the-badge&logo=webassembly&logoColor=white)](https://webassembly.org/)
   [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+  [![Heroicons](https://img.shields.io/badge/Heroicons-06B6D4?style=for-the-badge&logo=react&logoColor=white)](https://heroicons.com/)
 
   <p align="center">
-    <b>Privacy-First. High-Performance. Liquid Glass UI.</b>
+    <b>100% Client-Side. Zero Server Uploads. High-Performance Web Processing.</b>
     <br />
-    A modern PDF tool that processes everything locally using Rust & WebAssembly.
+    A fast, privacy-focused PDF suite that processes documents entirely inside your browser memory.
   </p>
 </div>
 
@@ -23,95 +20,80 @@
 
 ## 🚀 Overview
 
-**Litas** (formerly DarkPDFConverter) is a cutting-edge web application designed for processing PDF documents entirely within the browser. By leveraging **Rust** compiled to **WebAssembly (WASM)**, it delivers near-native performance for complex operations like merging, splitting, and rendering, without ever sending a single byte of your data to a server.
-
-The user interface is built with a modern **Liquid Glass** aesthetic, featuring 3D interactions and a responsive design that feels alive.
-
-## ✨ Key Features
-
-### 🛡️ Privacy & Performance
--   **Zero-Server Processing**: All PDF manipulations happen on your device via WASM.
--   **Rust Core**: Critical operations (merge, split, rotate) are powered by a custom Rust engine for speed and safety.
--   **SharedArrayBuffer**: Optimized zero-copy data transfer between the UI and worker threads.
-
-### 🎨 Next-Gen UI/UX
--   **Liquid Glass Methodology**: A premium design system using multilayered blur, saturation, and noise.
--   **3D Tool Carousel**: Interactive 3D menu using `react-three-fiber` and physics-based springs.
--   **Aurora Background**: Dynamic, 4D animated background that responds to user presence.
--   **Virtualized Previews**: Handle large PDFs effortlessly with `react-window`.
-
-### 🛠️ PDF Tools
--   **Dark Mode Conversion**: Intelligent color inversion for comfortable reading.
--   **Merge & Split**: Combine multiple files or extract specific pages.
--   **Rotate & Organize**: Fix orientation issues easily.
--   **Dark/Light Theming**: Fully responsive system themes.
-
-## 🏗️ Architecture
-
-Litas uses a hybrid architecture where React runs the UI on the main thread and a dedicated Web Worker (powered by Rust/WASM) performs CPU‑heavy PDF operations.
-
-<p align="center">
-  <img src="docs/diagrams/architecture.svg" alt="Litas architecture diagram" width="900" />
-</p>
-
-## 🛠️ Installation
-
-### Prerequisites
--   Node.js (v18+)
--   npm or pnpm
-
-### Setup
-1.  **Clone the repository**
-    ```bash
-    git clone https://github.com/HVVSATHWIK/DarkPDFConverter.git
-    cd DarkPDFConverter
-    ```
-
-2.  **Install Dependencies**
-    ```bash
-    npm install
-    ```
-
-3.  **Run Development Server**
-    ```bash
-    npm run dev
-    ```
-  Open the URL shown in the terminal (Vite may choose a different port if 5173 is in use).
-
-## 📦 Building for Production
-
-### Standard Build
-The project is configured to automatically handle the WASM artifacts for Vercel/Netlify.
-```bash
-npm run build
-```
-This produces a `dist` folder ready for deployment.
-
-### Developing the Rust Core (Optional)
-If you want to modify the functionality in `src-wasm`:
-1.  Install [Rust and Cargo](https://rustup.rs/).
-2.  Install wasm-pack: `cargo install wasm-pack`.
-3.  Run the build command:
-    ```bash
-    npm run build:wasm
-    ```
-
-## 🤝 Contributing
-
-Contributions are welcome! Please check the `Implementation Plan` artifacts in the `.gemini` folder for current roadmap status.
-
-1.  Fork the Project
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the Branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
-
-## 📄 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
+**LitasDark** is a high-performance, client-side PDF utility suite designed with absolute privacy in mind. Every PDF operation — whether compressing, converting, merging, or cleansing metadata — executes **100% inside your browser** using Web Workers, `pdf-lib`, and `pdfjs-dist`. Zero document bytes are ever uploaded to an external server.
 
 ---
 
-<p align="center">
-  Built by Veerendranath
-</p>
+## ✨ Suite of Tools
+
+### ⚡ Optimize PDF
+- **Smart Optimization Engine**: Automatically selects the optimal compression path based on document structure.
+- **Vector Stream Deflation**: Lossless object stream compression preserving crisp vector text, fonts, and hyperlinks.
+- **Scanned Document Rasterization**: Image downsampling with customizable DPI and JPEG quality controls.
+- **12M Pixel Safety Cap**: Prevents browser out-of-memory errors on massive image-heavy pages.
+- **Smart Size Guard**: Detects already-optimized files (**`ALREADY OPTIMIZED`**) and protects against size bloat.
+
+### 🌙 Dark Mode PDF
+- Inverts document backgrounds and text colors for comfortable, eye-safe reading in low-light environments.
+
+### 🥞 Merge PDFs
+- Combines multiple PDF files into a single structured document with customizable page ordering.
+
+### ✂️ Split PDF
+- Splits large PDFs into separate, individual page files or standalone chunks.
+
+### 🔄 Rotate PDF
+- Adjusts page orientation (90°, 180°, 270°) for individual pages or entire documents.
+
+### 📤 Extract Pages
+- Pulls selected page numbers or ranges out into a new standalone PDF document.
+
+### 🖼️ Images to PDF
+- Converts PNG, JPG, JPEG, and WebP images into a single cohesive PDF document.
+
+### 🛡️ Cleanse Metadata
+- Sanitizes document properties — stripping EXIF tags, author details, title metadata, creation dates, and producer signatures.
+
+---
+
+## 🔒 Privacy & Architecture
+
+- **Client-Side RAM Processing**: Files stay in local browser memory and are discarded as soon as processing completes or the workspace is reset.
+- **Web Worker Offloading**: Heavy PDF manipulation runs asynchronously in `optimizer.worker.ts`, keeping the main UI responsive at 60 FPS.
+- **Unified Heroicons System**: Cohesive, semantic iconography using `@heroicons/react/24/outline` for visual clarity and accessibility.
+
+---
+
+## 🛠️ Development & Usage
+
+### Prerequisites
+- **Node.js**: v18 or higher
+- **npm**: v9 or higher
+
+### Getting Started
+
+1. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
+
+2. **Start Development Server**:
+   ```bash
+   npm run dev
+   ```
+
+3. **Lint Codebase**:
+   ```bash
+   npm run lint
+   ```
+
+4. **Build for Production**:
+   ```bash
+   npm run build
+   ```
+
+---
+
+## 📄 License
+
+Distributed under the MIT License.
