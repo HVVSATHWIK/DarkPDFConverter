@@ -95,16 +95,16 @@ export const OptimizePDFControls: React.FC<OptimizePDFControlsProps> = ({
 
     if (newLevel === 'recommended') {
       newEngine = 'vector';
-      newQuality = 0.75;
-      newDpi = 150;
+      newQuality = 0.62;
+      newDpi = 120;
     } else if (newLevel === 'low') {
       newEngine = 'vector';
-      newQuality = 0.88;
-      newDpi = 180;
+      newQuality = 0.80;
+      newDpi = 150;
     } else if (newLevel === 'extreme') {
       newEngine = 'raster';
-      newQuality = 0.60;
-      newDpi = 120;
+      newQuality = 0.48;
+      newDpi = 96;
     }
 
     setEngine(newEngine);
@@ -182,37 +182,47 @@ export const OptimizePDFControls: React.FC<OptimizePDFControlsProps> = ({
           <button
             type="button"
             onClick={() => handleEngineChange('vector')}
-            className={`p-2.5 rounded-xl border flex items-center gap-2.5 transition-all cursor-pointer ${
+            className={`p-2.5 rounded-xl border flex items-center justify-between gap-2.5 transition-all cursor-pointer ${
               engine === 'vector'
                 ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-sm ring-1 ring-cyan-500/30'
                 : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-900'
             }`}
           >
-            <div className={`p-2 rounded-lg shrink-0 ${engine === 'vector' ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-800 text-slate-400'}`}>
-              <DocumentTextIcon className="w-4 h-4 shrink-0" />
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className={`p-2 rounded-lg shrink-0 ${engine === 'vector' ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-800 text-slate-400'}`}>
+                <DocumentTextIcon className="w-4 h-4 shrink-0" />
+              </div>
+              <div className="text-left min-w-0">
+                <div className="font-bold text-white text-xs sm:text-sm leading-tight">Vector Text Mode</div>
+                <div className="text-[10px] text-slate-400 font-normal truncate">100% Crisp Vector Text</div>
+              </div>
             </div>
-            <div className="text-left min-w-0">
-              <div className="font-bold text-white text-xs sm:text-sm leading-tight">Vector Text Mode</div>
-              <div className="text-[10px] text-slate-400 font-normal">100% Crisp Vector Text</div>
-            </div>
+            {engine === 'vector' && (
+              <CheckCircleIcon className="w-4 h-4 text-cyan-400 shrink-0" />
+            )}
           </button>
 
           <button
             type="button"
             onClick={() => handleEngineChange('raster')}
-            className={`p-2.5 rounded-xl border flex items-center gap-2.5 transition-all cursor-pointer ${
+            className={`p-2.5 rounded-xl border flex items-center justify-between gap-2.5 transition-all cursor-pointer ${
               engine === 'raster'
                 ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-sm ring-1 ring-cyan-500/30'
                 : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-900'
             }`}
           >
-            <div className={`p-2 rounded-lg shrink-0 ${engine === 'raster' ? 'bg-amber-500/20 text-amber-300' : 'bg-slate-800 text-slate-400'}`}>
-              <PhotoIcon className="w-4 h-4 shrink-0" />
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className={`p-2 rounded-lg shrink-0 ${engine === 'raster' ? 'bg-amber-500/20 text-amber-300' : 'bg-slate-800 text-slate-400'}`}>
+                <PhotoIcon className="w-4 h-4 shrink-0" />
+              </div>
+              <div className="text-left min-w-0">
+                <div className="font-bold text-white text-xs sm:text-sm leading-tight">Scanned Document Mode</div>
+                <div className="text-[10px] text-slate-400 font-normal truncate">High-DPI Image Compression</div>
+              </div>
             </div>
-            <div className="text-left min-w-0">
-              <div className="font-bold text-white text-xs sm:text-sm leading-tight">Scanned Document Mode</div>
-              <div className="text-[10px] text-slate-400 font-normal">High-DPI Image Compression</div>
-            </div>
+            {engine === 'raster' && (
+              <CheckCircleIcon className="w-4 h-4 text-cyan-400 shrink-0" />
+            )}
           </button>
         </div>
       </div>
@@ -253,7 +263,7 @@ export const OptimizePDFControls: React.FC<OptimizePDFControlsProps> = ({
                       {preset.badge}
                     </span>
                     {isSelected && (
-                      <CheckCircleIcon className="w-4.5 h-4.5 text-cyan-400 shrink-0" />
+                      <CheckCircleIcon className="w-4 h-4 text-cyan-400 shrink-0" />
                     )}
                   </div>
                 </div>

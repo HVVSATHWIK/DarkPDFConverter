@@ -1,8 +1,6 @@
 import { PDFDocument } from 'pdf-lib';
 import { pdfjs } from 'react-pdf';
-import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-
-pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
+import '../config/pdfWorker';
 
 export type CompressionLevel = 'recommended' | 'extreme' | 'low' | 'custom';
 export type CompressionEngine = 'vector' | 'raster';
@@ -59,12 +57,20 @@ export function useCompressPDF() {
     // Clamp scale for safety
     targetScale = Math.max(1.2, Math.min(3.0, targetScale));
 
+    // MONOTONIC PROGRESS WRAPPER
+    let maxProgressEmitted = 0;
+    const reportProgress = (perc: number, msg: string) => {
+      const clamped = Math.max(maxProgressEmitted, Math.min(0.99, perc));
+      maxProgressEmitted = clamped;
+      onProgress?.(clamped, msg);
+    };
+
     // MODE 1: NATIVE VECTOR STREAM OPTIMIZATION (100% Sharp Text & Fonts)
     const runVectorOptimization = async () => {
-      onProgress?.(0.20, 'Analyzing document structures & vector streams...');
+      reportProgress(0.10, 'Analyzing document structures & vector streams...');
       const pdfDoc = await PDFDocument.load(arrayBuffer.slice(0));
 
-      onProgress?.(0.50, 'Stripping unreferenced metadata & rebuilding xref tables...');
+      reportProgress(0.20, 'Stripping unreferenced metadata & rebuilding xref tables...');
       if (options?.stripMetadata !== false) {
         pdfDoc.setTitle('');
         pdfDoc.setAuthor('');
@@ -74,7 +80,7 @@ export function useCompressPDF() {
         pdfDoc.setCreator('LitasDark Local Optimizer');
       }
 
-      onProgress?.(0.80, 'Deflating content streams with Object Streams (PDF 1.5)...');
+      reportProgress(0.35, 'Deflating content streams with Object Streams (PDF 1.5)...');
       const compressedBytes = await pdfDoc.save({
         useObjectStreams: true,
       });
@@ -82,9 +88,13 @@ export function useCompressPDF() {
       return compressedBytes;
     };
 
-    // MODE 2: HIGH-DPI RASTER DOWN-SAMPLING (For Scanned / Photo PDFs)
-    const runHighDpiRasterPass = async (scale: number, quality: number) => {
-      onProgress?.(0.15, 'Loading pages for high-clarity raster pass...');
+    // MODE 2: HIGH-CLARITY RASTER DOWN-SAMPLING
+    const runHighDpiRasterPass = async (
+      scale: number,
+      quality: number,
+      baseProg = 0.40,
+      progWeight = 0.50
+    ) => {
       const loadingTask = pdfjs.getDocument({ data: new Uint8Array(arrayBuffer.slice(0)) });
       const pdf = await loadingTask.promise;
       const numPages = pdf.numPages;
@@ -92,10 +102,11 @@ export function useCompressPDF() {
       const newPdfDoc = await PDFDocument.create();
 
       for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-        const progressPerc = 0.15 + (pageNum / numPages) * 0.70;
-        onProgress?.(
-          progressPerc,
-          `Processing page ${pageNum} of ${numPages} (${Math.round(scale * 72)} DPI, ${Math.round(
+        const pageRatio = pageNum / numPages;
+        const currentProg = baseProg + pageRatio * progWeight;
+        reportProgress(
+          currentProg,
+          `Compressing page ${pageNum} of ${numPages} (${Math.round(scale * 72)} DPI, ${Math.round(
             quality * 100
           )}% quality)...`
         );
@@ -110,11 +121,9 @@ export function useCompressPDF() {
 
         if (!ctx) throw new Error('Failed to create 2D canvas context.');
 
-        // High quality crisp image smoothing
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
 
-        // Fill white background before rendering
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -145,8 +154,49 @@ export function useCompressPDF() {
         canvas.height = 0;
       }
 
-      onProgress?.(0.88, 'Writing high-DPI document object streams...');
       return await newPdfDoc.save({ useObjectStreams: true });
+    };
+
+    const runAdaptiveRasterPass = async (
+      initialScale: number,
+      initialQuality: number,
+      originalSize: number
+    ): Promise<Uint8Array> => {
+      // Aim for at least 25% to 50% substantial file size reduction
+      const significantTargetSize = originalSize * 0.75; 
+
+      const candidates = [
+        { scale: Math.min(initialScale, 1.4), quality: Math.min(initialQuality, 0.65) },
+        { scale: Math.min(initialScale, 1.2), quality: Math.min(initialQuality, 0.58) },
+        { scale: Math.min(initialScale, 1.0), quality: Math.min(initialQuality, 0.50) },
+        { scale: Math.min(initialScale, 0.85), quality: Math.min(initialQuality, 0.42) },
+      ];
+
+      let bestBytes: Uint8Array | null = null;
+      const totalCandidates = candidates.length;
+
+      for (let i = 0; i < totalCandidates; i++) {
+        const { scale, quality } = candidates[i];
+        const baseProg = 0.40 + (i / totalCandidates) * 0.50;
+        const progWeight = 0.50 / totalCandidates;
+
+        try {
+          const bytes = await runHighDpiRasterPass(scale, quality, baseProg, progWeight);
+          
+          if (!bestBytes || bytes.byteLength < bestBytes.byteLength) {
+            bestBytes = bytes;
+          }
+
+          // Stop early ONLY if we reached significant target compression (< 75% of original size)
+          if (bestBytes.byteLength < significantTargetSize) {
+            return bestBytes;
+          }
+        } catch (err) {
+          console.warn(`Adaptive raster pass failed at scale ${scale}:`, err);
+        }
+      }
+
+      return bestBytes || new Uint8Array(arrayBuffer);
     };
 
     try {
@@ -156,20 +206,25 @@ export function useCompressPDF() {
         // Run Native Vector Stream Optimization
         finalBytes = await runVectorOptimization();
 
-        // If vector optimization didn't shrink or user selected extreme, check if raster pass is requested
-        if (finalBytes.byteLength >= originalSize && level === 'extreme') {
-          onProgress?.(0.60, 'Vector streams fully compressed. Trying high-clarity raster pass...');
-          const rasterBytes = await runHighDpiRasterPass(targetScale, jpegQuality);
-          if (rasterBytes.byteLength < finalBytes.byteLength) {
-            finalBytes = rasterBytes;
+        // If vector stream cleanup yielded no reduction (0% compressed or larger), 
+        // run adaptive raster pass to achieve actual size reduction.
+        if (finalBytes.byteLength >= originalSize) {
+          onProgress?.(0.55, 'Vector streams dense. Executing adaptive image compression pass...');
+          try {
+            const adaptiveBytes = await runAdaptiveRasterPass(targetScale, jpegQuality, originalSize);
+            if (adaptiveBytes.byteLength < finalBytes.byteLength) {
+              finalBytes = adaptiveBytes;
+            }
+          } catch (e) {
+            console.warn('Adaptive compression fallback failed, retaining vector output:', e);
           }
         }
       } else {
         // Run High-DPI Raster Pass for Scanned Documents
-        finalBytes = await runHighDpiRasterPass(targetScale, jpegQuality);
+        finalBytes = await runAdaptiveRasterPass(targetScale, jpegQuality, originalSize);
       }
 
-      onProgress?.(1.0, 'Optimization complete!');
+      reportProgress(1.0, 'Optimization complete!');
       const result = new Uint8Array(finalBytes);
       (result as any).originalSize = originalSize;
       (result as any).compressedSize = finalBytes.byteLength;
@@ -181,7 +236,7 @@ export function useCompressPDF() {
       const finalFallback = new Uint8Array(fallbackBytes);
       (finalFallback as any).originalSize = originalSize;
       (finalFallback as any).compressedSize = fallbackBytes.byteLength;
-      onProgress?.(1.0, 'Optimization complete!');
+      reportProgress(1.0, 'Optimization complete!');
       return finalFallback;
     }
   };

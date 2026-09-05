@@ -12,13 +12,7 @@ import {
   DocumentIcon,
 } from '@heroicons/react/24/outline';
 
-// Initialize PDF.js worker using local Vite asset URL
-if (typeof window !== 'undefined') {
-  pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-    'pdfjs-dist/build/pdf.worker.min.mjs',
-    import.meta.url
-  ).toString();
-}
+import '../../config/pdfWorker';
 
 interface PDFPreviewProps {
   file: string | File | Blob | { data: Uint8Array } | null;

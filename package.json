@@ -20,7 +20,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 3000",
-    "build": "tsc -p tsconfig.build.json && vite build",
+    "build": "cp node_modules/pdfjs-dist/build/pdf.worker.min.mjs public/pdf.worker.min.mjs || true && tsc -p tsconfig.build.json && vite build",
+    "postinstall": "cp node_modules/pdfjs-dist/build/pdf.worker.min.mjs public/pdf.worker.min.mjs || true",
     "typecheck": "tsc -b",
     "lint": "eslint src vite.config.* vitest.config.* tailwind.config.* postcss.config.js",
     "lint:fix": "eslint src vite.config.* vitest.config.* tailwind.config.* postcss.config.js --fix",

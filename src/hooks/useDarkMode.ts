@@ -1,6 +1,6 @@
 import { PDFDocument } from 'pdf-lib';
 import { pdfjs } from 'react-pdf';
-import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+import '../config/pdfWorker';
 
 export type ThemeName = 'dark' | 'darker' | 'darkest' | 'sepia' | 'midnight' | 'slate';
 export type DarkModeRenderMode = 'preserve-images' | 'invert';
@@ -58,7 +58,7 @@ const THEME_CONFIGS: Record<ThemeName, ThemeConfig> = {
   }
 };
 
-pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
+
 
 async function canvasToPngBytes(canvas: HTMLCanvasElement): Promise<Uint8Array> {
   const blob = await new Promise<Blob>((resolve, reject) => {

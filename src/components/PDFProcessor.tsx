@@ -622,19 +622,19 @@ function PDFProcessor({
               </div>
 
               {resultStats?.originalSize && resultStats?.processedSize && (
-                <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 text-left space-y-1.5 shadow-sm">
+                <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 text-left space-y-2 shadow-sm">
                   <div className="flex items-center justify-between text-xs font-bold text-white">
                     <span className="flex items-center gap-1.5">
                       <PresentationChartLineIcon className="w-4 h-4 text-cyan-400 shrink-0" />
                       <span>File Size Comparison</span>
                     </span>
                     {resultStats.originalSize > resultStats.processedSize ? (
-                      <span className="text-[10px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                        Saved {Math.round((1 - resultStats.processedSize / resultStats.originalSize) * 100)}%
+                      <span className="text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                        Saved {Math.round((1 - resultStats.processedSize / resultStats.originalSize) * 100)}% ({formatFileSize(resultStats.originalSize - resultStats.processedSize)})
                       </span>
                     ) : (
-                      <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
-                        Fully Optimized
+                      <span className="text-[10px] uppercase tracking-wider font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-cyan-300 border border-slate-700">
+                        Fully Compact
                       </span>
                     )}
                   </div>
@@ -642,6 +642,11 @@ function PDFProcessor({
                     <span>Original: <span className="font-semibold text-slate-200">{formatFileSize(resultStats.originalSize)}</span></span>
                     <span>Optimized: <span className="font-bold text-cyan-400">{formatFileSize(resultStats.processedSize)}</span></span>
                   </div>
+                  {resultStats.originalSize <= resultStats.processedSize && (
+                    <div className="text-[10px] text-slate-400 border-t border-slate-800/80 pt-1.5 leading-snug">
+                      Document structure & object streams are already at maximum compression density.
+                    </div>
+                  )}
                 </div>
               )}
 
