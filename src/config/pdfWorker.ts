@@ -1,13 +1,13 @@
 import { pdfjs } from 'react-pdf';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
-// Configure PDF.js worker using same-origin static asset to prevent Vite ?import errors
+// Configure PDF.js worker using standard Vite asset URL
 if (typeof window !== 'undefined') {
-  pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
+  pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
 }
 
 export function setupPdfWorker() {
   if (typeof window !== 'undefined') {
-    pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
+    pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
   }
 }
-

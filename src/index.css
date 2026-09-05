@@ -184,6 +184,32 @@ h6 {
   @apply font-semibold text-slate-100;
 }
 
+/* Dedicated LitasDark Slim Visible Scrollbar for Preview Panel */
+.litas-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.litas-scrollbar::-webkit-scrollbar-track {
+  background: rgba(4, 7, 17, 0.85);
+  border-radius: 4px;
+}
+
+.litas-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(6, 182, 212, 0.45);
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  border-radius: 9999px;
+}
+
+.litas-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(6, 182, 212, 0.80);
+}
+
+.litas-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(6, 182, 212, 0.5) rgba(4, 7, 17, 0.85);
+}
+
 /* Custom Scrollbar - Minimalist */
 ::-webkit-scrollbar {
   width: 6px;
@@ -225,10 +251,23 @@ h6 {
 }
 
 /* Improve native form control theming on dark UI.
-   - Select dropdowns (option list) are OS-controlled in many browsers,
-     but these rules improve consistency where supported. */
+   - Select dropdowns (option list) styled with dark slate background. */
 select {
   color-scheme: dark;
+  background-color: #090d16;
+  color: #f8fafc;
+}
+
+select option {
+  background-color: #0f172a;
+  color: #f8fafc;
+  padding: 8px 12px;
+}
+
+select option:checked,
+select option:hover {
+  background-color: #1e293b;
+  color: #38bdf8;
 }
 
 /* A consistent "panel" surface for tool cards/settings blocks. */

@@ -5,23 +5,28 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { LiquidBackground } from '@/components/layout/LiquidBackground';
 import { ScrollToTop } from '@/components/common/ScrollToTop';
+import { ReportBugProvider } from '@/context/ReportBugContext';
+import { ReportBugModal } from '@/components/common/ReportBugModal';
 import './index.css';
 
 function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <ScrollToTop />
-      <div className="relative h-screen flex flex-col overflow-hidden">
-        <LiquidBackground />
-        <Header />
-        <main className="flex-grow min-h-0 overflow-y-auto relative z-10 flex flex-col">
-          <div className="flex-1">
-            <AppRoutes />
-          </div>
-          <Footer />
-        </main>
-      </div>
-      <Toaster />
+      <ReportBugProvider>
+        <ScrollToTop />
+        <div className="relative h-screen flex flex-col overflow-hidden">
+          <LiquidBackground />
+          <Header />
+          <main className="flex-grow min-h-0 overflow-y-auto relative z-10 flex flex-col">
+            <div className="flex-1">
+              <AppRoutes />
+            </div>
+            <Footer />
+          </main>
+        </div>
+        <Toaster />
+        <ReportBugModal />
+      </ReportBugProvider>
     </BrowserRouter>
   );
 }

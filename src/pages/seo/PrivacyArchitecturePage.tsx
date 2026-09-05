@@ -3,20 +3,20 @@ import { CompetitorComparisonTable } from '@/components/seo/CompetitorComparison
 import { SEO } from '@/components/common/SEO';
 import { Link } from 'react-router-dom';
 import {
-  ShieldCheck,
-  Cpu,
-  FileText,
-  HardDrive,
-  Download,
-  AlertTriangle,
-  CheckCircle2,
-  HelpCircle,
-  ArrowRight,
-  Server,
-  Globe,
-  Layers,
-  MemoryStick,
-} from 'lucide-react';
+  ShieldCheckIcon,
+  CpuChipIcon,
+  DocumentTextIcon,
+  ComputerDesktopIcon,
+  ArrowDownTrayIcon,
+  ExclamationTriangleIcon,
+  CheckCircleIcon,
+  QuestionMarkCircleIcon,
+  ArrowRightIcon,
+  ServerIcon,
+  GlobeAltIcon,
+  Square3Stack3DIcon,
+  CircleStackIcon,
+} from '@heroicons/react/24/outline';
 
 export default function PrivacyArchitecturePage() {
   const faqList = [
@@ -64,11 +64,11 @@ export default function PrivacyArchitecturePage() {
         <section className="space-y-4">
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
-              <ShieldCheck className="w-3.5 h-3.5" />
+              <ShieldCheckIcon className="w-3.5 h-3.5" />
               Technical Architecture Specification
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
-              <Cpu className="w-3.5 h-3.5" />
+              <CpuChipIcon className="w-3.5 h-3.5" />
               In-Browser WebAssembly Runtime
             </span>
           </div>
@@ -85,7 +85,7 @@ export default function PrivacyArchitecturePage() {
         <section className="panel-surface p-6 md:p-8 rounded-2xl space-y-6">
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-cyan-400 font-mono text-xs font-semibold uppercase tracking-wider">
-              <Layers className="w-4 h-4" />
+              <Square3Stack3DIcon className="w-4 h-4" />
               <span>Data Flow Architecture</span>
             </div>
             <h2 className="text-xl md:text-2xl font-bold text-slate-100">Local Document Execution Path</h2>
@@ -100,7 +100,7 @@ export default function PrivacyArchitecturePage() {
             <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2 relative flex flex-col justify-between">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-mono text-slate-500 font-bold uppercase">01 / Input</span>
-                <HardDrive className="w-4 h-4 text-cyan-400" />
+                <ComputerDesktopIcon className="w-4 h-4 text-cyan-400" />
               </div>
               <div>
                 <h3 className="text-sm font-bold text-slate-100">Your Device</h3>
@@ -111,14 +111,14 @@ export default function PrivacyArchitecturePage() {
 
             {/* Arrow 1 */}
             <div className="hidden md:flex items-center justify-center -mx-2 text-slate-600">
-              <ArrowRight className="w-5 h-5 text-cyan-500/60" />
+              <ArrowRightIcon className="w-5 h-5 text-cyan-500/60" />
             </div>
 
             {/* Step 2 */}
             <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2 relative flex flex-col justify-between">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-mono text-slate-500 font-bold uppercase">02 / Ingestion</span>
-                <FileText className="w-4 h-4 text-cyan-400" />
+                <DocumentTextIcon className="w-4 h-4 text-cyan-400" />
               </div>
               <div>
                 <h3 className="text-sm font-bold text-slate-100">Browser File API</h3>
@@ -129,14 +129,14 @@ export default function PrivacyArchitecturePage() {
 
             {/* Arrow 2 */}
             <div className="hidden md:flex items-center justify-center -mx-2 text-slate-600">
-              <ArrowRight className="w-5 h-5 text-cyan-500/60" />
+              <ArrowRightIcon className="w-5 h-5 text-cyan-500/60" />
             </div>
 
             {/* Step 3 */}
             <div className="p-4 rounded-xl bg-cyan-950/40 border border-cyan-500/30 space-y-2 relative flex flex-col justify-between">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-mono text-cyan-400 font-bold uppercase">03 / Execution</span>
-                <Cpu className="w-4 h-4 text-cyan-400" />
+                <CpuChipIcon className="w-4 h-4 text-cyan-400" />
               </div>
               <div>
                 <h3 className="text-sm font-bold text-slate-100">Local Engine / WASM</h3>
@@ -147,14 +147,14 @@ export default function PrivacyArchitecturePage() {
 
             {/* Arrow 3 */}
             <div className="hidden md:flex items-center justify-center -mx-2 text-slate-600">
-              <ArrowRight className="w-5 h-5 text-cyan-500/60" />
+              <ArrowRightIcon className="w-5 h-5 text-cyan-500/60" />
             </div>
 
             {/* Step 4 */}
             <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2 relative flex flex-col justify-between">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-mono text-slate-500 font-bold uppercase">04 / Buffer</span>
-                <MemoryStick className="w-4 h-4 text-indigo-400" />
+                <CircleStackIcon className="w-4 h-4 text-indigo-400" />
               </div>
               <div>
                 <h3 className="text-sm font-bold text-slate-100">Browser Memory</h3>
@@ -165,14 +165,14 @@ export default function PrivacyArchitecturePage() {
 
             {/* Arrow 4 */}
             <div className="hidden md:flex items-center justify-center -mx-2 text-slate-600">
-              <ArrowRight className="w-5 h-5 text-cyan-500/60" />
+              <ArrowRightIcon className="w-5 h-5 text-cyan-500/60" />
             </div>
 
             {/* Step 5 */}
             <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2 relative flex flex-col justify-between">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-mono text-slate-500 font-bold uppercase">05 / Export</span>
-                <Download className="w-4 h-4 text-emerald-400" />
+                <ArrowDownTrayIcon className="w-4 h-4 text-emerald-400" />
               </div>
               <div>
                 <h3 className="text-sm font-bold text-slate-100">Local Download</h3>
@@ -183,7 +183,7 @@ export default function PrivacyArchitecturePage() {
           </div>
 
           <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800/80 text-xs text-slate-400 flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <CheckCircleIcon className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>Document bytes remain strictly isolated within local browser memory throughout this execution path.</span>
           </div>
         </section>
@@ -200,7 +200,7 @@ export default function PrivacyArchitecturePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="panel-surface p-5 rounded-xl space-y-2.5">
               <div className="w-9 h-9 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 border border-cyan-500/20">
-                <Cpu className="w-4 h-4" />
+                <CpuChipIcon className="w-4 h-4" />
               </div>
               <h3 className="text-base font-bold text-slate-100">Local Processing</h3>
               <p className="text-xs text-slate-300/80 leading-relaxed">
@@ -210,7 +210,7 @@ export default function PrivacyArchitecturePage() {
 
             <div className="panel-surface p-5 rounded-xl space-y-2.5">
               <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
-                <Server className="w-4 h-4" />
+                <ServerIcon className="w-4 h-4" />
               </div>
               <h3 className="text-base font-bold text-slate-100">No Upload Endpoint</h3>
               <p className="text-xs text-slate-300/80 leading-relaxed">
@@ -220,7 +220,7 @@ export default function PrivacyArchitecturePage() {
 
             <div className="panel-surface p-5 rounded-xl space-y-2.5">
               <div className="w-9 h-9 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
-                <HardDrive className="w-4 h-4" />
+                <ComputerDesktopIcon className="w-4 h-4" />
               </div>
               <h3 className="text-base font-bold text-slate-100">Browser Memory</h3>
               <p className="text-xs text-slate-300/80 leading-relaxed">
@@ -230,7 +230,7 @@ export default function PrivacyArchitecturePage() {
 
             <div className="panel-surface p-5 rounded-xl space-y-2.5">
               <div className="w-9 h-9 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 border border-cyan-500/20">
-                <Download className="w-4 h-4" />
+                <ArrowDownTrayIcon className="w-4 h-4" />
               </div>
               <h3 className="text-base font-bold text-slate-100">Local Download</h3>
               <p className="text-xs text-slate-300/80 leading-relaxed">
@@ -295,7 +295,7 @@ export default function PrivacyArchitecturePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             <div className="p-4 rounded-xl bg-emerald-950/30 border border-emerald-500/30 space-y-1">
               <span className="font-bold text-emerald-300 text-sm flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <ShieldCheckIcon className="w-4 h-4 text-emerald-400" />
                 Document Data: Stays Local
               </span>
               <p className="text-slate-300/90 leading-relaxed">
@@ -304,7 +304,7 @@ export default function PrivacyArchitecturePage() {
             </div>
             <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
               <span className="font-bold text-slate-200 text-sm flex items-center gap-1.5">
-                <Globe className="w-4 h-4 text-cyan-400" />
+                <GlobeAltIcon className="w-4 h-4 text-cyan-400" />
                 Website Resources: Downloaded Normally
               </span>
               <p className="text-slate-400 leading-relaxed">
@@ -403,7 +403,7 @@ export default function PrivacyArchitecturePage() {
         <section className="panel-surface p-6 md:p-8 rounded-2xl space-y-6 border-l-4 border-l-amber-500">
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-amber-400 font-mono text-xs font-semibold uppercase tracking-wider">
-              <AlertTriangle className="w-4 h-4" />
+              <ExclamationTriangleIcon className="w-4 h-4" />
               <span>Technical Scope &amp; Security Boundaries</span>
             </div>
             <h2 className="text-xl md:text-2xl font-bold text-slate-100">What Local Processing Does Not Protect Against</h2>
@@ -469,7 +469,7 @@ export default function PrivacyArchitecturePage() {
             <div className="panel-surface p-6 rounded-2xl space-y-4 border-t-2 border-t-emerald-400">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-                  <Cpu className="w-5 h-5 text-emerald-400" />
+                  <CpuChipIcon className="w-5 h-5 text-emerald-400" />
                   Client-Side Model (LitasDark)
                 </h3>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
@@ -478,23 +478,23 @@ export default function PrivacyArchitecturePage() {
               </div>
               <ul className="space-y-2.5 text-xs text-slate-300">
                 <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <CheckCircleIcon className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                   <span><strong>Processing Location:</strong> Executed inside local browser WebAssembly &amp; Web Worker threads.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <CheckCircleIcon className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                   <span><strong>Network Transfer:</strong> Zero document bytes sent across the network.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <CheckCircleIcon className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                   <span><strong>Server Risk Vector:</strong> No remote server document storage or server retention.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <CheckCircleIcon className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                   <span><strong>Performance Driver:</strong> Bound by local device CPU and browser tab memory allocations.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <CheckCircleIcon className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                   <span><strong>Offline Capability:</strong> Operates offline once web application assets are cached.</span>
                 </li>
               </ul>
@@ -504,7 +504,7 @@ export default function PrivacyArchitecturePage() {
             <div className="panel-surface p-6 rounded-2xl space-y-4 border-t-2 border-t-slate-600">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-                  <Globe className="w-5 h-5 text-slate-400" />
+                  <GlobeAltIcon className="w-5 h-5 text-slate-400" />
                   Server-Side Model (Traditional Cloud)
                 </h3>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-800 text-slate-400 border border-slate-700">
@@ -547,7 +547,7 @@ export default function PrivacyArchitecturePage() {
         <section className="panel-surface p-6 md:p-8 rounded-2xl space-y-6">
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-cyan-400 font-mono text-xs font-semibold uppercase tracking-wider">
-              <HelpCircle className="w-4 h-4" />
+              <QuestionMarkCircleIcon className="w-4 h-4" />
               <span>Technical Clarifications</span>
             </div>
             <h2 className="text-xl md:text-2xl font-bold text-slate-100">Frequently Asked Technical Questions</h2>

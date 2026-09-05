@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { motion } from 'framer-motion';
 import { useProcessPDF, ProcessOptions } from '../hooks/useProcessPDF';
+import { PipelineProgressCard } from './common/PipelineProgressCard';
 import {
   XCircleIcon,
   DocumentPlusIcon,
@@ -9,7 +10,6 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   CheckCircleIcon,
-  ArrowPathIcon,
   PresentationChartLineIcon,
 } from '@heroicons/react/24/outline';
 import { DarkModeOptions } from '@/hooks/useDarkMode';
@@ -19,6 +19,7 @@ import { ExtractOptions } from '@/hooks/useExtractPages';
 import { ImageToPdfOptions } from '@/hooks/useImagesToPdf';
 import { CompressOptions } from '@/hooks/useCompressPDF';
 import type { Tool } from '../types';
+import { ContextualReportTrigger } from './common/ContextualReportTrigger';
 
 type SelectedFileItem = {
   id: string;
@@ -76,6 +77,8 @@ function PDFProcessor({
 }: PDFProcessorProps) {
   const [selectedFiles, setSelectedFiles] = useState<SelectedFileItem[]>([]);
   const [progress, setProgress] = useState(0);
+  const [progressMessage, setProgressMessage] = useState<string>('Initializing processing engine...');
+  const [processStartTime, setProcessStartTime] = useState<number | undefined>(undefined);
   const { processDocument, isProcessing } = useProcessPDF();
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [resultStats, setResultStats] = useState<{ originalSize?: number; processedSize?: number } | null>(null);
@@ -132,6 +135,8 @@ function PDFProcessor({
 
     try {
       setProgress(0);
+      setProgressMessage('Analyzing document structure...');
+      setProcessStartTime(Date.now());
       if (downloadUrl) URL.revokeObjectURL(downloadUrl);
       setDownloadUrl(null);
 
@@ -148,22 +153,23 @@ function PDFProcessor({
         compressOptions: activeTool?.name === 'Optimize PDF' ? compressOptions : undefined,
       };
 
+      const handleProgressUpdate = (p: number, msg?: string) => {
+        setProgress(Math.round(p * 100));
+        if (msg) setProgressMessage(msg);
+      };
+
       let result;
       if ((isMergeTool || isImageTool) && allowMultipleFiles) {
         result = await processDocument(
           selectedFiles.map((s) => s.file),
-          (p) => {
-            setProgress(Math.round(p * 100));
-          },
+          handleProgressUpdate,
           processOptions
         );
       } else if (selectedFiles.length > 0) {
         const fileToProcess = selectedFiles[0].file;
         result = await processDocument(
           fileToProcess,
-          (p) => {
-            setProgress(Math.round(p * 100));
-          },
+          handleProgressUpdate,
           processOptions
         );
       } else {
@@ -589,24 +595,14 @@ function PDFProcessor({
       {/* 4. Primary CTA & Result State */}
       {selectedFiles.length > 0 && (
         <div className="pt-2 border-t border-slate-800/80 space-y-3">
-          {/* Active Processing State */}
+          {/* Active Processing State: Restrained Engineering 3-Stage Pipeline UI */}
           {isProcessing && (
-            <div className="p-4 rounded-xl bg-slate-900/90 border border-cyan-500/30 space-y-2">
-              <div className="flex items-center justify-between text-xs font-semibold text-cyan-300">
-                <span className="flex items-center gap-2">
-                  <ArrowPathIcon className="w-4 h-4 animate-spin text-cyan-400" />
-                  Processing document...
-                </span>
-                <span>{progress}%</span>
-              </div>
-              <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                <motion.div
-                  className="h-full bg-cyan-500"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progress}%` }}
-                />
-              </div>
-            </div>
+            <PipelineProgressCard
+              progress={progress}
+              progressMsg={progressMessage}
+              toolName={activeTool?.name || 'PDF Engine'}
+              startTime={processStartTime}
+            />
           )}
 
           {/* Download / Success State */}
@@ -621,34 +617,77 @@ function PDFProcessor({
                 <span>PDF Ready for Download</span>
               </div>
 
-              {resultStats?.originalSize && resultStats?.processedSize && (
+            {resultStats?.originalSize && resultStats?.processedSize && (() => {
+              const toolIdentifier = String(activeTool?.id || toolId || '').toLowerCase();
+              const toolNameLower = (activeTool?.name || '').toLowerCase();
+              const isCompressTool =
+                toolIdentifier.includes('compress') ||
+                toolIdentifier.includes('optimize') ||
+                toolNameLower.includes('compress') ||
+                toolNameLower.includes('optimize');
+              const isDarkModeTool =
+                toolIdentifier.includes('dark') ||
+                toolNameLower.includes('dark');
+
+              return (
                 <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 text-left space-y-2 shadow-sm">
                   <div className="flex items-center justify-between text-xs font-bold text-white">
                     <span className="flex items-center gap-1.5">
                       <PresentationChartLineIcon className="w-4 h-4 text-cyan-400 shrink-0" />
-                      <span>File Size Comparison</span>
+                      <span>
+                        {isCompressTool ? 'File Size Comparison' : 'File Processing Summary'}
+                      </span>
                     </span>
-                    {resultStats.originalSize > resultStats.processedSize ? (
-                      <span className="text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                        Saved {Math.round((1 - resultStats.processedSize / resultStats.originalSize) * 100)}% ({formatFileSize(resultStats.originalSize - resultStats.processedSize)})
-                      </span>
-                    ) : (
-                      <span className="text-[10px] uppercase tracking-wider font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-cyan-300 border border-slate-700">
-                        Fully Compact
-                      </span>
-                    )}
+                    {(() => {
+                      const savedBytes = resultStats.originalSize - resultStats.processedSize;
+                      if (savedBytes > 0) {
+                        const savedPct = (savedBytes / resultStats.originalSize) * 100;
+                        if (savedPct >= 1) {
+                          return (
+                            <span className="text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                              Saved {Math.round(savedPct)}% ({formatFileSize(savedBytes)})
+                            </span>
+                          );
+                        }
+                        return (
+                          <span className="text-[10px] uppercase tracking-wider font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                            Minimal Reduction
+                          </span>
+                        );
+                      }
+                      if (isCompressTool) {
+                        return (
+                          <span className="text-[10px] uppercase tracking-wider font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                            Already Optimized
+                          </span>
+                        );
+                      }
+                      return (
+                        <span className="text-[10px] uppercase tracking-wider font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                          Transformed
+                        </span>
+                      );
+                    })()}
                   </div>
                   <div className="flex items-center justify-between text-xs text-slate-300">
                     <span>Original: <span className="font-semibold text-slate-200">{formatFileSize(resultStats.originalSize)}</span></span>
-                    <span>Optimized: <span className="font-bold text-cyan-400">{formatFileSize(resultStats.processedSize)}</span></span>
+                    <span>
+                      {isCompressTool ? 'Optimized:' : 'Processed:'}{' '}
+                      <span className="font-bold text-cyan-400">{formatFileSize(resultStats.processedSize)}</span>
+                    </span>
                   </div>
                   {resultStats.originalSize <= resultStats.processedSize && (
                     <div className="text-[10px] text-slate-400 border-t border-slate-800/80 pt-1.5 leading-snug">
-                      Document structure & object streams are already at maximum compression density.
+                      {isDarkModeTool
+                        ? `File size adjusted (+${formatFileSize(resultStats.processedSize - resultStats.originalSize)}) to embed high-clarity dark theme canvas layers.`
+                        : isCompressTool
+                        ? 'This PDF is already efficiently compressed.'
+                        : 'Document successfully transformed and regenerated.'}
                     </div>
                   )}
                 </div>
-              )}
+              );
+            })()}
 
               <a
                 href={downloadUrl}
@@ -666,6 +705,18 @@ function PDFProcessor({
               >
                 {isMergeTool ? 'Start Another Merge' : 'Process Another File'}
               </button>
+
+              <ContextualReportTrigger
+                toolName={activeTool?.name || 'PDF Engine'}
+                fileSizeMb={
+                  selectedFiles[0]?.file
+                    ? (selectedFiles[0].file.size / (1024 * 1024)).toFixed(2) + ' MB'
+                    : undefined
+                }
+                operationStatus="success"
+                customLabel="Something wrong with the result output?"
+                className="pt-1"
+              />
             </motion.div>
           ) : (
             /* Primary CTA Button */
@@ -696,12 +747,21 @@ function ErrorFallback({ error, resetErrorBoundary }: any) {
     <div role="alert" className="p-4 bg-rose-950/40 text-white rounded-xl border border-rose-500/40 space-y-3">
       <h3 className="text-sm font-bold text-rose-300">Processing Error</h3>
       <p className="text-xs text-rose-200/90">{error.message}</p>
-      <button
-        onClick={resetErrorBoundary}
-        className="px-3.5 py-1.5 bg-slate-900 text-xs font-semibold text-white rounded-lg border border-slate-700 hover:bg-slate-800"
-      >
-        Try Again
-      </button>
+      <div className="flex items-center justify-between gap-3 pt-1">
+        <button
+          onClick={resetErrorBoundary}
+          className="px-3.5 py-1.5 bg-slate-900 text-xs font-semibold text-white rounded-lg border border-slate-700 hover:bg-slate-800"
+        >
+          Try Again
+        </button>
+        <ContextualReportTrigger
+          toolName="PDF Engine"
+          lastError={error.message}
+          operationStatus="failed"
+          variant="button"
+          customLabel="Report error"
+        />
+      </div>
     </div>
   );
 }

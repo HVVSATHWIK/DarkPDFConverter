@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
 import { Logo } from '@/components/common/Logo';
+import { useReportBug } from '@/context/ReportBugContext';
 
 export function Footer() {
+  const { openModal } = useReportBug();
   return (
     <footer className="w-full border-t border-slate-800/80 bg-slate-950/80 backdrop-blur-md relative z-20 text-xs text-slate-400 mt-auto">
       <div className="mx-auto max-w-7xl px-4 py-10 md:px-6 space-y-8">
@@ -148,9 +150,13 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <a href="mailto:support@litasdark.org?subject=LitasDark%20Feedback%20or%20Bug%20Report" className="text-cyan-400/90 hover:text-cyan-300 font-medium transition-colors flex items-center gap-1">
-                  Report Bug / Contact
-                </a>
+                <button
+                  type="button"
+                  onClick={(e) => openModal(e.currentTarget)}
+                  className="text-cyan-400/90 hover:text-cyan-300 font-medium transition-colors flex items-center gap-1 text-left"
+                >
+                  Help &amp; Feedback / Report a problem
+                </button>
               </li>
             </ul>
           </div>

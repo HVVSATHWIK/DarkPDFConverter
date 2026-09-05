@@ -19,25 +19,62 @@ interface PDFPreviewProps {
 }
 
 export default function PDFPreview({ file }: PDFPreviewProps) {
-  const bufferState = usePdfBuffer(file);
+  // Check if file is an image
+  const isImageFile = useMemo(() => {
+    if (!file) return false;
+    if (file instanceof File || file instanceof Blob) {
+      if (file.type && file.type.startsWith('image/')) return true;
+      if ('name' in file && typeof (file as any).name === 'string') {
+        return /\.(png|jpg|jpeg|webp|gif|bmp|tiff|svg)$/i.test((file as any).name);
+      }
+    }
+    if (typeof file === 'string') {
+      return /^data:image\//i.test(file) || /\.(png|jpg|jpeg|webp|gif|bmp|svg)(\?.*)?$/i.test(file);
+    }
+    return false;
+  }, [file]);
+
+  const imageUrl = useMemo(() => {
+    if (!isImageFile || !file) return null;
+    if (file instanceof File || file instanceof Blob) {
+      return URL.createObjectURL(file);
+    }
+    if (typeof file === 'string') {
+      return file;
+    }
+    return null;
+  }, [file, isImageFile]);
+
+  // Clean up ObjectURL
+  useEffect(() => {
+    return () => {
+      if (imageUrl && imageUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(imageUrl);
+      }
+    };
+  }, [imageUrl]);
+
+  const bufferState = usePdfBuffer(isImageFile ? null : file);
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSizes, setPageSizes] = useState<{ height: number; width: number }[]>([]);
   const [scale, setScale] = useState<number>(1.0);
   const [viewMode, setViewMode] = useState<'single' | 'scroll'>('single');
+  const [isPdfError, setIsPdfError] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Normalizing file buffer for react-pdf Document component
   const documentFile = useMemo(() => {
-    if (bufferState.status !== 'ready') return null;
+    if (isImageFile || bufferState.status !== 'ready') return null;
     return { data: new Uint8Array(bufferState.buffer as ArrayBufferLike).slice(0) };
-  }, [bufferState]);
+  }, [bufferState, isImageFile]);
 
   // Pre-load document metadata (dimensions and page count)
   useEffect(() => {
-    if (bufferState.status !== 'ready') return;
+    if (isImageFile || bufferState.status !== 'ready') return;
 
     let isMounted = true;
+    setIsPdfError(false);
     const loadMetadata = async () => {
       try {
         const finalBuffer = new Uint8Array(bufferState.buffer as ArrayBufferLike).slice(0);
@@ -59,6 +96,9 @@ export default function PDFPreview({ file }: PDFPreviewProps) {
         }
       } catch (err) {
         console.error('Metadata Load Failed in PDFPreview:', err);
+        if (isMounted) {
+          setIsPdfError(true);
+        }
       }
     };
 
@@ -66,23 +106,22 @@ export default function PDFPreview({ file }: PDFPreviewProps) {
     return () => {
       isMounted = false;
     };
-  }, [bufferState]);
+  }, [bufferState, isImageFile]);
 
-  // Fit Width handler
+  // Zoom & Fit Controls
   const handleFitWidth = () => {
     const activePageSize = pageSizes[currentPage - 1] || pageSizes[0];
     const clientWidth = containerRef.current?.clientWidth || 800;
     if (activePageSize && activePageSize.width > 0) {
-      const padding = 48; // Horizontal spacing
+      const padding = 48;
       const availableWidth = Math.max(150, clientWidth - padding);
       const computedScale = +(availableWidth / activePageSize.width).toFixed(2);
       setScale(Math.max(0.2, Math.min(computedScale, 3.0)));
     } else {
-      setScale(1.2);
+      setScale(1.0);
     }
   };
 
-  // Fit to Page handler
   const handleFitPage = () => {
     const activePageSize = pageSizes[currentPage - 1] || pageSizes[0];
     const clientWidth = containerRef.current?.clientWidth || 800;
@@ -108,23 +147,96 @@ export default function PDFPreview({ file }: PDFPreviewProps) {
   const prevPage = () => setCurrentPage((p) => Math.max(1, p - 1));
   const nextPage = () => setCurrentPage((p) => Math.min(numPages || 1, p + 1));
 
-  if (bufferState.status === 'loading') {
+  // IF INPUT IS AN IMAGE FILE, RENDER IMAGE CANVAS PREVIEW
+  if (isImageFile && imageUrl) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center p-8 text-slate-300 gap-3">
-        <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-        <span className="text-sm font-medium">Buffering PDF...</span>
+      <div className="w-full h-full min-h-0 flex flex-col bg-[#080b12] text-slate-100 overflow-hidden select-none">
+        {/* Top Image Toolbar */}
+        <div className="h-12 shrink-0 border-b border-white/10 px-4 flex items-center justify-between bg-slate-950/80 backdrop-blur-md z-20">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-cyan-300 font-mono px-2.5 py-1 bg-cyan-500/10 rounded-md border border-cyan-500/20 font-semibold">
+              IMAGE INPUT PREVIEW
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-lg p-1">
+              <button
+                type="button"
+                onClick={zoomOut}
+                className="p-1.5 rounded hover:bg-white/10 active:bg-white/20 transition-colors text-slate-300 hover:text-white"
+                title="Zoom out"
+                aria-label="Zoom out"
+              >
+                <MagnifyingGlassMinusIcon className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={resetZoom}
+                className="px-2 py-0.5 text-xs font-semibold text-slate-300 hover:text-white font-mono hover:bg-white/10 rounded transition-colors"
+                title="Reset Zoom to 100%"
+              >
+                {Math.round(scale * 100)}%
+              </button>
+              <button
+                type="button"
+                onClick={zoomIn}
+                className="p-1.5 rounded hover:bg-white/10 active:bg-white/20 transition-colors text-slate-300 hover:text-white"
+                title="Zoom in"
+                aria-label="Zoom in"
+              >
+                <MagnifyingGlassPlusIcon className="w-4 h-4" />
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={resetZoom}
+              className="p-1.5 bg-white/5 border border-white/10 hover:bg-white/10 active:bg-white/20 rounded-lg text-slate-300 hover:text-white transition-colors"
+              title="Fit Original Size"
+            >
+              <ArrowsPointingOutIcon className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Main Image View Canvas */}
+        <div
+          ref={containerRef}
+          className="flex-1 min-h-0 w-full overflow-y-auto p-6 flex items-center justify-center bg-[#040711] litas-scrollbar"
+        >
+          <div className="relative shadow-2xl shadow-black/90 rounded-2xl overflow-hidden border border-slate-800/80 bg-slate-950 max-w-full max-h-full flex items-center justify-center p-2">
+            <img
+              src={imageUrl}
+              alt="Input file preview"
+              style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}
+              className="max-w-full max-h-[500px] object-contain transition-transform duration-150 rounded-lg"
+            />
+          </div>
+        </div>
       </div>
     );
   }
 
-  if (bufferState.status === 'error') {
+  if (bufferState.status === 'loading') {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center p-8 text-rose-300 gap-2">
-        <div className="p-3 bg-rose-500/10 rounded-full border border-rose-500/20">
-          <DocumentIcon className="w-6 h-6 text-rose-400" />
+      <div className="w-full h-full flex flex-col items-center justify-center p-8 text-slate-300 gap-3">
+        <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+        <span className="text-sm font-medium">Buffering document...</span>
+      </div>
+    );
+  }
+
+  if (bufferState.status === 'error' || isPdfError) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center p-8 text-slate-300 gap-2 text-center">
+        <div className="p-3 bg-cyan-500/10 rounded-full border border-cyan-500/20">
+          <DocumentIcon className="w-6 h-6 text-cyan-400" />
         </div>
-        <p className="text-sm font-semibold">Error loading PDF buffer.</p>
-        <p className="text-xs text-rose-400/80">{bufferState.error.message}</p>
+        <p className="text-sm font-semibold text-slate-200">Image File Loaded</p>
+        <p className="text-xs text-slate-400 max-w-xs leading-relaxed">
+          Click <span className="font-bold text-cyan-400">"Convert to PDF"</span> to build and view the compiled PDF document.
+        </p>
       </div>
     );
   }
@@ -259,7 +371,7 @@ export default function PDFPreview({ file }: PDFPreviewProps) {
       {/* Main PDF Canvas Area */}
       <div
         ref={containerRef}
-        className="flex-1 min-h-0 w-full overflow-auto p-4 sm:p-6 flex flex-col items-center bg-[#040711]"
+        className="flex-1 min-h-0 w-full overflow-y-auto p-4 sm:p-6 flex flex-col items-center bg-[#040711] litas-scrollbar"
       >
         <Document
           file={documentFile}

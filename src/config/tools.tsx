@@ -4,7 +4,7 @@ import {
   ScissorsIcon,
   ArrowPathRoundedSquareIcon,
   ArrowsPointingInIcon,
-  DocumentDuplicateIcon,
+  DocumentArrowUpIcon,
   FingerPrintIcon,
   PhotoIcon,
 } from '@heroicons/react/24/outline';
@@ -49,7 +49,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     id: 6,
     name: 'Extract Pages',
     path: '/extract-pdf',
-    icon: <DocumentDuplicateIcon className="w-5 h-5" />,
+    icon: <DocumentArrowUpIcon className="w-5 h-5" />,
     description: 'Extract selected pages from a PDF into a new document.',
     category: 'organize',
     categoryLabel: 'Organize',

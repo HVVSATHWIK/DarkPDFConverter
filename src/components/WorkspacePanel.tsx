@@ -20,6 +20,7 @@ import { getToolGuideById, getToolGuideBySlug } from '@/config/toolGuides';
 import { SEO } from './common/SEO';
 import { Breadcrumbs } from './seo/Breadcrumbs';
 import { GuideInfoButton } from './tools/GuideInfoButton';
+import { ContextualReportTrigger } from './common/ContextualReportTrigger';
 
 interface ToolPageProps {
   activeTool: Tool;
@@ -348,9 +349,9 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
 
       {/* 2. Primary Interactive Tool Workspace */}
       <section className="w-full bg-[#080808] flex-1">
-        <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row min-h-[580px]">
+        <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-210px)] min-h-[580px] lg:max-h-[850px]">
           {/* Workspace Panel: Upload & Controls */}
-          <aside className="w-full lg:w-[440px] shrink-0 border-b lg:border-b-0 lg:border-r border-slate-800/80 flex flex-col bg-[#050505]">
+          <aside className="w-full lg:w-[440px] shrink-0 border-b lg:border-b-0 lg:border-r border-slate-800/80 flex flex-col bg-[#050505] lg:h-full lg:overflow-y-auto litas-scrollbar">
             <div className="p-5 space-y-5 flex-1 flex flex-col justify-between">
               <div className="space-y-5">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-800/60">
@@ -385,7 +386,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
           </aside>
 
           {/* Main Workspace Area: Live Preview Canvas */}
-          <div className="flex-1 bg-[#0A0A0A] relative flex flex-col min-w-0">
+          <div className="flex-1 bg-[#0A0A0A] relative flex flex-col min-w-0 h-full overflow-hidden">
             {/* Preview Toolbar */}
             <div className="h-12 border-b border-slate-800/80 flex items-center justify-between px-5 shrink-0 bg-black/40 backdrop-blur-sm z-10">
               <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
@@ -419,9 +420,9 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
             </div>
 
             {/* Preview Canvas */}
-            <div className="flex-1 min-h-[440px] w-full p-4 sm:p-6 flex items-center justify-center relative bg-[radial-gradient(#1a1a1a_1px,transparent_1px)] [background-size:20px_20px] overflow-hidden">
+            <div className="flex-1 min-h-0 w-full p-3 sm:p-5 flex flex-col items-center justify-center relative bg-[radial-gradient(#1a1a1a_1px,transparent_1px)] [background-size:20px_20px] overflow-hidden">
               {processedData ? (
-                <div className="w-full h-full max-w-4xl flex flex-col items-center justify-center relative shadow-2xl shadow-black/80 rounded-2xl overflow-hidden border border-slate-800 bg-slate-950/90 backdrop-blur-sm">
+                <div className="w-full h-full max-w-5xl flex flex-col min-h-0 relative shadow-2xl shadow-black/80 rounded-2xl overflow-hidden border border-slate-800 bg-slate-950/90 backdrop-blur-sm">
                   {previewTab === 'output' &&
                     (processedData.processedPdf ||
                       processedData instanceof Uint8Array ||
@@ -435,15 +436,21 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
                   {/* Error Overlay */}
                   {processedData.error && (
                     <div className="absolute inset-0 bg-black/80 flex items-center justify-center p-6 backdrop-blur-sm z-30">
-                      <div className="bg-rose-950/60 border border-rose-500/40 p-4 rounded-xl text-rose-200 text-center max-w-md space-y-2">
+                      <div className="bg-rose-950/60 border border-rose-500/40 p-4 rounded-xl text-rose-200 text-center max-w-md space-y-3">
                         <p className="font-semibold text-sm">Error Processing PDF</p>
                         <p className="text-xs opacity-80">{processedData.error}</p>
+                        <ContextualReportTrigger
+                          toolName={activeTool.name}
+                          lastError={processedData.error}
+                          operationStatus="failed"
+                          variant="warning"
+                        />
                       </div>
                     </div>
                   )}
                 </div>
               ) : selectedFilesForPreview.length > 0 ? (
-                <div className="w-full h-full max-w-4xl flex flex-col items-center justify-center relative shadow-xl shadow-black/50 rounded-2xl overflow-hidden border border-slate-800 bg-slate-950/90 backdrop-blur-sm">
+                <div className="w-full h-full max-w-5xl flex flex-col min-h-0 relative shadow-xl shadow-black/50 rounded-2xl overflow-hidden border border-slate-800 bg-slate-950/90 backdrop-blur-sm">
                   <div className="absolute top-3 left-3 z-30 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-md text-[10px] font-mono text-cyan-300 border border-slate-800">
                     LOADED INPUT PREVIEW
                   </div>
