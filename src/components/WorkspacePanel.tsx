@@ -13,6 +13,8 @@ import ExtractPagesControls from './tools/ExtractPagesControls';
 import { ExtractOptions } from '@/hooks/useExtractPages';
 import ImagesToPDFControls from './tools/ImagesToPDFControls';
 import { ImageToPdfOptions } from '@/hooks/useImagesToPdf';
+import OptimizePDFControls from './tools/OptimizePDFControls';
+import { CompressOptions } from '@/hooks/useCompressPDF';
 import PDFPreview from './common/PDFPreview';
 import { getToolGuideById, getToolGuideBySlug } from '@/config/toolGuides';
 import { SEO } from './common/SEO';
@@ -49,6 +51,11 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
   const [imageToPdfSettings, setImageToPdfSettings] = useState<ImageToPdfOptions>({
     pageSize: 'fit',
     margin: 0,
+  });
+  const [compressSettings, setCompressSettings] = useState<CompressOptions>({
+    level: 'recommended',
+    jpegQuality: 0.60,
+    maxDpi: 150,
   });
 
   const slug = location.pathname.replace(/^\//, '');
@@ -223,15 +230,22 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
 
       case 'Optimize PDF':
         return (
-          <PDFProcessorWithErrorBoundary
-            toolId={activeTool.id}
-            activeTool={activeTool}
-            allowMultipleFiles={false}
-            onComplete={handleComplete}
-            onError={handleError}
-            onSelectionChange={setSelectedFilesForPreview}
-            processActionName="Optimize PDF"
-          />
+          <>
+            <PDFProcessorWithErrorBoundary
+              toolId={activeTool.id}
+              activeTool={activeTool}
+              allowMultipleFiles={false}
+              onComplete={handleComplete}
+              onError={handleError}
+              onSelectionChange={setSelectedFilesForPreview}
+              processActionName="Optimize PDF"
+              compressOptions={compressSettings}
+            />
+            <OptimizePDFControls
+              onSettingsChange={setCompressSettings}
+              currentOptions={compressSettings}
+            />
+          </>
         );
 
       case 'Cleanse Metadata':
@@ -295,12 +309,23 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
       <header className="w-full border-b border-slate-800/80 bg-slate-950/80 px-4 py-4 sm:py-5 md:px-8">
         <div className="max-w-7xl mx-auto space-y-2.5">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <Breadcrumbs
-              items={[
-                { name: 'Tools', path: '/tools' },
-                { name: activeTool.name },
-              ]}
-            />
+            <div className="flex items-center gap-2.5">
+              <Link
+                to={backUrl}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 hover:border-slate-700 text-xs font-semibold transition-all cursor-pointer shadow-sm group shrink-0"
+                aria-label={`Return to ${backLabel}`}
+              >
+                <ArrowUturnLeftIcon className="w-3.5 h-3.5 text-cyan-400 transition-transform group-hover:-translate-x-1" />
+                <span>Return to {backLabel}</span>
+              </Link>
+              <div className="h-4 w-px bg-slate-800 shrink-0" />
+              <Breadcrumbs
+                items={[
+                  { name: 'Tools', path: '/tools' },
+                  { name: activeTool.name },
+                ]}
+              />
+            </div>
             <div className="flex items-center gap-2.5">
               <div className="flex items-center gap-1.5 text-[11px] text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1 rounded-full font-medium">
                 <ShieldCheckIcon className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
@@ -329,14 +354,12 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
             <div className="p-5 space-y-5 flex-1 flex flex-col justify-between">
               <div className="space-y-5">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-800/60">
-                  <Link
-                    to={backUrl}
-                    className="group flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors"
-                    aria-label={`Back to ${backLabel}`}
-                  >
-                    <ArrowUturnLeftIcon className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
-                    <span>{backLabel}</span>
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                      {activeTool.name} Panel
+                    </span>
+                  </div>
                   <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                     {activeTool.categoryLabel || 'PDF Utility'}
                   </span>

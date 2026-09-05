@@ -3,22 +3,22 @@ import { Link, useNavigate } from 'react-router-dom';
 import { SEO } from '@/components/common/SEO';
 import {
   ChevronDownIcon,
-  ScaleIcon,
+  BuildingLibraryIcon,
   HeartIcon,
   AcademicCapIcon,
   CommandLineIcon,
   ArrowRightIcon,
   MoonIcon,
-  Square2StackIcon,
-  ShieldCheckIcon,
+  Square3Stack3DIcon,
+  FingerPrintIcon,
   PhotoIcon,
   MagnifyingGlassIcon,
   LockClosedIcon,
-  BoltIcon,
-  SparklesIcon,
-  FolderOpenIcon,
+  RocketLaunchIcon,
+  CheckBadgeIcon,
+  DocumentArrowUpIcon,
   CpuChipIcon,
-  ArrowDownTrayIcon,
+  FolderArrowDownIcon,
   ShieldExclamationIcon,
 } from '@heroicons/react/24/outline';
 
@@ -36,7 +36,7 @@ const FEATURED_TOOLS = [
     id: 'merge',
     title: 'Merge PDFs',
     desc: 'Combines multiple PDF files into a single ordered document locally in browser memory.',
-    icon: Square2StackIcon,
+    icon: Square3Stack3DIcon,
     path: '/merge-pdf',
     badge: 'Multi-File',
   },
@@ -44,7 +44,7 @@ const FEATURED_TOOLS = [
     id: 'cleanse',
     title: 'Cleanse Metadata',
     desc: 'Removes hidden author names, timestamps, software signatures, and local file paths from PDF properties.',
-    icon: ShieldCheckIcon,
+    icon: FingerPrintIcon,
     path: '/cleanse-metadata',
     badge: 'Security',
   },
@@ -67,12 +67,12 @@ const WHY_LITASDARK = [
   {
     title: 'Fast',
     desc: 'Processing happens locally on your device hardware with zero network transmission or remote server wait queues.',
-    icon: BoltIcon,
+    icon: RocketLaunchIcon,
   },
   {
     title: 'Simple',
     desc: 'No account registration or subscription workflow required. Open any tool, choose your file, and process immediately.',
-    icon: SparklesIcon,
+    icon: CheckBadgeIcon,
   },
 ];
 
@@ -81,7 +81,7 @@ const SIMPLE_STEPS = [
     step: '01',
     title: 'Select',
     desc: 'Choose or drop any PDF document directly from your local device.',
-    icon: FolderOpenIcon,
+    icon: DocumentArrowUpIcon,
   },
   {
     step: '02',
@@ -93,7 +93,7 @@ const SIMPLE_STEPS = [
     step: '03',
     title: 'Download',
     desc: 'Save your transformed PDF immediately back to local disk storage.',
-    icon: ArrowDownTrayIcon,
+    icon: FolderArrowDownIcon,
   },
 ];
 
@@ -102,7 +102,7 @@ const USE_CASES = [
     id: 'legal-professionals',
     title: 'Legal Practice',
     desc: 'Cleanse metadata and combine litigation exhibits locally without cloud transmission security risks.',
-    icon: ScaleIcon,
+    icon: BuildingLibraryIcon,
   },
   {
     id: 'healthcare',

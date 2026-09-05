@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ShieldCheckIcon,
+  LockClosedIcon,
   CpuChipIcon,
   DocumentCheckIcon,
   ExclamationTriangleIcon,
@@ -147,7 +147,7 @@ export default function ToolContentSection({
         {/* Privacy & Limitations */}
         <div className="p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
           <div className="flex items-center gap-2 text-emerald-400 font-semibold text-sm">
-            <ShieldCheckIcon className="w-5 h-5" />
+            <LockClosedIcon className="w-5 h-5" />
             <span>Zero Server Transmission Policy</span>
           </div>
           <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">

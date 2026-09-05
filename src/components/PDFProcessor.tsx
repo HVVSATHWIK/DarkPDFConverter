@@ -10,12 +10,14 @@ import {
   ChevronDownIcon,
   CheckCircleIcon,
   ArrowPathIcon,
+  PresentationChartLineIcon,
 } from '@heroicons/react/24/outline';
 import { DarkModeOptions } from '@/hooks/useDarkMode';
 import { SplitOptions } from '@/hooks/useSplitPDF';
 import { RotateOptions } from '@/hooks/useRotatePDF';
 import { ExtractOptions } from '@/hooks/useExtractPages';
 import { ImageToPdfOptions } from '@/hooks/useImagesToPdf';
+import { CompressOptions } from '@/hooks/useCompressPDF';
 import type { Tool } from '../types';
 
 type SelectedFileItem = {
@@ -42,6 +44,7 @@ export interface PDFProcessorProps {
   rotateOptions?: RotateOptions;
   extractOptions?: ExtractOptions;
   imageToPdfOptions?: ImageToPdfOptions;
+  compressOptions?: CompressOptions;
   activeTool?: Tool | null;
 }
 
@@ -69,11 +72,13 @@ function PDFProcessor({
   rotateOptions,
   extractOptions,
   imageToPdfOptions,
+  compressOptions,
 }: PDFProcessorProps) {
   const [selectedFiles, setSelectedFiles] = useState<SelectedFileItem[]>([]);
   const [progress, setProgress] = useState(0);
   const { processDocument, isProcessing } = useProcessPDF();
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  const [resultStats, setResultStats] = useState<{ originalSize?: number; processedSize?: number } | null>(null);
   const downloadUrlRef = useRef<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -140,6 +145,7 @@ function PDFProcessor({
         rotateOptions: activeTool?.name === 'Rotate PDF' ? rotateOptions : undefined,
         extractOptions: activeTool?.name === 'Extract Pages' ? extractOptions : undefined,
         imageToPdfOptions: activeTool?.name === 'Images to PDF' ? imageToPdfOptions : undefined,
+        compressOptions: activeTool?.name === 'Optimize PDF' ? compressOptions : undefined,
       };
 
       let result;
@@ -169,6 +175,10 @@ function PDFProcessor({
         const blob = new Blob([result.processedPdf as any], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
         setDownloadUrl(url);
+        setResultStats({
+          originalSize: result.originalSize,
+          processedSize: result.processedSize,
+        });
       }
       if (result) {
         onComplete({
@@ -200,6 +210,7 @@ function PDFProcessor({
     rotateOptions,
     selectedFiles,
     splitPdfOptions,
+    compressOptions,
   ]);
 
   useEffect(() => {
@@ -610,10 +621,34 @@ function PDFProcessor({
                 <span>PDF Ready for Download</span>
               </div>
 
+              {resultStats?.originalSize && resultStats?.processedSize && (
+                <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 text-left space-y-1.5 shadow-sm">
+                  <div className="flex items-center justify-between text-xs font-bold text-white">
+                    <span className="flex items-center gap-1.5">
+                      <PresentationChartLineIcon className="w-4 h-4 text-cyan-400 shrink-0" />
+                      <span>File Size Comparison</span>
+                    </span>
+                    {resultStats.originalSize > resultStats.processedSize ? (
+                      <span className="text-[10px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                        Saved {Math.round((1 - resultStats.processedSize / resultStats.originalSize) * 100)}%
+                      </span>
+                    ) : (
+                      <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+                        Fully Optimized
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-slate-300">
+                    <span>Original: <span className="font-semibold text-slate-200">{formatFileSize(resultStats.originalSize)}</span></span>
+                    <span>Optimized: <span className="font-bold text-cyan-400">{formatFileSize(resultStats.processedSize)}</span></span>
+                  </div>
+                </div>
+              )}
+
               <a
                 href={downloadUrl}
                 download={downloadFileName()}
-                className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl transition-colors shadow-lg shadow-cyan-500/20 text-sm"
+                className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl transition-colors shadow-lg shadow-cyan-500/20 text-sm cursor-pointer"
               >
                 <ArrowDownTrayIcon className="w-4 h-4 stroke-[2.5]" />
                 <span>Download {isMergeTool ? 'Merged PDF' : 'Processed PDF'}</span>

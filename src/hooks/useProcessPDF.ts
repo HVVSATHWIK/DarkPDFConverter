@@ -6,7 +6,7 @@ import { useDarkMode, DarkModeOptions } from './useDarkMode';
 import { useMergePDFs } from './useMergePDFs';
 import { useSplitPDF, SplitOptions } from './useSplitPDF';
 import { useRotatePDF, RotateOptions } from './useRotatePDF';
-import { useCompressPDF } from './useCompressPDF';
+import { useCompressPDF, CompressOptions } from './useCompressPDF';
 import { useExtractPages, ExtractOptions } from './useExtractPages';
 
 export interface ProcessResult {
@@ -16,6 +16,8 @@ export interface ProcessResult {
   processedPdf?: Uint8Array;
   isMerged?: boolean;
   isSplit?: boolean;
+  originalSize?: number;
+  processedSize?: number;
 }
 
 export interface ProcessOptions {
@@ -25,6 +27,7 @@ export interface ProcessOptions {
   rotateOptions?: RotateOptions;
   extractOptions?: ExtractOptions;
   imageToPdfOptions?: ImageToPdfOptions;
+  compressOptions?: CompressOptions;
 }
 
 export function useProcessPDF() {
@@ -128,7 +131,7 @@ export function useProcessPDF() {
 
         } else if (options.activeToolName === 'Optimize PDF') {
           titlePrefix = 'Optimized';
-          processedPdf = await compressPdf(file, (p, m) => onProgress(p, m));
+          processedPdf = await compressPdf(file, options.compressOptions, (p, m) => onProgress(p, m));
 
         } else if (options.activeToolName === 'Extract Pages') {
           if (!options.extractOptions) throw new Error('Extract options missing.');
@@ -149,12 +152,17 @@ export function useProcessPDF() {
 
         if (!processedPdf) throw new Error('Processing failed to return data.');
 
+        const originalSize = (processedPdf as any)?.originalSize || file.size;
+        const processedSize = (processedPdf as any)?.compressedSize || processedPdf.byteLength;
+
         const tempDoc = await PDFDocument.load(processedPdf);
         onProgress(1, 'Processing complete!');
         return {
           pageCount: tempDoc.getPageCount(),
           title: `${titlePrefix} - ${file.name}`,
           processedPdf,
+          originalSize,
+          processedSize,
         };
       }
     } finally {
