@@ -21,6 +21,7 @@ import { SEO } from './common/SEO';
 import { Breadcrumbs } from './seo/Breadcrumbs';
 import { GuideInfoButton } from './tools/GuideInfoButton';
 import { ContextualReportTrigger } from './common/ContextualReportTrigger';
+import ToolContentSection from './tools/ToolContentSection';
 
 interface ToolPageProps {
   activeTool: Tool;
@@ -333,7 +334,13 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
                 <span className="hidden sm:inline">Files are processed locally in your browser</span>
                 <span className="sm:hidden">Local Processing</span>
               </div>
-              {guide && <GuideInfoButton to={`${toolPath}/guide`} />}
+              {guide && (
+                <GuideInfoButton
+                  onClick={() => {
+                    document.getElementById('tool-guide')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                />
+              )}
             </div>
           </div>
           <div>
@@ -374,12 +381,15 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
               {guide && (
                 <div className="pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs mt-4">
                   <span className="text-slate-400 text-[11px]">Need step-by-step help or specs?</span>
-                  <Link
-                    to={`${toolPath}/guide`}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      document.getElementById('tool-guide')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
                     className="inline-flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 font-semibold text-xs transition-colors cursor-pointer"
                   >
                     <span>How It Works &rarr;</span>
-                  </Link>
+                  </button>
                 </div>
               )}
             </div>
@@ -468,6 +478,13 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
           </div>
         </div>
       </section>
+
+      {/* 3. Tool Educational & Guide Section */}
+      {guide && (
+        <section id="tool-guide" className="w-full bg-[#050505] border-t border-slate-800/80">
+          <ToolContentSection guide={guide} toolPath={toolPath} toolName={activeTool.name} />
+        </section>
+      )}
     </div>
   );
 }
