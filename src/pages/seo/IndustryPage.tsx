@@ -111,7 +111,7 @@ const INDUSTRY_MAP: Record<string, IndustryData> = {
     badge: 'Engineers & Tech Teams',
     heading: 'High-Performance Rust/WASM Engine in Browser Web Workers',
     description:
-      'Fast, offline-capable PDF manipulation powered by modern web standards. Zero tracking, zero telemetry, and pure hardware-accelerated processing.',
+      'Fast, offline-capable PDF manipulation powered by modern web standards. Zero tracking, zero telemetry, and pure in-browser WebAssembly processing.',
     icon: CommandLineIcon,
     keyPainPoints: [
       'Sending proprietary source code or system architecture diagrams to unknown third-party cloud converters.',

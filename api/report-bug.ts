@@ -8,6 +8,14 @@ const MAX_REQUESTS_PER_WINDOW = 5;
 
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
+
+  // Clean up expired entries to prevent memory growth
+  for (const [key, entry] of ipRequestCounts.entries()) {
+    if (now > entry.resetTime) {
+      ipRequestCounts.delete(key);
+    }
+  }
+
   const entry = ipRequestCounts.get(ip);
 
   if (!entry || now > entry.resetTime) {
@@ -208,37 +216,34 @@ ${diagnosticsText}
         });
 
         if (error) {
-          console.error('[Resend API Error]:', JSON.stringify(error, null, 2));
-          // Fallback log to server console so user report is preserved
-          console.log('--------------------------------------------------');
-          console.log('[SERVER FALLBACK LOG] REPORT CAPTURED IN CONSOLE');
-          console.log(formattedBody);
-          console.log('--------------------------------------------------');
-          // Return success so user's submission completes reliably
+          console.error('[Resend API Error]:', error.message || 'Send email failed');
+          console.warn('[BugReport Fallback] Delivery failed via Resend', {
+            category: formattedCategory,
+            timestamp: submittedTime,
+            hasScreenshot: Boolean(attachments?.length),
+          });
           return res.status(200).json({ success: true, note: 'Logged to server fallback' });
         }
 
         console.log('[Resend Email Dispatched Successfully]: ID =', data?.id);
         return res.status(200).json({ success: true, id: data?.id });
       } catch (err) {
-        console.error('Error invoking Resend SDK:', err);
-        // Log to server console
-        console.log('--------------------------------------------------');
-        console.log('[SERVER FALLBACK LOG] REPORT CAPTURED IN CONSOLE');
-        console.log(formattedBody);
-        console.log('--------------------------------------------------');
+        console.error('Error invoking Resend SDK:', err instanceof Error ? err.message : 'Unknown error');
+        console.warn('[BugReport Fallback] Delivery error via Resend SDK', {
+          category: formattedCategory,
+          timestamp: submittedTime,
+          hasScreenshot: Boolean(attachments?.length),
+        });
         return res.status(200).json({ success: true, note: 'Logged to server fallback' });
       }
     }
 
-    // Fallback logging for local development / unconfigured environment
-    console.log('--------------------------------------------------');
-    console.log('[SERVER LOG] BUG REPORT RECEIVED (No RESEND_API_KEY set)');
-    console.log(`Category: ${formattedCategory}`);
-    console.log(`BUG_REPORT_TO: ${bugReportTo || 'Not set'}`);
-    console.log(formattedBody);
-    if (attachments) console.log(`Attachment: ${attachments[0].filename} (${attachments[0].content.length} bytes)`);
-    console.log('--------------------------------------------------');
+    // Safe logging for unconfigured environment (no RESEND_API_KEY set)
+    console.log('[BugReport] Received report in unconfigured environment', {
+      category: formattedCategory,
+      timestamp: submittedTime,
+      hasScreenshot: Boolean(attachments?.length),
+    });
 
     return res.status(200).json({ success: true });
   } catch (error) {

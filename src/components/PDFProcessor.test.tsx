@@ -7,6 +7,11 @@ import PDFProcessorWithErrorBoundary, { PDFProcessorProps } from './PDFProcessor
 import { useProcessPDF } from '@/hooks/useProcessPDF'; // Import the hook itself
 import { Tool } from '@/types';
 import { SplitOptions } from '@/hooks/useSplitPDF';
+import { ReportBugProvider } from '@/context/ReportBugContext';
+
+const renderWithProviders = (ui: React.ReactElement) => {
+  return render(<ReportBugProvider>{ui}</ReportBugProvider>);
+};
 
 // Mock the hook module
 const mockProcessDocumentGlobal = vi.fn(); // This will be our controllable mock function
@@ -69,7 +74,7 @@ describe('PDFProcessor', () => {
   });
 
   it('renders file input and allows file selection', async () => {
-    const { container } = render(<PDFProcessorWithErrorBoundary {...defaultProps} />);
+    const { container } = renderWithProviders(<PDFProcessorWithErrorBoundary {...defaultProps} />);
     const fileInput = container.querySelector(`#pdf-upload-${defaultProps.toolId}`) as HTMLInputElement;
     expect(fileInput).toBeInTheDocument();
 
@@ -91,7 +96,7 @@ describe('PDFProcessor', () => {
     };
     mockProcessDocumentGlobal.mockResolvedValue(specificMockSuccessResult);
 
-    const { container } = render(<PDFProcessorWithErrorBoundary {...defaultProps} />);
+    const { container } = renderWithProviders(<PDFProcessorWithErrorBoundary {...defaultProps} />);
     const fileInput = container.querySelector(`#pdf-upload-${defaultProps.toolId}`) as HTMLInputElement;
     const file = createMockFile('single.pdf');
 
@@ -139,7 +144,7 @@ describe('PDFProcessor', () => {
       isProcessing: false,
     });
 
-    const { container, rerender } = render(<PDFProcessorWithErrorBoundary {...defaultProps} />);
+    const { container, rerender } = renderWithProviders(<PDFProcessorWithErrorBoundary {...defaultProps} />);
     const fileInput = container.querySelector(`#pdf-upload-${defaultProps.toolId}`) as HTMLInputElement;
     const file = createMockFile('test.pdf');
     await act(async () => { fireEvent.change(fileInput, { target: { files: [file] } }); });
@@ -159,12 +164,12 @@ describe('PDFProcessor', () => {
       throw new Error("onProgress callback was not captured by mockProcessDocumentGlobal");
     }
 
-    rerender(<PDFProcessorWithErrorBoundary {...defaultProps} />);
+    rerender(<ReportBugProvider><PDFProcessorWithErrorBoundary {...defaultProps} /></ReportBugProvider>);
 
     await waitFor(() => {
       expect(screen.getByText(/Processing/i)).toBeInTheDocument();
 
-      const progressBarFill = document.querySelector('.h-full.bg-cyan-500');
+      const progressBarFill = document.querySelector('.h-full.from-cyan-500') || document.querySelector('.h-full.bg-gradient-to-r');
       expect(progressBarFill).toHaveStyle({ width: '50%' });
     });
   });
@@ -173,7 +178,7 @@ describe('PDFProcessor', () => {
     const errorMessage = "Something went wrong during processing";
     mockProcessDocumentGlobal.mockRejectedValue(new Error(errorMessage));
 
-    const { container } = render(<PDFProcessorWithErrorBoundary {...defaultProps} />);
+    const { container } = renderWithProviders(<PDFProcessorWithErrorBoundary {...defaultProps} />);
     const fileInput = container.querySelector(`#pdf-upload-${defaultProps.toolId}`) as HTMLInputElement;
     const file = createMockFile('error.pdf');
     await act(async () => { fireEvent.change(fileInput, { target: { files: [file] } }); });
@@ -202,7 +207,7 @@ describe('PDFProcessor', () => {
 
 
     const mergeTool: Tool = { id: 2, name: 'Merge PDFs', description: 'Merge multiple PDFs', icon: ' M ' };
-    const { container } = render(
+    const { container } = renderWithProviders(
       <PDFProcessorWithErrorBoundary {...defaultProps} activeTool={mergeTool} allowMultipleFiles={true} processActionName="Apply Merge PDFs" toolId={mergeTool.id} />
     );
 
@@ -246,7 +251,7 @@ describe('PDFProcessor', () => {
 
 
     const splitTool: Tool = { id: 3, name: 'Split PDF', description: 'Split a PDF', icon: 'S' };
-    const { container } = render( // Capture container
+    const { container } = renderWithProviders( // Capture container
         <PDFProcessorWithErrorBoundary
             {...defaultProps}
             activeTool={splitTool}

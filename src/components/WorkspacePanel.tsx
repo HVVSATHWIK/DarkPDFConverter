@@ -336,6 +336,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
               </div>
               {guide && (
                 <GuideInfoButton
+                  to={`/${guide.slug}/guide`}
                   onClick={() => {
                     document.getElementById('tool-guide')?.scrollIntoView({ behavior: 'smooth' });
                   }}

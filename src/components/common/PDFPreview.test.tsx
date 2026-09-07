@@ -62,7 +62,7 @@ describe('PDFPreview Component', () => {
     it('shows loading state when buffering', () => {
         vi.mocked(usePdfBufferModule.usePdfBuffer).mockReturnValue({ status: 'loading' });
         render(<PDFPreview file={null} />);
-        expect(screen.getByText('Buffering PDF...')).toBeInTheDocument();
+        expect(screen.getByText('Buffering document...')).toBeInTheDocument();
     });
 
     it('shows error state when buffer fails', () => {

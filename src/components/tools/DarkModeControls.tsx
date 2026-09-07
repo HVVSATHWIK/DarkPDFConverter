@@ -197,7 +197,7 @@ const DarkModeControls: React.FC<DarkModeControlsProps> = ({ onSettingsChange, c
           This component now only manages settings.
       */}
       <p className="text-xs text-slate-300/80 mt-2">
-        Tip: changes auto-apply after a moment; use Apply to refresh instantly.
+        Tip: changes auto-apply after a moment; use Apply to refresh instantly. Note: Dark Mode renders high-resolution dark visual pages optimized for night reading.
       </p>
     </div>
   );

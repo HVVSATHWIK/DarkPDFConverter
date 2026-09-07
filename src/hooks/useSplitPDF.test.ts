@@ -109,6 +109,40 @@ describe('useSplitPDF', () => {
       .rejects.toThrow('Start page is out of bounds. PDF has 2 pages.');
   });
 
+  it('should handle boundary cases accurately: 1-page PDF (1 -> 1)', async () => {
+    const { splitPdf } = useSplitPDF();
+    mockLoadedPdfDoc.getPageCount.mockReturnValue(1);
+    await splitPdf(createMockFile(), { startPage: 1, endPage: 1 }, mockOnProgress);
+    const newPdfInstance = await (PDFDocument.create as Mock).mock.results[0].value;
+    expect(newPdfInstance.copyPages).toHaveBeenCalledWith(mockLoadedPdfDoc, [0]);
+  });
+
+  it('should handle boundary cases accurately: 5-page PDF (1 -> 1, 2 -> 5, 5 -> 5, 5 -> 10, 6 -> 6)', async () => {
+    const { splitPdf } = useSplitPDF();
+    mockLoadedPdfDoc.getPageCount.mockReturnValue(5);
+
+    // 1 -> 1
+    await splitPdf(createMockFile(), { startPage: 1, endPage: 1 }, mockOnProgress);
+    const newPdfInstance = await (PDFDocument.create as Mock).mock.results[0].value;
+    expect(newPdfInstance.copyPages).toHaveBeenLastCalledWith(mockLoadedPdfDoc, [0]);
+
+    // 2 -> 5
+    await splitPdf(createMockFile(), { startPage: 2, endPage: 5 }, mockOnProgress);
+    expect(newPdfInstance.copyPages).toHaveBeenLastCalledWith(mockLoadedPdfDoc, [1, 2, 3, 4]);
+
+    // 5 -> 5
+    await splitPdf(createMockFile(), { startPage: 5, endPage: 5 }, mockOnProgress);
+    expect(newPdfInstance.copyPages).toHaveBeenLastCalledWith(mockLoadedPdfDoc, [4]);
+
+    // 5 -> 10 (capped)
+    await splitPdf(createMockFile(), { startPage: 5, endPage: 10 }, mockOnProgress);
+    expect(newPdfInstance.copyPages).toHaveBeenLastCalledWith(mockLoadedPdfDoc, [4]);
+
+    // 6 -> 6 (out of bounds)
+    await expect(splitPdf(createMockFile(), { startPage: 6, endPage: 6 }, mockOnProgress))
+      .rejects.toThrow('Start page is out of bounds. PDF has 5 pages.');
+  });
+
   it('should throw error if no file is provided', async () => {
     const { splitPdf } = useSplitPDF();
     await expect(splitPdf(null as any, { startPage: 1, endPage: 1 }, mockOnProgress))

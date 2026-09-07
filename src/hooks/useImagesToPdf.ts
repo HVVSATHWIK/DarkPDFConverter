@@ -5,6 +5,27 @@ export interface ImageToPdfOptions {
   margin?: number; // margin in points (0, 18, 36)
 }
 
+const MAX_CANVAS_DIMENSION = 4096;
+const MAX_CANVAS_PIXELS = 12_000_000;
+
+function getSafeCanvasDimensions(rawWidth: number, rawHeight: number): { width: number; height: number } {
+  let width = rawWidth;
+  let height = rawHeight;
+  const totalPixels = width * height;
+
+  if (width > MAX_CANVAS_DIMENSION || height > MAX_CANVAS_DIMENSION || totalPixels > MAX_CANVAS_PIXELS) {
+    const scaleFactor = Math.min(
+      MAX_CANVAS_DIMENSION / width,
+      MAX_CANVAS_DIMENSION / height,
+      Math.sqrt(MAX_CANVAS_PIXELS / totalPixels)
+    );
+    width = Math.max(1, Math.round(width * scaleFactor));
+    height = Math.max(1, Math.round(height * scaleFactor));
+  }
+
+  return { width, height };
+}
+
 async function fileToEmbeddableBuffer(file: File): Promise<{ buffer: ArrayBuffer; isPng: boolean }> {
   const isPng = file.type === 'image/png' || file.name.toLowerCase().endsWith('.png');
   const isJpg = file.type === 'image/jpeg' || file.type === 'image/jpg' || file.name.toLowerCase().endsWith('.jpg') || file.name.toLowerCase().endsWith('.jpeg');
@@ -25,19 +46,24 @@ async function fileToEmbeddableBuffer(file: File): Promise<{ buffer: ArrayBuffer
 
     img.onload = () => {
       URL.revokeObjectURL(objectUrl);
+      const rawWidth = img.naturalWidth || img.width;
+      const rawHeight = img.naturalHeight || img.height;
+      if (!rawWidth || !rawHeight) {
+        reject(new Error(`Invalid image dimensions (0x0) for ${file.name}`));
+        return;
+      }
+
+      const { width, height } = getSafeCanvasDimensions(rawWidth, rawHeight);
       const canvas = document.createElement('canvas');
-      canvas.width = img.naturalWidth || img.width;
-      canvas.height = img.naturalHeight || img.height;
+      canvas.width = width;
+      canvas.height = height;
+
       const ctx = canvas.getContext('2d');
       if (!ctx) {
         reject(new Error('Canvas context not available'));
         return;
       }
-      ctx.drawImage(img, 0, 0);
-      if (canvas.width === 0 || canvas.height === 0) {
-        reject(new Error(`Invalid image dimensions (0x0) for ${file.name}`));
-        return;
-      }
+      ctx.drawImage(img, 0, 0, width, height);
       canvas.toBlob(async (blob) => {
         if (!blob) {
           reject(new Error(`Failed to process image ${file.name}`));
@@ -94,12 +120,15 @@ export function useImagesToPdf() {
         const pngBuffer = await new Promise<ArrayBuffer>((resolve, reject) => {
           img.onload = () => {
             URL.revokeObjectURL(objectUrl);
+            const rawWidth = img.naturalWidth || img.width;
+            const rawHeight = img.naturalHeight || img.height;
+            const { width, height } = getSafeCanvasDimensions(rawWidth, rawHeight);
             const canvas = document.createElement('canvas');
-            canvas.width = img.naturalWidth || img.width;
-            canvas.height = img.naturalHeight || img.height;
+            canvas.width = width;
+            canvas.height = height;
             const ctx = canvas.getContext('2d');
             if (!ctx) return reject(new Error('Canvas 2D error'));
-            ctx.drawImage(img, 0, 0);
+            ctx.drawImage(img, 0, 0, width, height);
             canvas.toBlob(async (b) => {
               if (b) resolve(await b.arrayBuffer());
               else reject(new Error('toBlob error'));

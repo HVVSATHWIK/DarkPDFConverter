@@ -36,10 +36,8 @@ export const usePdfBuffer = (file: string | File | Blob | { data: Uint8Array } |
                     throw new Error("Unknown file format");
                 }
 
-                // Use standard ArrayBuffer (copied here to ensure ownership for UI).
-                // We clone it to prevent detachment if the same buffer was used elsewhere.
-                const clone = rawBuffer.slice(0);
-                setState({ status: 'ready', buffer: clone, isShared: false });
+                // Pass rawBuffer directly (freshly allocated/fetched buffer owned by this instance)
+                setState({ status: 'ready', buffer: rawBuffer, isShared: false });
             } catch (e: unknown) {
                 // Fix 2: Remove usage of `any` type for error handling
                 console.error("Buffer Load Error:", e);

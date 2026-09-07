@@ -228,14 +228,19 @@ export default function PDFPreview({ file }: PDFPreviewProps) {
   }
 
   if (bufferState.status === 'error' || isPdfError) {
+    const isBufferError = bufferState.status === 'error';
     return (
       <div className="w-full h-full flex flex-col items-center justify-center p-8 text-slate-300 gap-2 text-center">
         <div className="p-3 bg-cyan-500/10 rounded-full border border-cyan-500/20">
           <DocumentIcon className="w-6 h-6 text-cyan-400" />
         </div>
-        <p className="text-sm font-semibold text-slate-200">Image File Loaded</p>
+        <p className="text-sm font-semibold text-slate-200">
+          {isBufferError ? 'Error loading PDF buffer.' : 'Image File Loaded'}
+        </p>
         <p className="text-xs text-slate-400 max-w-xs leading-relaxed">
-          Click <span className="font-bold text-cyan-400">"Convert to PDF"</span> to build and view the compiled PDF document.
+          {isBufferError
+            ? 'Unable to load PDF buffer.'
+            : 'Click "Convert to PDF" to build and view the compiled PDF document.'}
         </p>
       </div>
     );

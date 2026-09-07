@@ -100,6 +100,15 @@ function PDFProcessor({
   }, [downloadUrl]);
 
   useEffect(() => {
+    return () => {
+      if (downloadUrlRef.current) {
+        URL.revokeObjectURL(downloadUrlRef.current);
+        downloadUrlRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     setSelectedFiles([]);
     setProgress(0);
     if (downloadUrlRef.current) {
