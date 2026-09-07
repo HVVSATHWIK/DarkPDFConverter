@@ -13,7 +13,7 @@ export default function PrivacyPage() {
 
         <div className="space-y-2 border-b border-slate-800 pb-6">
           <h1 className="text-3xl font-bold text-white tracking-tight">Privacy Policy</h1>
-          <p className="text-xs text-slate-400">Last updated: August 31, 2026</p>
+          <p className="text-xs text-slate-400">Last updated: September 7, 2026</p>
         </div>
 
         {/* Core Privacy Principle */}
@@ -51,9 +51,62 @@ export default function PrivacyPage() {
           </p>
         </section>
 
+        {/* Advertising & Google AdSense */}
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold text-white">4. Advertising and Google AdSense</h2>
+          <p>
+            LitasDark may use Google AdSense and third-party advertising partners to display advertisements on the website.
+          </p>
+          <p>
+            In connection with ad serving and measurement, third-party vendors, including Google, use cookies, web beacons, IP addresses, or other identifiers. Third-party vendors, including Google, use cookies to serve ads based on a user&apos;s prior visits to LitasDark or other websites on the Internet.
+          </p>
+          <p>
+            Google&apos;s use of advertising cookies enables it and its partners to serve ads to users based on their visit to LitasDark and/or other websites across the Internet. As a result of ad serving on this website, third parties may place and read cookies on users&apos; browsers, or use web beacons or IP addresses to collect information.
+          </p>
+          <p>
+            Users may opt out of personalized advertising by visiting{' '}
+            <a
+              href="https://www.google.com/settings/ads"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 hover:underline"
+            >
+              Google Ads Settings
+            </a>
+            . Alternatively, users can opt out of a third-party vendor&apos;s use of cookies for personalized advertising by visiting{' '}
+            <a
+              href="https://www.aboutads.info/choices"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 hover:underline"
+            >
+              www.aboutads.info
+            </a>
+            .
+          </p>
+          <p>
+            For information about how Google uses data when you use partner sites or applications, please visit{' '}
+            <a
+              href="https://policies.google.com/technologies/partner-sites"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 hover:underline"
+            >
+              How Google uses information from sites or apps that use our services
+            </a>
+            .
+          </p>
+          <div className="p-4 rounded-lg bg-slate-900/40 border border-slate-800 text-xs text-slate-400 leading-relaxed space-y-1">
+            <p className="font-medium text-slate-300">Important Privacy Distinction Regarding Document Processing</p>
+            <p>
+              Your PDF documents and files are processed strictly locally in your web browser and are not uploaded to LitasDark&apos;s servers for PDF processing. This local processing guarantee applies specifically to your documents and files. This does not mean that advertising technologies used on the website collect no information: third-party advertising partners may place and read cookies, or use web beacons and IP addresses, for ad serving and measurement as described above. LitasDark does not receive, collect, or store Google&apos;s advertising data on its servers.
+            </p>
+          </div>
+        </section>
+
         {/* Regulatory Disclaimers */}
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-white">4. Regulatory &amp; Compliance Disclaimers</h2>
+          <h2 className="text-lg font-semibold text-white">5. Regulatory &amp; Compliance Disclaimers</h2>
           <p className="text-xs text-slate-400 leading-relaxed">
             Disclaimer: LitasDark operates strictly as a local software utility and does not act as a Data Processor or Business Associate under HIPAA, GDPR, or similar data privacy frameworks. Users are solely responsible for ensuring their use of local software complies with their specific organizational policies, private confidentiality agreements, and applicable professional regulations.
           </p>
@@ -61,7 +114,7 @@ export default function PrivacyPage() {
 
         {/* Contact */}
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-white">5. Contact</h2>
+          <h2 className="text-lg font-semibold text-white">6. Contact</h2>
           <p>
             If you have questions regarding this Privacy Policy or our client-side architecture, please review our Technical Architecture Whitepaper or reach out through our support channels.
           </p>

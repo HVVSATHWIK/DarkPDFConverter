@@ -46,7 +46,7 @@ const COMPETITOR_MAP: Record<string, CompetitorData> = {
       },
       {
         issue: 'Third-party tracking scripts and ad networks common on free cloud conversion tiers.',
-        litasFix: 'Zero tracking cookies, zero external telemetry, and an ad-free interface.',
+        litasFix: 'Zero document uploads, local memory execution, and transparent privacy disclosures.',
       },
     ],
     faqs: [
