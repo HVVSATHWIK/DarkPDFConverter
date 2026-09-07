@@ -1,6 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Logo } from '@/components/common/Logo';
-import { BeakerIcon } from '@heroicons/react/24/outline';
 
 export function Header() {
   const location = useLocation();
@@ -72,7 +71,6 @@ export function Header() {
                 : 'text-slate-300 hover:text-slate-100 hover:bg-slate-900/60 border border-slate-800'
             }`}
           >
-            <BeakerIcon className="w-3.5 h-3.5 text-cyan-400" />
             <span>3D Labs</span>
           </Link>
         </nav>

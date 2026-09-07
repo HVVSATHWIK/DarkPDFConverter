@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { CompressOptions, CompressionLevel, CompressionEngine } from '@/hooks/useCompressPDF';
 import {
-  SparklesIcon,
+  CpuChipIcon,
   AdjustmentsVerticalIcon,
   ChevronDownIcon,
   ChevronUpIcon,
@@ -120,7 +120,7 @@ export const OptimizePDFControls: React.FC<OptimizePDFControlsProps> = ({
       <div className="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800/80 space-y-1">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 font-bold text-slate-100 text-xs">
-            <SparklesIcon className="w-3.5 h-3.5 text-cyan-400" />
+            <CpuChipIcon className="w-3.5 h-3.5 text-cyan-400" />
             <span>Smart Optimization</span>
           </div>
           <span className="text-[10px] font-bold text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded-full border border-cyan-500/30">

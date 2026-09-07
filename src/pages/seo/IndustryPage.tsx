@@ -10,10 +10,9 @@ import {
   DocumentCheckIcon,
   AcademicCapIcon,
   CommandLineIcon,
-  HeartIcon,
   ScaleIcon,
   ArrowRightIcon,
-  SparklesIcon,
+  WrenchScrewdriverIcon,
 } from '@heroicons/react/24/outline';
 
 interface IndustryData {
@@ -61,7 +60,7 @@ const INDUSTRY_MAP: Record<string, IndustryData> = {
     heading: 'Privacy-First Architecture for Clinical Documentation',
     description:
       'Manage records, research reports, and medical documents locally. Zero external data transmission supports clinical workstations needing privacy-aligned document handling.',
-    icon: HeartIcon,
+    icon: ShieldCheckIcon,
     keyPainPoints: [
       'Sending sensitive patient documentation over external cloud networks introduces privacy risks.',
       'Large clinical research papers and documentation require fast multi-page splitting and organizing.',
@@ -188,7 +187,7 @@ export default function IndustryPage() {
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-              <SparklesIcon className="w-5 h-5 text-cyan-400" />
+              <WrenchScrewdriverIcon className="w-5 h-5 text-cyan-400" />
               Recommended Tools for {data.badge}
             </h2>
             <Link to="/" className="text-xs text-cyan-400 hover:underline flex items-center gap-1">

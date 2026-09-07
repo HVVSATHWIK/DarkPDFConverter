@@ -9,7 +9,7 @@ import {
   ShieldCheckIcon,
   XCircleIcon,
   CheckCircleIcon,
-  SparklesIcon,
+  CpuChipIcon,
   ArrowRightIcon,
   BoltIcon,
 } from '@heroicons/react/24/outline';
@@ -158,7 +158,7 @@ export default function CompetitorAlternativePage() {
         <section className="space-y-4">
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
-              <SparklesIcon className="w-3.5 h-3.5" />
+              <CpuChipIcon className="w-3.5 h-3.5" />
               Architectural Comparison
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">

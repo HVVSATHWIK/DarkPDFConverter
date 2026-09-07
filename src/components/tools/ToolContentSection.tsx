@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   LockClosedIcon,
-  CpuChipIcon,
+  Square3Stack3DIcon,
   DocumentCheckIcon,
   ExclamationTriangleIcon,
   QuestionMarkCircleIcon,
   ArrowUpIcon,
   ChevronDownIcon,
   ArrowRightIcon,
-  SparklesIcon,
+  BookOpenIcon,
 } from '@heroicons/react/24/outline';
 import { ToolGuideData, TOOL_GUIDES } from '@/config/toolGuides';
 import { TOOL_DEFINITIONS } from '@/config/tools';
@@ -59,7 +59,7 @@ export default function ToolContentSection({
       {/* 1. Header Overview & How It Works */}
       <section className="space-y-4">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-cyan-400">
-          <SparklesIcon className="w-4 h-4" />
+          <BookOpenIcon className="w-4 h-4" />
           <span>Complete User Guide &amp; Technical Reference</span>
         </div>
         <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
@@ -119,7 +119,7 @@ export default function ToolContentSection({
         {/* Technical Specs */}
         <div className="p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
           <div className="flex items-center gap-2 text-indigo-400 font-semibold text-sm">
-            <CpuChipIcon className="w-5 h-5" />
+            <Square3Stack3DIcon className="w-5 h-5" />
             <span>Technical Architecture</span>
           </div>
           <dl className="space-y-3 text-xs sm:text-sm">

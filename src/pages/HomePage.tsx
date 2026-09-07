@@ -4,7 +4,7 @@ import { SEO } from '@/components/common/SEO';
 import {
   ChevronDownIcon,
   BuildingLibraryIcon,
-  HeartIcon,
+  ShieldCheckIcon,
   AcademicCapIcon,
   CommandLineIcon,
   ArrowRightIcon,
@@ -14,8 +14,7 @@ import {
   PhotoIcon,
   MagnifyingGlassIcon,
   LockClosedIcon,
-  RocketLaunchIcon,
-  CheckBadgeIcon,
+  CheckCircleIcon,
   DocumentArrowUpIcon,
   CpuChipIcon,
   FolderArrowDownIcon,
@@ -67,12 +66,12 @@ const WHY_LITASDARK = [
   {
     title: 'Fast',
     desc: 'Processing happens locally on your device hardware with zero network transmission or remote server wait queues.',
-    icon: RocketLaunchIcon,
+    icon: CpuChipIcon,
   },
   {
     title: 'Simple',
     desc: 'No account registration or subscription workflow required. Open any tool, choose your file, and process immediately.',
-    icon: CheckBadgeIcon,
+    icon: CheckCircleIcon,
   },
 ];
 
@@ -108,7 +107,7 @@ const USE_CASES = [
     id: 'healthcare',
     title: 'Healthcare & Records',
     desc: 'Review medical documents in dark mode with local browser processing designed for privacy-sensitive workflows.',
-    icon: HeartIcon,
+    icon: ShieldCheckIcon,
   },
   {
     id: 'students-researchers',

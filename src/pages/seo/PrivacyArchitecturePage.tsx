@@ -12,8 +12,6 @@ import {
   CheckCircleIcon,
   QuestionMarkCircleIcon,
   ArrowRightIcon,
-  ServerIcon,
-  GlobeAltIcon,
   Square3Stack3DIcon,
   CircleStackIcon,
 } from '@heroicons/react/24/outline';
@@ -210,7 +208,7 @@ export default function PrivacyArchitecturePage() {
 
             <div className="panel-surface p-5 rounded-xl space-y-2.5">
               <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
-                <ServerIcon className="w-4 h-4" />
+                <ShieldCheckIcon className="w-4 h-4" />
               </div>
               <h3 className="text-base font-bold text-slate-100">No Upload Endpoint</h3>
               <p className="text-xs text-slate-300/80 leading-relaxed">
@@ -304,7 +302,6 @@ export default function PrivacyArchitecturePage() {
             </div>
             <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
               <span className="font-bold text-slate-200 text-sm flex items-center gap-1.5">
-                <GlobeAltIcon className="w-4 h-4 text-cyan-400" />
                 Website Resources: Downloaded Normally
               </span>
               <p className="text-slate-400 leading-relaxed">
@@ -504,7 +501,6 @@ export default function PrivacyArchitecturePage() {
             <div className="panel-surface p-6 rounded-2xl space-y-4 border-t-2 border-t-slate-600">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-                  <GlobeAltIcon className="w-5 h-5 text-slate-400" />
                   Server-Side Model (Traditional Cloud)
                 </h3>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-800 text-slate-400 border border-slate-700">

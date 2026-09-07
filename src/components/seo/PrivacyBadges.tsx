@@ -1,4 +1,4 @@
-import { LockClosedIcon, CpuChipIcon, FingerPrintIcon, CheckBadgeIcon } from '@heroicons/react/24/outline';
+import { LockClosedIcon, CpuChipIcon, ComputerDesktopIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
 export function PrivacyBadges() {
   const badges = [
@@ -13,12 +13,12 @@ export function PrivacyBadges() {
       description: 'Client-side execution powered by compiled WebAssembly without server latency.',
     },
     {
-      icon: FingerPrintIcon,
+      icon: ComputerDesktopIcon,
       title: 'Zero Data Transmission',
       description: 'Files remain in local volatile device memory without external server transmission.',
     },
     {
-      icon: CheckBadgeIcon,
+      icon: CheckCircleIcon,
       title: 'Unrestricted Local Access',
       description: 'Process files directly on your device with no hidden paywalls and no mandatory accounts.',
     },
