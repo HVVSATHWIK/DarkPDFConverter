@@ -1,11 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/api/report-bug",
-      "destination": "/api/report-bug"
-    },
-    {
-      "source": "/((?!api/).*)",
+      "source": "/((?!api/.*).*)",
       "destination": "/index.html"
     }
   ]

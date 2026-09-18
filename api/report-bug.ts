@@ -53,27 +53,108 @@ function parseOS(osStr?: string, ua?: string): string {
   return osStr || 'Not available';
 }
 
-export async function handleReportBug(req: Request, res: Response) {
+async function parseRequestBody(req: any): Promise<any> {
+  if (req.body) {
+    if (typeof req.body === 'string') {
+      try {
+        return JSON.parse(req.body);
+      } catch {
+        return {};
+      }
+    }
+    if (Buffer.isBuffer(req.body)) {
+      try {
+        return JSON.parse(req.body.toString('utf-8'));
+      } catch {
+        return {};
+      }
+    }
+    if (typeof req.body === 'object') {
+      return req.body;
+    }
+  }
+
+  // Handle stream in case body-parser did not run
+  if (typeof req.on === 'function') {
+    try {
+      const buffers: Buffer[] = [];
+      let totalBytes = 0;
+      const MAX_PAYLOAD_BYTES = 1024 * 1024; // 1MB maximum payload safety limit
+
+      for await (const chunk of req) {
+        const buf = typeof chunk === 'string' ? Buffer.from(chunk) : chunk;
+        totalBytes += buf.length;
+        if (totalBytes > MAX_PAYLOAD_BYTES) {
+          return {};
+        }
+        buffers.push(buf);
+      }
+      const raw = Buffer.concat(buffers).toString('utf-8');
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  }
+
+  return {};
+}
+
+function sendJson(res: any, status: number, data: Record<string, unknown>) {
+  if (typeof res.setHeader === 'function') {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+  }
+  if (typeof res.status === 'function' && typeof res.json === 'function') {
+    return res.status(status).json(data);
+  }
+  res.statusCode = status;
+  res.setHeader('Content-Type', 'application/json');
+  res.end(JSON.stringify(data));
+}
+
+export async function handleReportBug(req: Request | any, res: Response | any) {
+  // CORS & Method checks for Vercel / serverless runtime
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Allow', 'POST');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    if (typeof res.status === 'function') {
+      return res.status(204).end();
+    }
+    res.statusCode = 204;
+    return res.end();
+  }
+
+  if (req.method && req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return sendJson(res, 405, { error: 'Method not allowed. Please use POST.' });
+  }
+
   try {
+    // Parse request body reliably across Vercel and Express
+    const body = await parseRequestBody(req);
+
     // 1. IP Rate Limiting
     const clientIp =
-      (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() ||
-      req.socket.remoteAddress ||
+      (req.headers?.['x-forwarded-for'] as string)?.split(',')[0].trim() ||
+      (req.headers?.['x-real-ip'] as string) ||
+      req.socket?.remoteAddress ||
       'unknown';
 
     if (isRateLimited(clientIp)) {
-      return res.status(429).json({ error: 'Too many bug report requests. Please try again later.' });
+      return sendJson(res, 429, { error: 'Too many bug report requests. Please try again later.' });
     }
 
     // 2. Honeypot Validation
-    const honeypot = req.body?.website || req.body?.company_url;
+    const honeypot = body?.website || body?.company_url;
     if (honeypot && String(honeypot).trim().length > 0) {
       // Silently discard bot submission with 200 OK
-      return res.status(200).json({ success: true });
+      return sendJson(res, 200, { success: true });
     }
 
     // 3. Payload Validation
-    const { category, description, contact, metadata, screenshot } = req.body || {};
+    const { category, description, contact, metadata, screenshot } = body || {};
 
     const validCategories = [
       'bug',
@@ -87,23 +168,29 @@ export async function handleReportBug(req: Request, res: Response) {
     ];
 
     if (!category || !validCategories.includes(category)) {
-      return res.status(400).json({ error: 'Invalid category provided.' });
+      return sendJson(res, 400, { error: 'Invalid category provided.' });
     }
 
     if (!description || typeof description !== 'string' || description.trim().length === 0) {
-      return res.status(400).json({ error: 'Description is required.' });
+      return sendJson(res, 400, { error: 'Description is required.' });
     }
 
     if (description.length > 2000) {
-      return res.status(400).json({ error: 'Description must be 2000 characters or fewer.' });
+      return sendJson(res, 400, { error: 'Description must be 2000 characters or fewer.' });
     }
 
     if (contact && typeof contact === 'string' && contact.length > 300) {
-      return res.status(400).json({ error: 'Contact information is too long.' });
+      return sendJson(res, 400, { error: 'Contact information is too long.' });
     }
 
     if (metadata && JSON.stringify(metadata).length > 4000) {
-      return res.status(400).json({ error: 'Metadata payload is too large.' });
+      return sendJson(res, 400, { error: 'Metadata payload is too large.' });
+    }
+
+    if (screenshot) {
+      if (typeof screenshot !== 'string' || screenshot.length > 600000 || !screenshot.startsWith('data:image/')) {
+        return sendJson(res, 400, { error: 'Invalid screenshot attachment or file size exceeds limit.' });
+      }
     }
 
     // 4. Read Credentials EXCLUSIVELY from Server-side Environment Variables
@@ -115,9 +202,9 @@ export async function handleReportBug(req: Request, res: Response) {
     // Parse screenshot attachment if present
     let attachments: { filename: string; content: Buffer }[] | undefined = undefined;
     if (screenshot && typeof screenshot === 'string' && screenshot.startsWith('data:image/')) {
-      const matches = screenshot.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
+      const matches = screenshot.match(/^data:image\/(png|jpeg|jpg|webp);base64,([A-Za-z0-9+/=]+)$/);
       if (matches) {
-        const ext = matches[1] || 'png';
+        const ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
         const base64Data = matches[2];
         attachments = [
           {
@@ -222,11 +309,11 @@ ${diagnosticsText}
             timestamp: submittedTime,
             hasScreenshot: Boolean(attachments?.length),
           });
-          return res.status(200).json({ success: true, note: 'Logged to server fallback' });
+          return sendJson(res, 200, { success: true, note: 'Logged to server fallback' });
         }
 
         console.log('[Resend Email Dispatched Successfully]: ID =', data?.id);
-        return res.status(200).json({ success: true, id: data?.id });
+        return sendJson(res, 200, { success: true, id: data?.id });
       } catch (err) {
         console.error('Error invoking Resend SDK:', err instanceof Error ? err.message : 'Unknown error');
         console.warn('[BugReport Fallback] Delivery error via Resend SDK', {
@@ -234,7 +321,7 @@ ${diagnosticsText}
           timestamp: submittedTime,
           hasScreenshot: Boolean(attachments?.length),
         });
-        return res.status(200).json({ success: true, note: 'Logged to server fallback' });
+        return sendJson(res, 200, { success: true, note: 'Logged to server fallback' });
       }
     }
 
@@ -245,9 +332,12 @@ ${diagnosticsText}
       hasScreenshot: Boolean(attachments?.length),
     });
 
-    return res.status(200).json({ success: true });
+    return sendJson(res, 200, { success: true });
   } catch (error) {
     console.error('Unhandled server error in handleReportBug:', error);
-    return res.status(500).json({ error: 'Unable to process report at this time.' });
+    return sendJson(res, 500, { error: 'Unable to process report at this time.' });
   }
 }
+
+// Vercel Serverless Function entry point
+export default handleReportBug;
