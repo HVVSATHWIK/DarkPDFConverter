@@ -23,7 +23,7 @@ export function Header() {
     location.pathname.startsWith('/compliance');
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80">
+    <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-blue-100 shadow-xs shadow-blue-500/5">
       <div className="mx-auto max-w-7xl px-4 py-3 md:px-6 flex items-center justify-between">
         {/* Brand Logo */}
         <Logo size="md" />
@@ -32,10 +32,10 @@ export function Header() {
         <nav className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium">
           <Link
             to="/"
-            className={`px-3 py-1.5 rounded-lg transition-colors ${
+            className={`px-3 py-1.5 rounded-xl transition-all ${
               onHome
-                ? 'text-cyan-300 font-semibold bg-cyan-500/10 border border-cyan-500/20'
-                : 'text-slate-300 hover:text-white hover:bg-slate-900/60'
+                ? 'text-blue-700 font-semibold bg-blue-50 border border-blue-200 shadow-2xs'
+                : 'text-slate-600 hover:text-blue-700 hover:bg-blue-50/50'
             }`}
           >
             Home
@@ -43,10 +43,10 @@ export function Header() {
 
           <Link
             to="/tools"
-            className={`px-3 py-1.5 rounded-lg transition-colors ${
+            className={`px-3 py-1.5 rounded-xl transition-all ${
               onTools
-                ? 'text-cyan-300 font-semibold bg-cyan-500/10 border border-cyan-500/20'
-                : 'text-slate-300 hover:text-white hover:bg-slate-900/60'
+                ? 'text-blue-700 font-semibold bg-blue-50 border border-blue-200 shadow-2xs'
+                : 'text-slate-600 hover:text-blue-700 hover:bg-blue-50/50'
             }`}
           >
             Tools
@@ -54,10 +54,10 @@ export function Header() {
 
           <Link
             to="/privacy-architecture"
-            className={`hidden sm:inline-flex px-3 py-1.5 rounded-lg transition-colors ${
+            className={`hidden sm:inline-flex px-3 py-1.5 rounded-xl transition-all ${
               onPrivacy
-                ? 'text-cyan-300 font-semibold bg-cyan-500/10 border border-cyan-500/20'
-                : 'text-slate-300 hover:text-white hover:bg-slate-900/60'
+                ? 'text-blue-700 font-semibold bg-blue-50 border border-blue-200 shadow-2xs'
+                : 'text-slate-600 hover:text-blue-700 hover:bg-blue-50/50'
             }`}
           >
             Privacy
@@ -65,10 +65,10 @@ export function Header() {
 
           <Link
             to="/explore"
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
               onExplore
-                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-[0_0_12px_rgba(6,182,212,0.15)]'
-                : 'text-slate-300 hover:text-slate-100 hover:bg-slate-900/60 border border-slate-800'
+                ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/25 border border-blue-600'
+                : 'text-blue-700 hover:bg-blue-50 border border-blue-200/80 bg-white'
             }`}
           >
             <span>3D Labs</span>

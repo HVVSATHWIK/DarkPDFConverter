@@ -7,12 +7,11 @@
   line-height: 1.5;
   font-weight: 500;
 
-  color-scheme: dark;
-  /* App is visually dark; default text must be light for contrast. */
-  --text-primary: #f8fafc;
-  /* Slate 50 */
-  --text-secondary: #cbd5e1;
-  /* Slate 300 */
+  color-scheme: light;
+  --text-primary: #0f172a;
+  /* Slate 900 */
+  --text-secondary: #475569;
+  /* Slate 600 */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -21,7 +20,7 @@
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 *,
@@ -38,10 +37,10 @@ body,
 
 html,
 body {
-  color-scheme: dark;
-  /* Firefox scrollbar theming */
+  color-scheme: light;
+  /* Modern clean scrollbar theming */
   scrollbar-width: thin;
-  scrollbar-color: rgba(148, 163, 184, 0.75) rgba(2, 6, 23, 0.35);
+  scrollbar-color: rgba(59, 130, 246, 0.45) #f1f5f9;
 }
 
 body {
@@ -49,9 +48,7 @@ body {
   display: block;
   min-width: 320px;
   min-height: 100vh;
-  /* 3D Liquid Background Base Color */
-  background-color: #020617;
-
+  background-color: #f8fafc;
   color: var(--text-primary);
   overflow-x: hidden;
   overflow-y: hidden;
@@ -147,67 +144,63 @@ body {
   }
 }
 
-/* 2025 Liquid Glass Architecture */
+/* Professional White and Blue Surfaces */
 .card-liquid-glass {
-  /* Dark-mode glass surface (less milky, more consistent). */
-  background: linear-gradient(145deg, rgba(2, 6, 23, 0.78) 0%, rgba(2, 6, 23, 0.42) 100%);
-
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
-
-  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: #ffffff;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(219, 234, 254, 0.85);
   box-shadow:
-    0 18px 55px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-
-  border-radius: 24px;
-  transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1),
-    box-shadow 0.25s cubic-bezier(0.25, 0.8, 0.25, 1),
-    border-color 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+    0 10px 30px -4px rgba(37, 99, 235, 0.06),
+    0 4px 12px -2px rgba(15, 23, 42, 0.03);
+  border-radius: 20px;
+  transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1),
+    box-shadow 0.2s cubic-bezier(0.25, 0.8, 0.25, 1),
+    border-color 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .card-liquid-glass:hover {
   transform: translateY(-1px);
   box-shadow:
-    0 22px 70px rgba(0, 0, 0, 0.42),
-    inset 0 1px 0 rgba(255, 255, 255, 0.07);
-  border-color: rgba(148, 163, 184, 0.22);
+    0 16px 40px -4px rgba(37, 99, 235, 0.10),
+    0 6px 16px -2px rgba(15, 23, 42, 0.04);
+  border-color: rgba(147, 197, 253, 0.9);
 }
 
-/* Typography Weight Inflation for Glass */
+/* Typography Defaults */
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-  @apply font-semibold text-slate-100;
+  @apply font-semibold text-slate-900;
 }
 
 /* Dedicated LitasDark Slim Visible Scrollbar for Preview Panel */
 .litas-scrollbar::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
 
 .litas-scrollbar::-webkit-scrollbar-track {
-  background: rgba(4, 7, 17, 0.85);
+  background: #f1f5f9;
   border-radius: 4px;
 }
 
 .litas-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(6, 182, 212, 0.45);
-  border: 1px solid rgba(6, 182, 212, 0.25);
+  background: rgba(37, 99, 235, 0.35);
+  border: 1px solid rgba(37, 99, 235, 0.15);
   border-radius: 9999px;
 }
 
 .litas-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(6, 182, 212, 0.80);
+  background: rgba(37, 99, 235, 0.65);
 }
 
 .litas-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(6, 182, 212, 0.5) rgba(4, 7, 17, 0.85);
+  scrollbar-color: rgba(37, 99, 235, 0.4) #f1f5f9;
 }
 
 /* Custom Scrollbar - Minimalist */
@@ -217,70 +210,69 @@ h6 {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(2, 6, 23, 0.35);
+  background: #f8fafc;
 }
 
 ::-webkit-scrollbar-corner {
-  background: rgba(2, 6, 23, 0.35);
+  background: #f8fafc;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.75);
+  background: rgba(148, 163, 184, 0.5);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.92);
+  background: rgba(59, 130, 246, 0.7);
 }
 
 /* UI Utilities */
 .btn-primary {
-  @apply bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold px-6 py-2.5 rounded-full shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/35 active:scale-[0.99] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950;
+  @apply bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-xl shadow-md shadow-blue-500/20 hover:shadow-blue-500/30 active:scale-[0.99] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50;
 }
 
 .btn-secondary {
-  @apply bg-white/5 text-slate-200 border border-white/10 font-medium px-5 py-2.5 rounded-full hover:bg-white/10 transition-all shadow-sm shadow-black/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25;
+  @apply bg-white text-blue-700 border border-blue-200 font-semibold px-5 py-2.5 rounded-xl hover:bg-blue-50 hover:border-blue-300 transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/40;
 }
 
 .btn-success {
-  @apply bg-gradient-to-r from-emerald-400 to-teal-500 text-white font-semibold px-6 py-3 rounded-full shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 active:scale-[0.99] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950;
+  @apply bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-2.5 rounded-xl shadow-md shadow-emerald-500/20 hover:shadow-emerald-500/30 active:scale-[0.99] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60;
 }
 
 .input-field {
-  @apply bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-slate-400 focus:ring-2 focus:ring-indigo-400/50 focus:border-indigo-400/40 outline-none transition-all shadow-sm shadow-black/20;
+  @apply bg-white border border-blue-200 rounded-xl px-4 py-2 text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all shadow-xs;
 }
 
-/* Improve native form control theming on dark UI.
-   - Select dropdowns (option list) styled with dark slate background. */
+/* Native form controls themed for white and blue */
 select {
-  color-scheme: dark;
-  background-color: #090d16;
-  color: #f8fafc;
+  color-scheme: light;
+  background-color: #ffffff;
+  color: #0f172a;
 }
 
 select option {
-  background-color: #0f172a;
-  color: #f8fafc;
+  background-color: #ffffff;
+  color: #0f172a;
   padding: 8px 12px;
 }
 
 select option:checked,
 select option:hover {
-  background-color: #1e293b;
-  color: #38bdf8;
+  background-color: #eff6ff;
+  color: #1d4ed8;
 }
 
-/* A consistent "panel" surface for tool cards/settings blocks. */
+/* Professional White & Blue Panel Surfaces */
 .panel-surface {
-  @apply rounded-xl border border-white/10 bg-gradient-to-b from-slate-900/40 to-slate-950/30 backdrop-blur-md shadow-sm shadow-black/35;
+  @apply rounded-2xl border border-blue-100/90 bg-white shadow-xs shadow-blue-500/5;
 }
 
 .panel-surface-strong {
-  @apply rounded-xl border border-white/10 bg-gradient-to-b from-slate-900/55 to-slate-950/40 backdrop-blur-md shadow-md shadow-black/45;
+  @apply rounded-2xl border border-blue-200/80 bg-white shadow-sm shadow-blue-500/10;
 }
 
 .control-field {
-  @apply w-full border border-white/10 bg-slate-950/55 text-white rounded-lg px-3 py-2 placeholder-slate-400 shadow-sm shadow-black/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/50 focus-visible:border-indigo-400/40;
+  @apply w-full border border-blue-200 bg-white text-slate-900 rounded-xl px-3.5 py-2 text-sm placeholder-slate-400 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-colors;
 }
 
 /* Utilities used across components */
@@ -294,5 +286,5 @@ select option:hover {
 }
 
 .shadow-top-lg {
-  box-shadow: 0 -10px 15px -3px rgba(0, 0, 0, 0.22), 0 -4px 6px -2px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 -10px 15px -3px rgba(37, 99, 235, 0.05), 0 -4px 6px -2px rgba(0, 0, 0, 0.03);
 }

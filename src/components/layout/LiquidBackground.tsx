@@ -241,9 +241,9 @@ const LiquidMaterial = shaderMaterial(
         uAmplitude: 0.3,  // Reduced from 0.4 for calmer waves
         uSpeed: 0.2,      // Slower speed
         uPulseSpeed: 0.5,
-        uBaseColor: new THREE.Color('#010206'), // Almost Pure Black
-        uHighlight1: new THREE.Color('#0f172a'), // Slate 900 (Very Subtle)
-        uHighlight2: new THREE.Color('#0e7490')  // Cyan 700 (Much darker than previous Cyan 500)
+        uBaseColor: new THREE.Color('#f1f5f9'), // Soft crisp white-slate
+        uHighlight1: new THREE.Color('#dbeafe'), // Soft blue accent (Blue 100)
+        uHighlight2: new THREE.Color('#3b82f6')  // Crisp royal blue reflection (Blue 500)
     },
     liquidVertexShader,
     liquidFragmentShader
@@ -362,21 +362,21 @@ function ParticleSystem() {
 
 export function LiquidBackground() {
     return (
-        <div className="fixed inset-0 -z-10 bg-black">
+        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-50 via-white to-blue-50/50">
             <Canvas
                 dpr={[1, 1.5]}
-                camera={{ position: [0, 2, 6], fov: 45 }} // Moved camera up and back
+                camera={{ position: [0, 2, 6], fov: 45 }}
                 gl={{ antialias: false, toneMapping: THREE.ACESFilmicToneMapping }}
             >
-                <color attach="background" args={['#010206']} />
-                <fog attach="fog" args={['#010206', 5, 20]} /> {/* Darker fog to match base */}
+                <color attach="background" args={['#f8fafc']} />
+                <fog attach="fog" args={['#f8fafc', 5, 20]} />
 
                 <LiquidPlane />
                 <ParticleSystem />
             </Canvas>
 
-            {/* UX Overlay: Darkens the background to ensure utility tool readability */}
-            <div className="absolute inset-0 bg-gradient-to-b from-slate-950/30 via-slate-950/60 to-slate-950/80 backdrop-blur-[1px]" />
+            {/* UX Overlay: Soft luminous white & blue gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-b from-blue-50/30 via-white/70 to-slate-50/85 backdrop-blur-[1px] pointer-events-none" />
         </div>
     );
 }

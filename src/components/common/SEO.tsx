@@ -22,19 +22,140 @@ const DEFAULT_SEO = {
 
 const STATIC_ROUTE_SEO: Record<string, { title: string; description: string; keywords: string }> = {
   '/': {
-    title: 'LitasDark - Free In-Browser PDF Tools | Zero Server Uploads',
+    title: 'LitasDark - Free In-Browser PDF Suite | Zero Server Uploads',
     description:
-      'Free, privacy-focused PDF tools running locally in your browser memory via WebAssembly. Dark Mode Inverter, Merge, Split, Rotate, Compress, Extract, and Metadata Cleaner.',
+      'Free, privacy-focused PDF tools running locally in your browser memory via WebAssembly: Dark Mode Inverter, Merge, Split, Rotate, Compress, and Metadata Cleaner.',
     keywords:
       'pdf tools, free pdf editor, dark mode pdf, merge pdf online, split pdf free, rotate pdf, compress pdf locally, sanitize pdf metadata, images to pdf, client side pdf',
   },
   '/tools': {
-    title: 'All PDF Tools - Free, Private In-Browser Utilities | LitasDark',
+    title: 'All PDF Tools - Free, Private In-Browser Suite | LitasDark',
     description:
       'Browse our complete suite of free in-browser PDF utilities: Dark Mode Converter, Merge, Split, Rotate, Compress, Extract Pages, Clean Metadata, and Images to PDF.',
     keywords:
       'pdf tools list, free pdf utilities, online pdf tools no upload, client side pdf tools, all pdf editors',
   },
+  '/explore': {
+    title: 'Interactive PDF Tools Gallery & 3D Lab | LitasDark',
+    description:
+      'Explore the full suite of client-side PDF manipulation tools with interactive visual previews, 3D controls, and fast local processing.',
+    keywords: 'interactive pdf tools, litasdark gallery, visual pdf suite, browser pdf utilities',
+  },
+  // Tool Workspaces
+  '/dark-mode-pdf': {
+    title: 'Dark Mode PDF Converter - Invert PDF Colors Free | LitasDark',
+    description:
+      'Invert bright PDF backgrounds into dark mode, OLED black, or warm sepia reading themes. Read comfortably with zero eye strain and zero server uploads.',
+    keywords:
+      'dark mode pdf, invert pdf colors, pdf dark theme, night reading pdf, oled black pdf, sepia pdf, free pdf reader dark mode, client side pdf inverter',
+  },
+  '/merge-pdf': {
+    title: 'Merge PDF Online - Combine Multiple PDF Files Free | LitasDark',
+    description:
+      'Combine multiple PDF documents into a single file in seconds. Reorder files, preserve sharp vector quality, and merge safely with zero server uploads.',
+    keywords:
+      'merge pdf online, combine pdf files, join pdf documents, merge multiple pdfs free, client side pdf merge, webassembly pdf merger, no upload pdf merger',
+  },
+  '/split-pdf': {
+    title: 'Split PDF Online - Separate PDF Page Ranges Free | LitasDark',
+    description:
+      'Split large PDF documents and extract continuous page ranges directly in your browser. Fast, free, and completely private with zero server uploads.',
+    keywords:
+      'split pdf online, separate pdf pages, extract page range from pdf, divide pdf into smaller files, cut pdf pages free, in browser pdf splitter',
+  },
+  '/rotate-pdf': {
+    title: 'Rotate PDF Online - Rotate PDF Pages 90, 180, 270 | LitasDark',
+    description:
+      'Permanently rotate PDF pages 90°, 180°, or 270° in your browser. Fix sideways or upside-down scans instantly with zero quality loss and no server uploads.',
+    keywords:
+      'rotate pdf online, flip pdf orientation, turn pdf pages 90 degrees, permanent pdf rotation, fix upside down pdf, free pdf rotator no upload',
+  },
+  '/compress-pdf': {
+    title: 'Compress PDF Online - Reduce PDF File Size Free | LitasDark',
+    description:
+      'Compress and optimize PDF file sizes directly in browser memory. Strip redundant objects and deflate streams with zero quality loss and no cloud uploads.',
+    keywords:
+      'compress pdf online, reduce pdf file size, shrink pdf free, pdf optimizer in browser, lossy and lossless pdf compression, private pdf compressor',
+  },
+  '/extract-pdf': {
+    title: 'Extract PDF Pages Online - Pull Specific Pages Free | LitasDark',
+    description:
+      'Extract specific, non-consecutive pages or custom page selections from any PDF into a new standalone document. Fast, private local WebAssembly processing.',
+    keywords:
+      'extract pdf pages, pull specific pages from pdf, save individual pdf pages, cherry pick pdf pages, export pdf pages free, private pdf extractor',
+  },
+  '/cleanse-metadata': {
+    title: 'Clean PDF Metadata Online - Strip Author & Tags | LitasDark',
+    description:
+      'Strip hidden author names, software creator tags, editing timestamps, and revision histories from PDF files. Sanitize documents locally with zero uploads.',
+    keywords:
+      'clean pdf metadata, scrub pdf metadata, remove author from pdf, sanitize pdf document, strip pdf properties, pdf privacy cleaner, wipe pdf tags',
+  },
+  '/images-to-pdf': {
+    title: 'Images to PDF Converter - Convert PNG & JPG to PDF | LitasDark',
+    description:
+      'Convert JPG, PNG, and WebP images into clean, high-resolution PDF documents. Customize page sizes, margins, and layout with zero server uploads.',
+    keywords:
+      'images to pdf, jpg to pdf, png to pdf converter, combine photos to pdf, webp to pdf online, create pdf from images free, local image to pdf',
+  },
+  // Dedicated Tool Guides & Tutorials
+  '/dark-mode-pdf/guide': {
+    title: 'How to Invert PDF to Dark Mode - Complete Guide | LitasDark',
+    description:
+      'Learn how to convert bright white PDFs into dark mode, OLED black, and sepia themes. Step-by-step guide with contrast tips and technical canvas specs.',
+    keywords:
+      'how to dark mode pdf, guide invert pdf colors, pdf reading contrast guide, night mode pdf tutorial, oled dark pdf instructions, pdf eye strain relief',
+  },
+  '/merge-pdf/guide': {
+    title: 'How to Merge PDF Files Online - Step-by-Step Guide | LitasDark',
+    description:
+      'Master merging multiple PDF documents into a unified file. Learn about file ordering, vector preservation, and client-side WebAssembly processing.',
+    keywords:
+      'how to merge pdfs, combine pdf files tutorial, step by step pdf merge guide, join pdf documents instructions, webassembly pdf merge explained',
+  },
+  '/split-pdf/guide': {
+    title: 'How to Split PDF Pages Online - Step-by-Step Guide | LitasDark',
+    description:
+      'Complete tutorial on splitting PDF files and isolating continuous page ranges. Learn when to use Split vs Extract with practical step-by-step examples.',
+    keywords:
+      'how to split pdf, divide pdf guide, separate pdf pages tutorial, split vs extract pdf, extract page range instructions, cut pdf document guide',
+  },
+  '/rotate-pdf/guide': {
+    title: 'How to Rotate PDF Pages Permanently - User Guide | LitasDark',
+    description:
+      'Learn how to permanently rotate individual or all PDF pages by 90°, 180°, or 270°. Discover how orientation dictionary flags preserve 100% quality.',
+    keywords:
+      'how to rotate pdf, permanent pdf rotation guide, fix sideways pdf tutorial, rotate pdf pages 90 degrees instructions, pdf rotate dictionary attribute',
+  },
+  '/compress-pdf/guide': {
+    title: 'How to Compress PDF Documents - Optimization Guide | LitasDark',
+    description:
+      'Explore PDF optimization strategies: Flate stream deflation, image downsampling, and object deduplication. Shrink file sizes while preserving text quality.',
+    keywords:
+      'how to compress pdf, pdf optimization guide, reduce pdf size tutorial, flate compression pdf, image downsampling in pdf, pdf size safety guard',
+  },
+  '/extract-pdf/guide': {
+    title: 'How to Extract Specific PDF Pages - Complete Guide | LitasDark',
+    description:
+      'Learn how to cherry-pick and extract non-consecutive pages from multi-page PDFs. Step-by-step instructions for creating focused excerpt documents.',
+    keywords:
+      'how to extract pdf pages, cherry pick pdf pages tutorial, extract non consecutive pages guide, pull specific pages from pdf, export pdf pages guide',
+  },
+  '/cleanse-metadata/guide': {
+    title: 'How to Remove PDF Metadata & Author Tags - Guide | LitasDark',
+    description:
+      'Comprehensive guide to sanitizing PDF metadata: wipe author names, software fingerprints, and edit timestamps before sharing sensitive documents.',
+    keywords:
+      'how to remove pdf metadata, sanitize pdf guide, scrub author tags tutorial, wipe pdf creation date, inspect pdf metadata properties, pdf redaction vs metadata',
+  },
+  '/images-to-pdf/guide': {
+    title: 'How to Convert Images to PDF Online - User Guide | LitasDark',
+    description:
+      'Step-by-step tutorial on compiling JPG, PNG, and WebP photos into structured PDFs. Configure fit options, page margins, and maintain native resolution.',
+    keywords:
+      'how to convert images to pdf, jpg to pdf guide, png to pdf tutorial, compile photos into pdf instructions, image to pdf margins and sizing guide',
+  },
+  // Technical, Legal & Architecture
   '/privacy-architecture': {
     title: 'Technical & Privacy Architecture Whitepaper | LitasDark',
     description:
@@ -43,22 +164,16 @@ const STATIC_ROUTE_SEO: Record<string, { title: string; description: string; key
       'pdf technical architecture, client side pdf security, zero upload architecture, in browser pdf processing, webassembly document privacy',
   },
   '/privacy': {
-    title: 'Privacy Policy | LitasDark',
+    title: 'Privacy Policy - Zero Data Retention | LitasDark',
     description:
       'Read our transparent Privacy Policy. LitasDark is an in-browser utility that does not collect, transmit, or store your document files or personal data.',
-    keywords: 'litasdark privacy policy, zero data retention, client side document privacy',
+    keywords: 'litasdark privacy policy, zero data retention, client side document privacy, no cloud storage pdf',
   },
   '/terms': {
-    title: 'Terms of Service | LitasDark',
+    title: 'Terms of Service & Usage Disclaimers | LitasDark',
     description:
-      'Terms of Service and legal disclosures for using LitasDark in-browser client-side PDF manipulation tools.',
-    keywords: 'litasdark terms of service, legal terms, software disclaimers',
-  },
-  '/explore': {
-    title: 'Interactive PDF Tools Gallery | LitasDark',
-    description:
-      'Explore the full suite of client-side PDF manipulation tools with interactive visual previews and fast local processing.',
-    keywords: 'interactive pdf tools, litasdark gallery, visual pdf suite',
+      'Terms of Service and legal disclosures for using LitasDark in-browser client-side PDF manipulation tools. Free, open, and private utility service.',
+    keywords: 'litasdark terms of service, legal terms, software disclaimers, free pdf tool terms',
   },
 };
 
@@ -74,22 +189,33 @@ export function SEO({
   const location = useLocation();
   const path = location.pathname.replace(/\/$/, '') || '/';
 
-  // Check tool guides first
+  // Check static route definitions first
+  const staticSeo = STATIC_ROUTE_SEO[path];
+
+  // Check tool guides
   const cleanSlug = path.replace(/^\//, '');
-  const toolGuide = TOOL_GUIDES[cleanSlug];
+  const isGuideRoute = cleanSlug.endsWith('/guide');
+  const baseSlug = isGuideRoute ? cleanSlug.replace(/\/guide$/, '') : cleanSlug;
+  const toolGuide = TOOL_GUIDES[baseSlug];
 
   let calculatedTitle = title;
   let calculatedDesc = description;
   let calculatedKeywords = keywords;
 
-  if (toolGuide && !title) {
-    calculatedTitle = toolGuide.title;
-    calculatedDesc = toolGuide.metaDescription;
-    calculatedKeywords = toolGuide.metaKeywords;
-  } else if (!calculatedTitle && STATIC_ROUTE_SEO[path]) {
-    calculatedTitle = STATIC_ROUTE_SEO[path].title;
-    calculatedDesc = STATIC_ROUTE_SEO[path].description;
-    calculatedKeywords = STATIC_ROUTE_SEO[path].keywords;
+  if (!calculatedTitle && staticSeo) {
+    calculatedTitle = staticSeo.title;
+    calculatedDesc = staticSeo.description;
+    calculatedKeywords = staticSeo.keywords;
+  } else if (!calculatedTitle && toolGuide) {
+    if (isGuideRoute) {
+      calculatedTitle = toolGuide.guideTitle || `How to Use ${toolGuide.h1} - Complete Guide | LitasDark`;
+      calculatedDesc = toolGuide.guideMetaDescription || toolGuide.metaDescription;
+      calculatedKeywords = toolGuide.guideMetaKeywords || toolGuide.metaKeywords;
+    } else {
+      calculatedTitle = toolGuide.workspaceTitle || toolGuide.title;
+      calculatedDesc = toolGuide.workspaceMetaDescription || toolGuide.metaDescription;
+      calculatedKeywords = toolGuide.workspaceMetaKeywords || toolGuide.metaKeywords;
+    }
   }
 
   const finalTitle = calculatedTitle || DEFAULT_SEO.title;
@@ -248,51 +374,72 @@ export function SEO({
     }
 
     if (toolGuide) {
-      graphItems.push({
-        '@type': 'WebApplication',
-        '@id': `https://litasdark.vercel.app/${toolGuide.slug}#webapp`,
-        name: toolGuide.h1,
-        url: `https://litasdark.vercel.app/${toolGuide.slug}`,
-        description: toolGuide.metaDescription,
-        applicationCategory: 'UtilitiesApplication',
-        operatingSystem: 'Any modern web browser with WebAssembly support',
-        browserRequirements: 'Requires HTML5, Web Workers, and WebAssembly',
-        offers: {
-          '@type': 'Offer',
-          price: '0.00',
-          priceCurrency: 'USD',
-          availability: 'https://schema.org/InStock',
+      const isGuide = path.endsWith('/guide');
+      const pageTitle = isGuide
+        ? (toolGuide.guideTitle || `How to Use ${toolGuide.h1} - Complete Guide`)
+        : (toolGuide.workspaceTitle || toolGuide.h1);
+      const pageDesc = isGuide
+        ? (toolGuide.guideMetaDescription || toolGuide.metaDescription)
+        : (toolGuide.workspaceMetaDescription || toolGuide.metaDescription);
+
+      if (!isGuide) {
+        graphItems.push({
+          '@type': 'WebApplication',
+          '@id': `https://litasdark.vercel.app/${toolGuide.slug}#webapp`,
+          name: pageTitle,
+          url: `https://litasdark.vercel.app/${toolGuide.slug}`,
+          description: pageDesc,
+          applicationCategory: 'UtilitiesApplication',
+          operatingSystem: 'Any modern web browser with WebAssembly support',
+          browserRequirements: 'Requires HTML5, Web Workers, and WebAssembly',
+          offers: {
+            '@type': 'Offer',
+            price: '0.00',
+            priceCurrency: 'USD',
+            availability: 'https://schema.org/InStock',
+          },
+          featureList: toolGuide.features.map((f) => f.title),
+          provider: {
+            '@type': 'Organization',
+            name: 'LitasDark',
+            url: 'https://litasdark.vercel.app',
+          },
+        });
+      }
+
+      const breadcrumbItems: any[] = [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: 'https://litasdark.vercel.app',
         },
-        featureList: toolGuide.features.map((f) => f.title),
-        provider: {
-          '@type': 'Organization',
-          name: 'LitasDark',
-          url: 'https://litasdark.vercel.app',
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Tools',
+          item: 'https://litasdark.vercel.app/tools',
         },
-      });
+        {
+          '@type': 'ListItem',
+          position: 3,
+          name: toolGuide.h1,
+          item: `https://litasdark.vercel.app/${toolGuide.slug}`,
+        },
+      ];
+
+      if (isGuide) {
+        breadcrumbItems.push({
+          '@type': 'ListItem',
+          position: 4,
+          name: 'Guide & Tutorial',
+          item: `https://litasdark.vercel.app/${toolGuide.slug}/guide`,
+        });
+      }
 
       graphItems.push({
         '@type': 'BreadcrumbList',
-        itemListElement: [
-          {
-            '@type': 'ListItem',
-            position: 1,
-            name: 'Home',
-            item: 'https://litasdark.vercel.app',
-          },
-          {
-            '@type': 'ListItem',
-            position: 2,
-            name: 'Tools',
-            item: 'https://litasdark.vercel.app/tools',
-          },
-          {
-            '@type': 'ListItem',
-            position: 3,
-            name: toolGuide.h1,
-            item: `https://litasdark.vercel.app/${toolGuide.slug}`,
-          },
-        ],
+        itemListElement: breadcrumbItems,
       });
     }
 

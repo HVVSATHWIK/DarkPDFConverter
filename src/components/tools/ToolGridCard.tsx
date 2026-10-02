@@ -2,6 +2,7 @@ import { useRef, useState, MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { ToolDefinition } from '@/config/tools';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
+import ToolOperationHelper from './ToolOperationHelper';
 
 interface ToolGridCardProps {
   tool: ToolDefinition;
@@ -11,50 +12,73 @@ export default function ToolGridCard({ tool }: ToolGridCardProps) {
   const divRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
-  const handleMouseMove = (e: MouseEvent<HTMLAnchorElement>) => {
+  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
     if (!divRef.current) return;
     const rect = divRef.current.getBoundingClientRect();
     setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
   };
 
   return (
-    <Link
-      to={tool.path}
+    <div
+      ref={divRef}
       onMouseMove={handleMouseMove}
-      className="group relative flex flex-col justify-between h-full rounded-xl border border-slate-800/90 bg-slate-900/50 p-5 sm:p-6 hover:bg-slate-900/90 hover:border-slate-700/80 transition-all duration-200 space-y-4 shadow-sm"
+      className="group relative flex flex-col justify-between h-full rounded-2xl border border-blue-900/40 bg-gradient-to-b from-slate-900/90 via-slate-900/70 to-slate-950/90 p-5 sm:p-6 hover:border-blue-500/50 hover:shadow-[0_0_30px_rgba(59,130,246,0.15)] transition-all duration-200 shadow-sm"
     >
+      {/* Dynamic Cursor Spotlight Effect */}
       <div
-        ref={divRef}
-        className="pointer-events-none absolute -inset-px opacity-0 transition duration-300 group-hover:opacity-100 rounded-xl overflow-hidden"
+        className="pointer-events-none absolute -inset-px opacity-0 transition duration-300 group-hover:opacity-100 rounded-2xl overflow-hidden"
         style={{
-          background: `radial-gradient(350px circle at ${position.x}px ${position.y}px, rgba(6, 182, 212, 0.08), transparent 45%)`,
+          background: `radial-gradient(350px circle at ${position.x}px ${position.y}px, rgba(56, 189, 248, 0.09), transparent 50%)`,
         }}
       />
 
-      <div className="space-y-3 relative z-10">
-        <div className="w-10 h-10 rounded-lg bg-slate-800/90 border border-slate-700/60 text-cyan-400 flex items-center justify-center group-hover:bg-cyan-500 group-hover:text-slate-950 group-hover:border-cyan-400 transition-colors shadow-sm shrink-0">
-          {tool.icon}
-        </div>
+      <div className="space-y-4 relative z-10 flex-1 flex flex-col">
+        {/* Clickable Header Area */}
+        <Link
+          to={tool.path}
+          className="flex items-start justify-between gap-3 group/link focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded-lg"
+        >
+          <div className="w-11 h-11 rounded-xl bg-blue-950/80 border border-blue-500/30 text-cyan-400 flex items-center justify-center group-hover/link:bg-blue-600 group-hover/link:text-white group-hover/link:border-blue-400 transition-all duration-200 shadow-sm shrink-0">
+            {tool.icon}
+          </div>
+          <span className="text-[11px] font-semibold tracking-wider uppercase text-blue-300/80 bg-blue-950/50 px-2.5 py-0.5 rounded border border-blue-800/40">
+            {tool.categoryLabel || 'Utility'}
+          </span>
+        </Link>
 
+        {/* Title and Short Description */}
         <div className="space-y-1.5">
-          <h3 className="font-bold text-slate-100 group-hover:text-cyan-300 transition-colors text-base">
+          <Link
+            to={tool.path}
+            className="block font-bold text-white group-hover:text-blue-300 transition-colors text-lg tracking-tight focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-400 rounded"
+          >
             {tool.name}
-          </h3>
-          <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+          </Link>
+          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
             {tool.description}
           </p>
         </div>
+
+        {/* Helper Text Component: Function & Benefits */}
+        <div className="flex-1 flex flex-col justify-end">
+          <ToolOperationHelper toolId={tool.id} />
+        </div>
       </div>
 
-      <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs relative z-10">
-        <span className="text-slate-400 font-medium text-[11px]">
-          {tool.categoryLabel || 'Utility'}
+      {/* Launch Action Footer */}
+      <div className="pt-3.5 mt-4 border-t border-blue-900/30 flex items-center justify-between text-xs relative z-10">
+        <span className="text-slate-400 font-medium text-[11px] flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          <span>Zero-Upload Secure</span>
         </span>
-        <span className="text-cyan-400 group-hover:text-cyan-300 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform font-semibold text-xs">
-          <span>Launch</span>
+        <Link
+          to={tool.path}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600 text-cyan-300 hover:text-white border border-blue-500/30 hover:border-blue-400 transition-all font-semibold text-xs shadow-sm active:scale-95"
+        >
+          <span>Launch Tool</span>
           <ArrowRightIcon className="w-3.5 h-3.5" />
-        </span>
+        </Link>
       </div>
-    </Link>
+    </div>
   );
 }

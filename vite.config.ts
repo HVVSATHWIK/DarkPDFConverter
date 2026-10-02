@@ -32,24 +32,15 @@ export default defineConfig({
     include: ['pdfjs-dist']
   },
   preview: {
-    headers: {
-      'Cross-Origin-Opener-Policy': 'same-origin',
-      'Cross-Origin-Embedder-Policy': 'require-corp',
-    },
     port: 4173,
   },
   server: {
     host: '0.0.0.0',
     port: 3000,
     allowedHosts: true,
-    headers: {
-      'Cross-Origin-Opener-Policy': 'same-origin',
-      'Cross-Origin-Embedder-Policy': 'require-corp',
-    },
     hmr: {
       timeout: 5000,
       overlay: true,
-      // clientPort: 5173, 
     },
   }
 });

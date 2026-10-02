@@ -13,12 +13,23 @@ import {
 } from '@heroicons/react/24/outline';
 
 import '../../config/pdfWorker';
+import { buildCssFilter, DarkModeRenderMode, ThemeName } from '../../hooks/useDarkMode';
 
 interface PDFPreviewProps {
   file: string | File | Blob | { data: Uint8Array } | null;
+  isDarkMode?: boolean;
+  theme?: string;
+  mode?: DarkModeRenderMode;
+  filter?: string;
 }
 
-export default function PDFPreview({ file }: PDFPreviewProps) {
+export default function PDFPreview({
+  file,
+  isDarkMode = false,
+  theme = 'dark',
+  mode = 'text-focused',
+  filter,
+}: PDFPreviewProps) {
   // Check if file is an image
   const isImageFile = useMemo(() => {
     if (!file) return false;
@@ -68,6 +79,13 @@ export default function PDFPreview({ file }: PDFPreviewProps) {
     if (isImageFile || bufferState.status !== 'ready') return null;
     return { data: new Uint8Array(bufferState.buffer as ArrayBufferLike).slice(0) };
   }, [bufferState, isImageFile]);
+
+  // Compute CSS filter for preview canvas (mode-aware)
+  const previewFilter = useMemo(() => {
+    if (filter) return filter;
+    if (!isDarkMode) return 'none';
+    return buildCssFilter((theme as ThemeName) || 'dark', 1.0, 1.0, mode || 'text-focused');
+  }, [filter, isDarkMode, mode, theme]);
 
   // Pre-load document metadata (dimensions and page count)
   useEffect(() => {
@@ -398,7 +416,10 @@ export default function PDFPreview({ file }: PDFPreviewProps) {
           className="flex flex-col items-center gap-6 max-w-full my-4"
         >
           {viewMode === 'single' ? (
-            <div className="relative shadow-2xl shadow-black/90 rounded-xl overflow-hidden border border-white/15 bg-slate-950">
+            <div
+              className="relative shadow-2xl shadow-black/90 rounded-xl overflow-hidden border border-white/15 bg-slate-950 transition-[filter] duration-200"
+              style={previewFilter !== 'none' ? { filter: previewFilter } : undefined}
+            >
               <Page
                 pageNumber={currentPage}
                 scale={scale}
@@ -417,7 +438,8 @@ export default function PDFPreview({ file }: PDFPreviewProps) {
             Array.from({ length: numPages || 1 }, (_, index) => (
               <div
                 key={`page_${index + 1}`}
-                className="relative shadow-2xl shadow-black/90 rounded-xl overflow-hidden border border-white/15 bg-slate-950 flex flex-col items-center"
+                className="relative shadow-2xl shadow-black/90 rounded-xl overflow-hidden border border-white/15 bg-slate-950 flex flex-col items-center transition-[filter] duration-200"
+                style={previewFilter !== 'none' ? { filter: previewFilter } : undefined}
               >
                 <div className="absolute top-2 left-2 z-10 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-mono text-slate-400 border border-white/10">
                   Page {index + 1}

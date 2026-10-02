@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
-import { handleReportBug } from './api/report-bug';
+import { handleReportBug } from './api/report-bug.ts';
 
 async function startServer() {
   const app = express();

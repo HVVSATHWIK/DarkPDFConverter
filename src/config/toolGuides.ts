@@ -22,6 +22,12 @@ export interface ToolGuideData {
   subtitle: string;
   metaDescription: string;
   metaKeywords: string;
+  workspaceTitle?: string;
+  workspaceMetaDescription?: string;
+  workspaceMetaKeywords?: string;
+  guideTitle?: string;
+  guideMetaDescription?: string;
+  guideMetaKeywords?: string;
   howItWorksOverview: string;
   steps: ToolStep[];
   features: ToolFeature[];
@@ -44,12 +50,22 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
   'dark-mode-pdf': {
     toolId: 1,
     slug: 'dark-mode-pdf',
-    title: 'Dark Mode PDF Converter - Invert PDF Colors for Night Reading | LitasDark',
+    title: 'Dark Mode PDF Converter - Invert PDF Colors Free | LitasDark',
+    workspaceTitle: 'Dark Mode PDF Converter - Invert PDF Colors Free | LitasDark',
+    workspaceMetaDescription:
+      'Invert bright PDF backgrounds into dark mode, OLED black, or warm sepia reading themes. Read comfortably with zero eye strain and zero server uploads.',
+    workspaceMetaKeywords:
+      'dark mode pdf, invert pdf colors, pdf dark theme, night reading pdf, oled black pdf, sepia pdf, free pdf reader dark mode, client side pdf inverter',
+    guideTitle: 'How to Invert PDF to Dark Mode - Complete Guide | LitasDark',
+    guideMetaDescription:
+      'Learn how to convert bright white PDFs into dark mode, OLED black, and sepia themes. Step-by-step guide with contrast tips and technical canvas specs.',
+    guideMetaKeywords:
+      'how to dark mode pdf, guide invert pdf colors, pdf reading contrast guide, night mode pdf tutorial, oled dark pdf instructions, pdf eye strain relief',
     h1: 'Dark Mode PDF Converter',
     subtitle:
       'Invert bright white backgrounds into eye-friendly dark, OLED black, or sepia themes entirely in your browser memory.',
     metaDescription:
-      'Convert bright white PDFs into dark mode, OLED black, sepia, or slate reading themes. Processed locally in your browser without altering your original files.',
+      'Invert bright PDF backgrounds into dark mode, OLED black, or warm sepia reading themes. Read comfortably with zero eye strain and zero server uploads.',
     metaKeywords:
       'dark mode pdf converter, invert pdf colors, pdf dark theme, night reading pdf, black background pdf, oled dark pdf, sepia pdf',
     howItWorksOverview:
@@ -150,11 +166,21 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
     toolId: 2,
     slug: 'merge-pdf',
     title: 'Merge PDF Online - Combine Multiple PDF Files Free | LitasDark',
+    workspaceTitle: 'Merge PDF Online - Combine Multiple PDF Files Free | LitasDark',
+    workspaceMetaDescription:
+      'Combine multiple PDF documents into a single file in seconds. Reorder files, preserve sharp vector quality, and merge safely with zero server uploads.',
+    workspaceMetaKeywords:
+      'merge pdf online, combine pdf files, join pdf documents, merge multiple pdfs free, client side pdf merge, webassembly pdf merger, no upload pdf merger',
+    guideTitle: 'How to Merge PDF Files Online - Step-by-Step Guide | LitasDark',
+    guideMetaDescription:
+      'Master merging multiple PDF documents into a unified file. Learn about file ordering, vector preservation, and client-side WebAssembly processing.',
+    guideMetaKeywords:
+      'how to merge pdfs, combine pdf files tutorial, step by step pdf merge guide, join pdf documents instructions, webassembly pdf merge explained',
     h1: 'Merge PDF Files Online',
     subtitle:
       'Combine multiple PDF documents and chapters into a single file in seconds, entirely in your browser memory.',
     metaDescription:
-      'Combine multiple PDF documents into a single file locally in your browser. Reorder files, preserve vector quality, and merge without uploading files to a server.',
+      'Combine multiple PDF documents into a single file in seconds. Reorder files, preserve sharp vector quality, and merge safely with zero server uploads.',
     metaKeywords:
       'merge pdf, combine pdf files, join pdf online free, merge pdf no upload, client side pdf merge, combine pdf documents',
     howItWorksOverview:
@@ -255,11 +281,21 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
     toolId: 3,
     slug: 'split-pdf',
     title: 'Split PDF Online - Separate PDF Page Ranges Free | LitasDark',
+    workspaceTitle: 'Split PDF Online - Separate PDF Page Ranges Free | LitasDark',
+    workspaceMetaDescription:
+      'Split large PDF documents and extract continuous page ranges directly in your browser. Fast, free, and completely private with zero server uploads.',
+    workspaceMetaKeywords:
+      'split pdf online, separate pdf pages, extract page range from pdf, divide pdf into smaller files, cut pdf pages free, in browser pdf splitter',
+    guideTitle: 'How to Split PDF Pages Online - Step-by-Step Guide | LitasDark',
+    guideMetaDescription:
+      'Complete tutorial on splitting PDF files and isolating continuous page ranges. Learn when to use Split vs Extract with practical step-by-step examples.',
+    guideMetaKeywords:
+      'how to split pdf, divide pdf guide, separate pdf pages tutorial, split vs extract pdf, extract page range instructions, cut pdf document guide',
     h1: 'Split PDF Pages Online',
     subtitle:
       'Extract custom page ranges or divide large PDF documents into smaller files directly in your browser.',
     metaDescription:
-      'Extract page ranges or split a PDF into smaller documents in your browser. No server uploads, unconstrained by artificial limits, and fast local processing.',
+      'Split large PDF documents and extract continuous page ranges directly in your browser. Fast, free, and completely private with zero server uploads.',
     metaKeywords:
       'split pdf, separate pdf pages, extract page range from pdf, cut pdf online free, split pdf without uploading, divide pdf',
     howItWorksOverview:
@@ -352,12 +388,22 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
   'rotate-pdf': {
     toolId: 4,
     slug: 'rotate-pdf',
-    title: 'Rotate PDF Online - Rotate PDF Pages 90, 180, 270 Degrees | LitasDark',
+    title: 'Rotate PDF Online - Rotate PDF Pages 90, 180, 270 | LitasDark',
+    workspaceTitle: 'Rotate PDF Online - Rotate PDF Pages 90, 180, 270 | LitasDark',
+    workspaceMetaDescription:
+      'Permanently rotate PDF pages 90°, 180°, or 270° in your browser. Fix sideways or upside-down scans instantly with zero quality loss and no server uploads.',
+    workspaceMetaKeywords:
+      'rotate pdf online, flip pdf orientation, turn pdf pages 90 degrees, permanent pdf rotation, fix upside down pdf, free pdf rotator no upload',
+    guideTitle: 'How to Rotate PDF Pages Permanently - User Guide | LitasDark',
+    guideMetaDescription:
+      'Learn how to permanently rotate individual or all PDF pages by 90°, 180°, or 270°. Discover how orientation dictionary flags preserve 100% quality.',
+    guideMetaKeywords:
+      'how to rotate pdf, permanent pdf rotation guide, fix sideways pdf tutorial, rotate pdf pages 90 degrees instructions, pdf rotate dictionary attribute',
     h1: 'Rotate PDF Pages Online',
     subtitle:
       'Permanently rotate upside-down or sideways PDF pages by 90°, 180°, or 270° directly in your browser.',
     metaDescription:
-      'Rotate individual PDF pages or entire documents permanently. Fast, browser-based orientation correction with zero cloud uploads.',
+      'Permanently rotate PDF pages 90°, 180°, or 270° in your browser. Fix sideways or upside-down scans instantly with zero quality loss and no server uploads.',
     metaKeywords:
       'rotate pdf, rotate pdf online, flip pdf orientation, turn pdf pages 90 degrees, free pdf rotator, permanent pdf rotation',
     howItWorksOverview:
@@ -448,12 +494,22 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
   'compress-pdf': {
     toolId: 5,
     slug: 'compress-pdf',
-    title: 'Compress PDF Online - Reduce PDF File Size Locally | LitasDark',
+    title: 'Compress PDF Online - Reduce PDF File Size Free | LitasDark',
+    workspaceTitle: 'Compress PDF Online - Reduce PDF File Size Free | LitasDark',
+    workspaceMetaDescription:
+      'Compress and optimize PDF file sizes directly in browser memory. Strip redundant objects and deflate streams with zero quality loss and no cloud uploads.',
+    workspaceMetaKeywords:
+      'compress pdf online, reduce pdf file size, shrink pdf free, pdf optimizer in browser, lossy and lossless pdf compression, private pdf compressor',
+    guideTitle: 'How to Compress PDF Documents - Optimization Guide | LitasDark',
+    guideMetaDescription:
+      'Explore PDF optimization strategies: Flate stream deflation, image downsampling, and object deduplication. Shrink file sizes while preserving text quality.',
+    guideMetaKeywords:
+      'how to compress pdf, pdf optimization guide, reduce pdf size tutorial, flate compression pdf, image downsampling in pdf, pdf size safety guard',
     h1: 'Compress PDF Documents Online',
     subtitle:
       'Optimize PDF document structures, deflate uncompressed streams, and reduce file sizes directly in your browser.',
     metaDescription:
-      'Optimize PDF file size in your browser by removing redundant structural objects and metadata. Transparent in-memory processing without third-party uploads.',
+      'Compress and optimize PDF file sizes directly in browser memory. Strip redundant objects and deflate streams with zero quality loss and no cloud uploads.',
     metaKeywords:
       'compress pdf, optimize pdf, reduce pdf size, shrink pdf file free, fast pdf optimizer, private pdf compression',
     howItWorksOverview:
@@ -546,11 +602,21 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
     toolId: 6,
     slug: 'extract-pdf',
     title: 'Extract PDF Pages Online - Pull Specific Pages Free | LitasDark',
+    workspaceTitle: 'Extract PDF Pages Online - Pull Specific Pages Free | LitasDark',
+    workspaceMetaDescription:
+      'Extract specific, non-consecutive pages or custom page selections from any PDF into a new standalone document. Fast, private local WebAssembly processing.',
+    workspaceMetaKeywords:
+      'extract pdf pages, pull specific pages from pdf, save individual pdf pages, cherry pick pdf pages, export pdf pages free, private pdf extractor',
+    guideTitle: 'How to Extract Specific PDF Pages - Complete Guide | LitasDark',
+    guideMetaDescription:
+      'Learn how to cherry-pick and extract non-consecutive pages from multi-page PDFs. Step-by-step instructions for creating focused excerpt documents.',
+    guideMetaKeywords:
+      'how to extract pdf pages, cherry pick pdf pages tutorial, extract non consecutive pages guide, pull specific pages from pdf, export pdf pages guide',
     h1: 'Extract Pages from PDF Online',
     subtitle:
       'Select and export individual target pages or custom page lists into a clean, standalone PDF document.',
     metaDescription:
-      'Select and extract individual pages or custom ranges from any PDF into a new document. Processed locally in your browser.',
+      'Extract specific, non-consecutive pages or custom page selections from any PDF into a new standalone document. Fast, private local WebAssembly processing.',
     metaKeywords:
       'extract pdf pages, pull pages from pdf, save specific pages pdf, export pdf pages free, private pdf extractor',
     howItWorksOverview:
@@ -642,12 +708,22 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
   'cleanse-metadata': {
     toolId: 7,
     slug: 'cleanse-metadata',
-    title: 'Clean PDF Metadata Online - Remove Document Info & Tags | LitasDark',
+    title: 'Clean PDF Metadata Online - Strip Author & Tags | LitasDark',
+    workspaceTitle: 'Clean PDF Metadata Online - Strip Author & Tags | LitasDark',
+    workspaceMetaDescription:
+      'Strip hidden author names, software creator tags, editing timestamps, and revision histories from PDF files. Sanitize documents locally with zero uploads.',
+    workspaceMetaKeywords:
+      'clean pdf metadata, scrub pdf metadata, remove author from pdf, sanitize pdf document, strip pdf properties, pdf privacy cleaner, wipe pdf tags',
+    guideTitle: 'How to Remove PDF Metadata & Author Tags - Guide | LitasDark',
+    guideMetaDescription:
+      'Comprehensive guide to sanitizing PDF metadata: wipe author names, software fingerprints, and edit timestamps before sharing sensitive documents.',
+    guideMetaKeywords:
+      'how to remove pdf metadata, sanitize pdf guide, scrub author tags tutorial, wipe pdf creation date, inspect pdf metadata properties, pdf redaction vs metadata',
     h1: 'Cleanse PDF Document Metadata',
     subtitle:
       'Inspect and strip author names, software creators, editing timestamps, and producer tags from PDF documents directly in your browser.',
     metaDescription:
-      'Inspect and strip author names, software creators, editing timestamps, and producer tags from PDF documents directly in your browser.',
+      'Strip hidden author names, software creator tags, editing timestamps, and revision histories from PDF files. Sanitize documents locally with zero uploads.',
     metaKeywords:
       'clean metadata pdf, scrub pdf metadata, remove author from pdf, strip pdf metadata online, pdf privacy tool, sanitize pdf info',
     howItWorksOverview:
@@ -739,12 +815,22 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
   'images-to-pdf': {
     toolId: 8,
     slug: 'images-to-pdf',
-    title: 'Images to PDF Converter - Convert PNG & JPG to PDF Online | LitasDark',
+    title: 'Images to PDF Converter - Convert PNG & JPG to PDF | LitasDark',
+    workspaceTitle: 'Images to PDF Converter - Convert PNG & JPG to PDF | LitasDark',
+    workspaceMetaDescription:
+      'Convert JPG, PNG, and WebP images into clean, high-resolution PDF documents. Customize page sizes, margins, and layout with zero server uploads.',
+    workspaceMetaKeywords:
+      'images to pdf, jpg to pdf, png to pdf converter, combine photos to pdf, webp to pdf online, create pdf from images free, local image to pdf',
+    guideTitle: 'How to Convert Images to PDF Online - User Guide | LitasDark',
+    guideMetaDescription:
+      'Step-by-step tutorial on compiling JPG, PNG, and WebP photos into structured PDFs. Configure fit options, page margins, and maintain native resolution.',
+    guideMetaKeywords:
+      'how to convert images to pdf, jpg to pdf guide, png to pdf tutorial, compile photos into pdf instructions, image to pdf margins and sizing guide',
     h1: 'Convert Images to PDF Online',
     subtitle:
       'Compile PNG, JPG, JPEG, and WebP images into standardized PDF documents locally in your browser.',
     metaDescription:
-      'Convert PNG, JPG, JPEG, and WebP images into a single PDF document in your browser. Configure page sizes, margins, and preserve image resolution.',
+      'Convert JPG, PNG, and WebP images into clean, high-resolution PDF documents. Customize page sizes, margins, and layout with zero server uploads.',
     metaKeywords:
       'images to pdf, jpg to pdf, png to pdf, convert photos to pdf, combine images into pdf free, in-browser image to pdf',
     howItWorksOverview:

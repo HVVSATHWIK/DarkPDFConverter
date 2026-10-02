@@ -46,7 +46,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
   const [processedData, setProcessedData] = useState<any>(null);
   const [selectedFilesForPreview, setSelectedFilesForPreview] = useState<File[]>([]);
   const [previewTab, setPreviewTab] = useState<'output' | 'input'>('input');
-  const [darkModeSettings, setDarkModeSettings] = useState<DarkModeOptions>({ theme: 'dark' });
+  const [darkModeSettings, setDarkModeSettings] = useState<DarkModeOptions>({ theme: 'dark', mode: 'text-focused' });
   const [splitPdfSettings, setSplitPdfSettings] = useState<SplitOptions | null>(null);
   const [rotateSettings, setRotateSettings] = useState<RotateOptions | null>(null);
   const [extractSettings, setExtractSettings] = useState<ExtractOptions | null>(null);
@@ -63,6 +63,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
   const slug = location.pathname.replace(/^\//, '');
   const guide = getToolGuideBySlug(slug) || getToolGuideById(activeTool.id);
   const toolPath = activeTool.path || (guide ? `/${guide.slug}` : `/${slug}`);
+  const isDarkModeTool = activeTool.name === 'Dark Mode PDF' || activeTool.name === 'Dark Mode';
 
   useEffect(() => {
     // Ensure route starts at scroll position 0, 0
@@ -75,7 +76,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
     setProcessedData(null);
     setSelectedFilesForPreview([]);
     if (activeTool.name !== 'Dark Mode PDF' && activeTool.name !== 'Dark Mode') {
-      setDarkModeSettings({ theme: 'dark' });
+      setDarkModeSettings({ theme: 'dark', mode: 'text-focused' });
     }
     if (activeTool.name === 'Split PDF') {
       setSplitPdfSettings((prev) => prev ?? { startPage: 1, endPage: 1 });
@@ -133,10 +134,6 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
             onSelectionChange={setSelectedFilesForPreview}
             processActionName="Apply Dark Mode"
             darkModePreviewOptions={darkModeSettings}
-            autoProcess
-            autoProcessOnSelect
-            autoProcessDeps={[darkModeSettings.theme, darkModeSettings.mode]}
-            autoProcessDebounceMs={200}
             controls={
               <DarkModeControls
                 onSettingsChange={setDarkModeSettings}
@@ -196,9 +193,6 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
               onSelectionChange={setSelectedFilesForPreview}
               processActionName="Rotate PDF"
               rotateOptions={rotateSettings || undefined}
-              autoProcess
-              autoProcessOnSelect
-              autoProcessDeps={[rotateSettings?.degrees, rotateSettings?.rotationType]}
             />
             <RotatePDFControls
               onSettingsChange={setRotateSettings}
@@ -260,8 +254,6 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
             onError={handleError}
             onSelectionChange={setSelectedFilesForPreview}
             processActionName="Cleanse Metadata"
-            autoProcess
-            autoProcessOnSelect
           />
         );
 
@@ -299,9 +291,9 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
   return (
     <div className="w-full min-h-screen bg-[#050505] text-slate-100 flex flex-col">
       <SEO
-        title={guide?.title}
-        description={guide?.metaDescription}
-        keywords={guide?.metaKeywords}
+        title={guide?.workspaceTitle || guide?.title}
+        description={guide?.workspaceMetaDescription || guide?.metaDescription}
+        keywords={guide?.workspaceMetaKeywords || guide?.metaKeywords}
         canonicalPath={`/${guide?.slug || ''}`}
         faqList={guide?.faqs}
         steps={guide?.steps}
@@ -360,9 +352,9 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
         <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-210px)] min-h-[580px] lg:max-h-[850px]">
           {/* Workspace Panel: Upload & Controls */}
           <aside className="w-full lg:w-[440px] shrink-0 border-b lg:border-b-0 lg:border-r border-slate-800/80 flex flex-col bg-[#050505] lg:h-full lg:overflow-y-auto litas-scrollbar">
-            <div className="p-5 space-y-5 flex-1 flex flex-col justify-between">
-              <div className="space-y-5">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-800/60">
+            <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between pb-2.5 border-b border-slate-800/60">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
@@ -375,7 +367,7 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
                 </div>
 
                 {/* Main Tool Processor UI */}
-                <div className="space-y-4">{renderToolSpecificUI()}</div>
+                <div className="space-y-3">{renderToolSpecificUI()}</div>
               </div>
 
               {/* Bottom Quick Guide Access */}
@@ -441,7 +433,12 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
                       <PDFPreview file={processedData.processedPdf || processedData} />
                     )}
                   {previewTab === 'input' && selectedFilesForPreview[0] && (
-                    <PDFPreview file={selectedFilesForPreview[0]} />
+                    <PDFPreview
+                      file={selectedFilesForPreview[0]}
+                      isDarkMode={isDarkModeTool}
+                      theme={darkModeSettings.theme}
+                      mode={darkModeSettings.mode}
+                    />
                   )}
 
                   {/* Error Overlay */}
@@ -465,7 +462,12 @@ export default function WorkspacePanel({ activeTool }: ToolPageProps) {
                   <div className="absolute top-3 left-3 z-30 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-md text-[10px] font-mono text-cyan-300 border border-slate-800">
                     LOADED INPUT PREVIEW
                   </div>
-                  <PDFPreview file={selectedFilesForPreview[0]} />
+                  <PDFPreview
+                    file={selectedFilesForPreview[0]}
+                    isDarkMode={isDarkModeTool}
+                    theme={darkModeSettings.theme}
+                    mode={darkModeSettings.mode}
+                  />
                 </div>
               ) : (
                 <div className="text-center space-y-3 opacity-40 select-none py-12">

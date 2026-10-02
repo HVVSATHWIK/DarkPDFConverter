@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { SEO } from '@/components/common/SEO';
+import ToolOperationHelper from '@/components/tools/ToolOperationHelper';
 import {
   ChevronDownIcon,
   BuildingLibraryIcon,
@@ -25,6 +26,7 @@ import {
 const FEATURED_TOOLS = [
   {
     id: 'dark-mode',
+    toolId: 1,
     title: 'Dark Mode PDF',
     desc: 'Inverts bright white PDF pages into eye-friendly dark, OLED black, or sepia themes for comfortable night reading.',
     icon: MoonIcon,
@@ -33,6 +35,7 @@ const FEATURED_TOOLS = [
   },
   {
     id: 'merge',
+    toolId: 2,
     title: 'Merge PDFs',
     desc: 'Combines multiple PDF files into a single ordered document locally in browser memory.',
     icon: Square3Stack3DIcon,
@@ -41,6 +44,7 @@ const FEATURED_TOOLS = [
   },
   {
     id: 'cleanse',
+    toolId: 7,
     title: 'Cleanse Metadata',
     desc: 'Removes hidden author names, timestamps, software signatures, and local file paths from PDF properties.',
     icon: FingerPrintIcon,
@@ -49,6 +53,7 @@ const FEATURED_TOOLS = [
   },
   {
     id: 'images-to-pdf',
+    toolId: 8,
     title: 'Images to PDF',
     desc: 'Compiles PNG, JPG, and WebP images into standardized PDF documents directly in your browser.',
     icon: PhotoIcon,
@@ -256,39 +261,55 @@ export default function HomePage() {
             {FEATURED_TOOLS.map((tool) => {
               const Icon = tool.icon;
               return (
-                <Link
+                <div
                   key={tool.id}
-                  to={tool.path}
-                  className="p-6 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-900/40 hover:from-slate-900 hover:to-slate-900/80 border border-slate-800/90 hover:border-cyan-500/40 transition-all duration-200 flex flex-col justify-between space-y-5 group relative shadow-md hover:shadow-[0_0_20px_rgba(6,182,212,0.12)] h-full"
+                  className="p-5 sm:p-6 rounded-2xl bg-gradient-to-b from-slate-900/90 via-slate-900/60 to-slate-950/90 border border-blue-900/40 hover:border-blue-500/40 transition-all duration-200 flex flex-col justify-between space-y-4 group relative shadow-md hover:shadow-[0_0_25px_rgba(59,130,246,0.14)] h-full"
                 >
-                  <div className="space-y-3.5">
-                    <div className="flex items-center justify-between">
-                      <div className="w-11 h-11 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center group-hover:bg-cyan-500 group-hover:text-slate-950 group-hover:border-cyan-400 transition-all duration-200 shadow-sm">
+                  <div className="space-y-3.5 flex-1 flex flex-col">
+                    <Link
+                      to={tool.path}
+                      className="flex items-center justify-between group/link focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-400 rounded-lg"
+                    >
+                      <div className="w-11 h-11 rounded-xl bg-blue-950/80 text-cyan-400 border border-blue-500/30 flex items-center justify-center group-hover/link:bg-blue-600 group-hover/link:text-white group-hover/link:border-blue-400 transition-all duration-200 shadow-sm">
                         <Icon className="w-5 h-5" />
                       </div>
-                      <span className="text-[10px] font-semibold text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20">
+                      <span className="text-[10px] font-semibold text-blue-300 bg-blue-950/60 px-2.5 py-0.5 rounded border border-blue-800/40">
                         {tool.badge}
                       </span>
-                    </div>
+                    </Link>
 
                     <div className="space-y-1.5">
-                      <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors">
+                      <Link
+                        to={tool.path}
+                        className="block text-base font-bold text-white group-hover:text-blue-300 transition-colors"
+                      >
                         {tool.title}
-                      </h3>
-                      <p className="text-xs text-slate-400 leading-relaxed">
+                      </Link>
+                      <p className="text-xs text-slate-300 leading-relaxed">
                         {tool.desc}
                       </p>
                     </div>
+
+                    {/* Operation Helper Text Component */}
+                    <div className="flex-1 flex flex-col justify-end">
+                      <ToolOperationHelper toolId={tool.toolId} />
+                    </div>
                   </div>
 
-                  <div className="pt-3 border-t border-slate-800/70 flex items-center justify-between text-xs font-semibold">
-                    <span className="text-slate-400 font-medium text-[11px]">In-Browser</span>
-                    <span className="text-cyan-400 group-hover:text-cyan-300 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  <div className="pt-3 border-t border-blue-900/30 flex items-center justify-between text-xs font-semibold">
+                    <span className="text-slate-400 font-medium text-[11px] flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                      <span>Client-Side</span>
+                    </span>
+                    <Link
+                      to={tool.path}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600 text-cyan-300 hover:text-white border border-blue-500/30 hover:border-blue-400 transition-all text-xs"
+                    >
                       <span>Launch</span>
                       <ArrowRightIcon className="w-3.5 h-3.5" />
-                    </span>
+                    </Link>
                   </div>
-                </Link>
+                </div>
               );
             })}
           </div>

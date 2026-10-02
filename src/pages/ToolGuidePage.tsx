@@ -49,9 +49,10 @@ export default function ToolGuidePage({ toolSlug: propSlug }: ToolGuidePageProps
   return (
     <div className="min-h-screen bg-[#050505] text-slate-100 flex flex-col w-full">
       <SEO
-        title={guide.title}
-        description={guide.metaDescription}
-        keywords={guide.metaKeywords}
+        title={guide.guideTitle || `How to Use ${guide.h1} - Complete Guide | LitasDark`}
+        description={guide.guideMetaDescription || guide.metaDescription}
+        keywords={guide.guideMetaKeywords || guide.metaKeywords}
+        canonicalPath={`/${guide.slug}/guide`}
       />
 
       {/* Guide Page Top Banner & Header */}

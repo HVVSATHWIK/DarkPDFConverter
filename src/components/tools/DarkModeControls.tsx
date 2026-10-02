@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { DarkModeOptions, DarkModeRenderMode, ThemeName } from '@/hooks/useDarkMode';
-import { CheckCircleIcon } from '@heroicons/react/24/solid';
+import { CheckCircleIcon, InformationCircleIcon } from '@heroicons/react/24/solid';
 
 interface DarkModeControlsProps {
   onSettingsChange: (options: DarkModeOptions) => void;
-  currentOptions: DarkModeOptions; // To initialize controls with current settings
+  currentOptions: DarkModeOptions;
   embedded?: boolean;
-  // isProcessing: boolean; // Will be used if we have a dedicated apply button here
 }
 
 const themes: ThemeName[] = ['dark', 'darker', 'darkest', 'sepia', 'midnight', 'slate'];
@@ -21,184 +21,203 @@ const themeSwatches: Record<ThemeName, { label: string; className: string }> = {
 };
 
 const themeDescriptions: Record<ThemeName, string> = {
-  dark: 'Classic dark slate theme with balanced contrast.',
-  darker: 'Deep charcoal modern theme.',
+  dark: 'Classic dark slate with balanced contrast.',
+  darker: 'Deep charcoal modern dark style.',
   darkest: 'Pure OLED black for maximum contrast.',
   sepia: 'Warm amber & parchment tone for relaxed reading.',
   midnight: 'Deep navy blue with moonlight accents.',
-  slate: 'Cool graphite gray theme with softer highlights.',
+  slate: 'Cool graphite gray with softer highlights.',
 };
+
 const modes: { value: DarkModeRenderMode; label: string; hint: string }[] = [
   {
-    value: 'preserve-images',
-    label: 'Preserve images (recommended)',
-    hint: 'Keeps photos closer to original colors (less inversion).'
+    value: 'text-focused',
+    label: 'Text Focused',
+    hint: 'Best for text documents & contracts. High clarity.'
+  },
+  {
+    value: 'image-preserve',
+    label: 'Image Preserve',
+    hint: 'Preserves colors in photos & diagrams.'
   },
   {
     value: 'invert',
-    label: 'Invert everything (classic)',
-    hint: 'Best for pure text PDFs, but photos may invert colors.'
+    label: 'High Contrast Invert',
+    hint: 'Maximum darkness invert. Fast.'
   },
 ];
 
 const DarkModeControls: React.FC<DarkModeControlsProps> = ({ onSettingsChange, currentOptions, embedded = false }) => {
   const [selectedTheme, setSelectedTheme] = useState<ThemeName>(currentOptions.theme || 'dark');
-  const [selectedMode, setSelectedMode] = useState<DarkModeRenderMode>(currentOptions.mode || 'preserve-images');
+  const [selectedMode, setSelectedMode] = useState<DarkModeRenderMode>(currentOptions.mode || 'text-focused');
+  const [showTip, setShowTip] = useState(false);
   const didEmitDefaultsRef = useRef(false);
-  // const [brightness, setBrightness] = useState(currentOptions.brightness || 1);
-  // const [contrast, setContrast] = useState(currentOptions.contrast || 1);
 
   // Keep local state in sync with parent updates (e.g., tool switching resets).
   useEffect(() => {
     const effectiveTheme: ThemeName = currentOptions.theme || 'dark';
-    const effectiveMode: DarkModeRenderMode = currentOptions.mode || 'preserve-images';
+    const effectiveMode: DarkModeRenderMode = currentOptions.mode || 'text-focused';
 
     setSelectedTheme(effectiveTheme);
     setSelectedMode(effectiveMode);
 
     // If parent didn't provide keys, emit effective defaults once.
-    // This prevents UI and processing options from drifting.
     if (!didEmitDefaultsRef.current && (!currentOptions.theme || !currentOptions.mode)) {
       didEmitDefaultsRef.current = true;
-      onSettingsChange({ theme: effectiveTheme, mode: effectiveMode });
+      onSettingsChange({ ...currentOptions, theme: effectiveTheme, mode: effectiveMode });
     }
-  }, [currentOptions.mode, currentOptions.theme, onSettingsChange]);
+  }, [currentOptions, onSettingsChange]);
 
   const handleThemeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newTheme = event.target.value as ThemeName;
     setSelectedTheme(newTheme);
-    onSettingsChange({ theme: newTheme, mode: selectedMode /*, brightness, contrast */ });
+    onSettingsChange({ ...currentOptions, theme: newTheme, mode: selectedMode });
   };
 
   const setTheme = (theme: ThemeName) => {
     setSelectedTheme(theme);
-    onSettingsChange({ theme, mode: selectedMode });
+    onSettingsChange({ ...currentOptions, theme, mode: selectedMode });
   };
 
   const handleModeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newMode = event.target.value as DarkModeRenderMode;
     setSelectedMode(newMode);
-    onSettingsChange({ theme: selectedTheme, mode: newMode });
+    onSettingsChange({ ...currentOptions, theme: selectedTheme, mode: newMode });
   };
 
-  // Add handlers for brightness/contrast if/when sliders are implemented
-  // const handleBrightnessChange = (event: React.ChangeEvent<HTMLInputElement>) => { ... };
-  // const handleContrastChange = (event: React.ChangeEvent<HTMLInputElement>) => { ... };
-
   return (
-    <div className={embedded ? 'space-y-4' : 'p-4 space-y-4 panel-surface'}>
-      {!embedded && <h3 className="text-lg font-semibold text-white">Dark Mode Settings</h3>}
+    <div className={embedded ? 'space-y-3' : 'p-3.5 space-y-3 panel-surface'}>
+      {!embedded && <h3 className="text-base font-semibold text-white">Dark Mode Settings</h3>}
 
-      <div>
-        <label htmlFor="mode-select" className="block text-sm font-medium text-slate-200 mb-1">
-          Mode
-        </label>
-        <select
-          id="mode-select"
-          name="mode"
-          value={selectedMode}
-          onChange={handleModeChange}
-          className="mt-1 block control-field"
-        >
-          {modes.map(m => (
-            <option key={m.value} value={m.value}>
-              {m.label}
-            </option>
-          ))}
-        </select>
-        <p className="text-xs text-slate-300/80 mt-2">
-          {modes.find(m => m.value === selectedMode)?.hint}
-        </p>
-      </div>
+      {/* Combined Single Section: Mode & Theme with Info Tooltip */}
+      <div className="p-3 rounded-xl bg-slate-900/70 border border-slate-800 space-y-3">
+        {/* Header row with Title and Tooltip Popover */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">
+              Theme & Mode
+            </span>
+          </div>
 
-      <div>
-        <label htmlFor="theme-select" className="block text-sm font-medium text-slate-200 mb-1">
-          Theme
-        </label>
-        <div className="flex items-center gap-3">
-          <div
-            className={
-              'h-9 w-9 rounded-xl border border-white/10 shadow-inner shadow-black/20 ' +
-              themeSwatches[selectedTheme].className
-            }
-            aria-hidden="true"
-          />
-          <select
-            id="theme-select"
-            name="theme"
-            value={selectedTheme}
-            onChange={handleThemeChange}
-            className="sr-only"
-          >
-            {themes.map(themeName => (
-              <option key={themeName} value={themeName}>
-                {themeSwatches[themeName].label}
-              </option>
-            ))}
-          </select>
-          <div className="text-sm font-semibold text-slate-100">
-            {themeSwatches[selectedTheme].label}
+          <div className="relative inline-block">
+            <button
+              type="button"
+              onClick={() => setShowTip((prev) => !prev)}
+              onMouseEnter={() => setShowTip(true)}
+              onMouseLeave={() => setShowTip(false)}
+              className="text-slate-400 hover:text-cyan-400 transition-colors p-0.5 rounded focus:outline-none"
+              aria-label="Theme & Mode Information"
+            >
+              <InformationCircleIcon className="w-4 h-4" />
+            </button>
+            <AnimatePresence>
+              {showTip && (
+                <motion.div
+                  initial={{ opacity: 0, y: 4, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 4, scale: 0.95 }}
+                  className="absolute z-50 right-0 top-6 w-60 p-2.5 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl text-[11px] text-slate-300 leading-snug space-y-1"
+                >
+                  <p className="font-semibold text-white">Live Real-time Preview</p>
+                  <p>
+                    Changes auto-apply to the preview canvas immediately. Click &quot;Apply Dark Mode &amp; Generate PDF&quot; to build the downloadable file.
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
-        <p className="text-xs text-slate-300/80 mt-2">
-          {themeDescriptions[selectedTheme]}
-        </p>
+        {/* 1. Mode Selector */}
+        <div className="space-y-1">
+          <label htmlFor="mode-select" className="block text-[11px] font-semibold text-slate-300">
+            Mode
+          </label>
+          <select
+            id="mode-select"
+            name="mode"
+            value={selectedMode}
+            onChange={handleModeChange}
+            className="w-full text-xs py-1.5 px-2.5 bg-slate-950/80 border border-slate-800 rounded-lg text-slate-200 focus:outline-none focus:border-cyan-500/70 focus:ring-1 focus:ring-cyan-500/40 transition-colors"
+          >
+            {modes.map((m) => (
+              <option key={m.value} value={m.value}>
+                {m.label}
+              </option>
+            ))}
+          </select>
+          <p className="text-[10px] text-slate-400">
+            {modes.find((m) => m.value === selectedMode)?.hint}
+          </p>
+        </div>
 
-        <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-          {themes.map(themeName => {
-            const isActive = themeName === selectedTheme;
-            return (
-              <button
-                key={themeName}
-                type="button"
-                onClick={() => setTheme(themeName)}
-                className={
-                  'relative flex items-center gap-2 rounded-xl border px-3 py-2 text-left transition ' +
-                  (isActive
-                    ? 'border-indigo-400/70 bg-indigo-500/10 ring-2 ring-indigo-400/30'
-                    : 'border-white/10 bg-white/5 hover:bg-white/10')
-                }
-                aria-pressed={isActive}
-                aria-label={`Theme: ${themeSwatches[themeName].label}`}
-              >
-                <span
-                  className={
-                    'h-4 w-4 rounded-md border border-white/10 ' + themeSwatches[themeName].className
-                  }
-                  aria-hidden="true"
-                />
-                <span className="text-xs font-medium text-slate-100">{themeSwatches[themeName].label}</span>
+        {/* 2. Theme Selector */}
+        <div className="space-y-1.5 pt-2 border-t border-slate-800/60">
+          <div className="flex items-center justify-between">
+            <label htmlFor="theme-select" className="block text-[11px] font-semibold text-slate-300">
+              Theme
+            </label>
+            <div className="flex items-center gap-1.5">
+              <span
+                className={`h-3 w-3 rounded-full border border-white/20 ${themeSwatches[selectedTheme].className}`}
+                aria-hidden="true"
+              />
+              <span className="text-[11px] font-medium text-cyan-400">
+                {themeSwatches[selectedTheme].label}
+              </span>
+            </div>
+            {/* Hidden native select for standard accessibility / test suites */}
+            <select
+              id="theme-select"
+              name="theme"
+              value={selectedTheme}
+              onChange={handleThemeChange}
+              className="sr-only"
+            >
+              {themes.map((themeName) => (
+                <option key={themeName} value={themeName}>
+                  {themeSwatches[themeName].label}
+                </option>
+              ))}
+            </select>
+          </div>
 
-                {isActive && (
-                  <span className="absolute right-2 top-2 text-indigo-200" aria-hidden="true">
-                    <CheckCircleIcon className="w-4 h-4" />
-                  </span>
-                )}
-              </button>
-            );
-          })}
+          {/* 6-Theme Compact 3x2 Grid */}
+          <div className="grid grid-cols-3 gap-1.5">
+            {themes.map((themeName) => {
+              const isActive = themeName === selectedTheme;
+              return (
+                <button
+                  key={themeName}
+                  type="button"
+                  onClick={() => setTheme(themeName)}
+                  className={`relative flex items-center gap-1.5 rounded-lg border px-2 py-1.5 text-left transition cursor-pointer ${
+                    isActive
+                      ? 'border-cyan-400/80 bg-cyan-500/10 ring-1 ring-cyan-400/40 text-cyan-300 font-bold'
+                      : 'border-slate-800 bg-slate-950/60 text-slate-300 hover:text-white hover:border-slate-700'
+                  }`}
+                  aria-pressed={isActive}
+                  aria-label={`Theme: ${themeSwatches[themeName].label}`}
+                >
+                  <span
+                    className={`h-3 w-3 shrink-0 rounded-full border border-white/10 ${themeSwatches[themeName].className}`}
+                    aria-hidden="true"
+                  />
+                  <span className="text-[11px] truncate flex-1">{themeSwatches[themeName].label}</span>
+
+                  {isActive && (
+                    <CheckCircleIcon className="w-3.5 h-3.5 text-cyan-400 shrink-0" aria-hidden="true" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          <p className="text-[10px] text-slate-400 pt-0.5">
+            {themeDescriptions[selectedTheme]}
+          </p>
         </div>
       </div>
-
-      {/* Placeholder for Brightness and Contrast Sliders */}
-      {/*
-      <div>
-        <label htmlFor="brightness-slider" className="block text-sm font-medium text-gray-300">Brightness: {brightness}</label>
-        <input type="range" id="brightness-slider" name="brightness" min="0.5" max="1.5" step="0.1" value={brightness} onChange={handleBrightnessChange} className="w-full" />
-      </div>
-      <div>
-        <label htmlFor="contrast-slider" className="block text-sm font-medium text-gray-300">Contrast: {contrast}</label>
-        <input type="range" id="contrast-slider" name="contrast" min="0.5" max="1.5" step="0.1" value={contrast} onChange={handleContrastChange} className="w-full" />
-      </div>
-      */}
-
-      {/* The main "Process" button is in PDFProcessor.tsx.
-          This component now only manages settings.
-      */}
-      <p className="text-xs text-slate-300/80 mt-2">
-        Tip: changes auto-apply after a moment; use Apply to refresh instantly. Note: Dark Mode renders high-resolution dark visual pages optimized for night reading.
-      </p>
     </div>
   );
 };

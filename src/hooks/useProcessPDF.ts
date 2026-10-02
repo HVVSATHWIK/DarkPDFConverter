@@ -120,8 +120,13 @@ export function useProcessPDF() {
           titlePrefix = 'Dark Mode';
           const arrayBuffer = await file.arrayBuffer();
           let pdfDoc = await PDFDocument.load(arrayBuffer);
-          onProgress(0.2, 'Applying Smart Dark Mode...');
-          pdfDoc = await applyDarkMode(pdfDoc, options.darkModeOptions || {});
+          onProgress(0.05, 'Preparing document canvas...');
+          pdfDoc = await applyDarkMode(
+            pdfDoc,
+            options.darkModeOptions || {},
+            (p, msg) => onProgress(0.05 + p * 0.9, msg)
+          );
+          onProgress(0.98, 'Packaging dark PDF document...');
           processedPdf = await pdfDoc.save();
 
         } else if (options.activeToolName === 'Rotate PDF') {
