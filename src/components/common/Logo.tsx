@@ -26,23 +26,22 @@ export function Logo({ size = 'md', showTagline = false, className = '' }: LogoP
       aria-label="LitasDark Home"
     >
       <div
-        className={`${iconSizes[size]} flex-shrink-0 flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 border border-blue-400/30 group-hover:shadow-md group-hover:shadow-blue-500/25 transition-all overflow-hidden shadow-xs`}
+        className={`${iconSizes[size]} flex-shrink-0 flex items-center justify-center rounded-lg bg-slate-900 border border-slate-700/80 group-hover:border-cyan-500/50 transition-colors overflow-hidden shadow-sm`}
       >
         <img
           src="/favicon.ico"
           alt="LitasDark Logo"
-          className="w-full h-full object-contain p-1 invert brightness-200"
+          className="w-full h-full object-contain p-1"
         />
       </div>
       <div className="flex flex-col">
         <span
-          className={`${textSizes[size]} font-extrabold tracking-tight leading-none`}
+          className={`${textSizes[size]} font-bold tracking-tight text-white group-hover:text-cyan-300 transition-colors leading-none`}
         >
-          <span className="text-slate-900 group-hover:text-blue-900 transition-colors">Litas</span>
-          <span className="text-blue-600 group-hover:text-blue-500 transition-colors">Dark</span>
+          LitasDark
         </span>
         {showTagline && (
-          <span className="text-[10px] text-slate-500 font-medium tracking-wider mt-0.5 uppercase">
+          <span className="text-[10px] text-slate-400 font-mono tracking-wider mt-0.5 uppercase">
             In-Browser PDF Suite
           </span>
         )}

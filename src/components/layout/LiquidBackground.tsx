@@ -241,9 +241,9 @@ const LiquidMaterial = shaderMaterial(
         uAmplitude: 0.3,  // Reduced from 0.4 for calmer waves
         uSpeed: 0.2,      // Slower speed
         uPulseSpeed: 0.5,
-        uBaseColor: new THREE.Color('#f1f5f9'), // Soft crisp white-slate
-        uHighlight1: new THREE.Color('#dbeafe'), // Soft blue accent (Blue 100)
-        uHighlight2: new THREE.Color('#3b82f6')  // Crisp royal blue reflection (Blue 500)
+        uBaseColor: new THREE.Color('#030712'), // Dark obsidian / midnight black base
+        uHighlight1: new THREE.Color('#0c192e'), // Deep navy / indigo swell
+        uHighlight2: new THREE.Color('#0284c7')  // Subtle electric cyan/blue crest
     },
     liquidVertexShader,
     liquidFragmentShader
@@ -362,21 +362,21 @@ function ParticleSystem() {
 
 export function LiquidBackground() {
     return (
-        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-50 via-white to-blue-50/50">
+        <div className="fixed inset-0 -z-10 bg-[#030712]">
             <Canvas
                 dpr={[1, 1.5]}
                 camera={{ position: [0, 2, 6], fov: 45 }}
                 gl={{ antialias: false, toneMapping: THREE.ACESFilmicToneMapping }}
             >
-                <color attach="background" args={['#f8fafc']} />
-                <fog attach="fog" args={['#f8fafc', 5, 20]} />
+                <color attach="background" args={['#030712']} />
+                <fog attach="fog" args={['#030712', 5, 20]} />
 
                 <LiquidPlane />
                 <ParticleSystem />
             </Canvas>
 
-            {/* UX Overlay: Soft luminous white & blue gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-b from-blue-50/30 via-white/70 to-slate-50/85 backdrop-blur-[1px] pointer-events-none" />
+            {/* UX Overlay: Deep dark gradient overlay for readable contrast */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[#030712]/30 via-[#030712]/60 to-[#030712]/90 pointer-events-none" />
         </div>
     );
 }

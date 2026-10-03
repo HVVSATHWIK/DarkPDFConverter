@@ -2,7 +2,6 @@ import { useRef, useState, MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { ToolDefinition } from '@/config/tools';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
-import ToolOperationHelper from './ToolOperationHelper';
 
 interface ToolGridCardProps {
   tool: ToolDefinition;
@@ -47,7 +46,7 @@ export default function ToolGridCard({ tool }: ToolGridCardProps) {
         </Link>
 
         {/* Title and Short Description */}
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 flex-1">
           <Link
             to={tool.path}
             className="block font-bold text-white group-hover:text-blue-300 transition-colors text-lg tracking-tight focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-400 rounded"
@@ -57,11 +56,6 @@ export default function ToolGridCard({ tool }: ToolGridCardProps) {
           <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
             {tool.description}
           </p>
-        </div>
-
-        {/* Helper Text Component: Function & Benefits */}
-        <div className="flex-1 flex flex-col justify-end">
-          <ToolOperationHelper toolId={tool.id} />
         </div>
       </div>
 

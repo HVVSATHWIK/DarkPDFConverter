@@ -23,7 +23,7 @@ export function Header() {
     location.pathname.startsWith('/compliance');
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-blue-100 shadow-xs shadow-blue-500/5">
+    <header className="sticky top-0 z-50 w-full bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 shadow-md shadow-black/20">
       <div className="mx-auto max-w-7xl px-4 py-3 md:px-6 flex items-center justify-between">
         {/* Brand Logo */}
         <Logo size="md" />
@@ -34,8 +34,8 @@ export function Header() {
             to="/"
             className={`px-3 py-1.5 rounded-xl transition-all ${
               onHome
-                ? 'text-blue-700 font-semibold bg-blue-50 border border-blue-200 shadow-2xs'
-                : 'text-slate-600 hover:text-blue-700 hover:bg-blue-50/50'
+                ? 'text-cyan-300 font-semibold bg-cyan-950/60 border border-cyan-800/60 shadow-sm'
+                : 'text-slate-400 hover:text-white hover:bg-slate-900/60'
             }`}
           >
             Home
@@ -45,8 +45,8 @@ export function Header() {
             to="/tools"
             className={`px-3 py-1.5 rounded-xl transition-all ${
               onTools
-                ? 'text-blue-700 font-semibold bg-blue-50 border border-blue-200 shadow-2xs'
-                : 'text-slate-600 hover:text-blue-700 hover:bg-blue-50/50'
+                ? 'text-cyan-300 font-semibold bg-cyan-950/60 border border-cyan-800/60 shadow-sm'
+                : 'text-slate-400 hover:text-white hover:bg-slate-900/60'
             }`}
           >
             Tools
@@ -56,8 +56,8 @@ export function Header() {
             to="/privacy-architecture"
             className={`hidden sm:inline-flex px-3 py-1.5 rounded-xl transition-all ${
               onPrivacy
-                ? 'text-blue-700 font-semibold bg-blue-50 border border-blue-200 shadow-2xs'
-                : 'text-slate-600 hover:text-blue-700 hover:bg-blue-50/50'
+                ? 'text-cyan-300 font-semibold bg-cyan-950/60 border border-cyan-800/60 shadow-sm'
+                : 'text-slate-400 hover:text-white hover:bg-slate-900/60'
             }`}
           >
             Privacy
@@ -67,8 +67,8 @@ export function Header() {
             to="/explore"
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
               onExplore
-                ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/25 border border-blue-600'
-                : 'text-blue-700 hover:bg-blue-50 border border-blue-200/80 bg-white'
+                ? 'bg-cyan-500 text-slate-950 shadow-sm shadow-cyan-500/25 border border-cyan-400 font-bold'
+                : 'text-cyan-400 hover:text-white hover:bg-slate-900/80 border border-cyan-500/30 bg-slate-950/60'
             }`}
           >
             <span>3D Labs</span>

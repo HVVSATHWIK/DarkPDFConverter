@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useProcessPDF, ProcessOptions } from '../hooks/useProcessPDF';
 import { PipelineProgressCard } from './common/PipelineProgressCard';
 import {
@@ -82,7 +82,6 @@ function PDFProcessor({
   const [outputQuality, setOutputQuality] = useState<'low' | 'medium' | 'high'>('medium');
   const [pageRange, setPageRange] = useState<string>('');
   const [imageDimming, setImageDimming] = useState<number>(0.0);
-  const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
   const [resultStats, setResultStats] = useState<{ originalSize?: number; processedSize?: number } | null>(null);
   const downloadUrlRef = useRef<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -437,16 +436,16 @@ function PDFProcessor({
   };
 
   return (
-    <div role="region" aria-label="PDF processing workspace" className="space-y-3 relative">
-      {/* 1. Uploader Drop Zone / Compact Selected File Card */}
-      <div className="space-y-2">
+    <div role="region" aria-label="PDF processing workspace" className="space-y-5 relative">
+      {/* 1. Uploader Drop Zone */}
+      <div className="space-y-3">
         {selectedFiles.length === 0 ? (
           <div
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
-            className={`group flex flex-col items-center justify-center p-6 sm:p-7 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 ease-in-out text-center ${
+            className={`group flex flex-col items-center justify-center p-8 sm:p-10 border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-200 ease-in-out text-center ${
               isDragging
                 ? 'border-cyan-400 bg-cyan-500/10 shadow-lg shadow-cyan-500/10'
                 : 'border-slate-800 hover:border-slate-700 bg-slate-900/60 hover:bg-slate-900/90'
@@ -462,32 +461,32 @@ function PDFProcessor({
               id={`pdf-upload-${toolId}`}
             />
             <div
-              className={`w-10 h-10 rounded-xl mb-2.5 flex items-center justify-center transition-colors ${
+              className={`w-12 h-12 rounded-xl mb-3 flex items-center justify-center transition-colors ${
                 isDragging
                   ? 'bg-cyan-500/20 text-cyan-300'
                   : 'bg-slate-800/80 text-cyan-400 group-hover:bg-cyan-500 group-hover:text-slate-950'
               }`}
             >
-              <DocumentPlusIcon className="w-5 h-5 transition-transform group-hover:scale-110" />
+              <DocumentPlusIcon className="w-6 h-6 transition-transform group-hover:scale-110" />
             </div>
-            <p className="text-xs sm:text-sm font-bold text-slate-100 group-hover:text-white">
+            <p className="text-sm font-bold text-slate-100 group-hover:text-white">
               {isImageTool
-                ? 'Drop images here or choose files'
-                : 'Drop PDF files here or choose files'}
+                ? 'Drop images here or choose files from your device'
+                : 'Drop PDF files here or choose files from your device'}
             </p>
-            <p className="text-[11px] text-slate-400 mt-1">
+            <p className="text-xs text-slate-400 mt-1.5">
               {isImageTool
-                ? 'Supports PNG, JPG, JPEG, WebP'
+                ? 'Supports PNG, JPG, JPEG, WebP format'
                 : allowMultipleFiles
                 ? 'Select multiple PDF files to organize and merge'
-                : 'Select a PDF document to begin preview'}
+                : 'Select a PDF document to process'}
             </p>
           </div>
         ) : (
-          /* 2. Compact Selected File Workspace */
-          <div className="space-y-2">
+          /* 2. Selected File Workspace */
+          <div className="space-y-3">
             <div className="flex items-center justify-between pb-1 border-b border-slate-800/80">
-              <span className="text-[11px] font-semibold text-slate-300">
+              <span className="text-xs font-semibold text-slate-300">
                 Selected {isImageTool ? 'Images' : 'Files'} ({selectedFiles.length})
               </span>
               <div className="flex items-center gap-2">
@@ -504,9 +503,9 @@ function PDFProcessor({
                     <button
                       type="button"
                       onClick={() => addMoreInputRef.current?.click()}
-                      className="text-[11px] text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1 transition-colors"
+                      className="text-xs text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1 transition-colors"
                     >
-                      <DocumentPlusIcon className="w-3 h-3" />
+                      <DocumentPlusIcon className="w-3.5 h-3.5" />
                       Add More
                     </button>
                   </>
@@ -515,7 +514,7 @@ function PDFProcessor({
                   <button
                     type="button"
                     onClick={clearAllFiles}
-                    className="text-[11px] text-slate-500 hover:text-rose-400 transition-colors"
+                    className="text-xs text-slate-500 hover:text-rose-400 transition-colors"
                   >
                     Clear All
                   </button>
@@ -523,18 +522,18 @@ function PDFProcessor({
               </div>
             </div>
 
-            <ul className="space-y-1.5 max-h-56 overflow-y-auto pr-0.5">
+            <ul className="space-y-2 max-h-72 overflow-y-auto pr-0.5">
               {selectedFiles.map((item, index) => (
                 <li
                   key={item.id}
-                  className="group flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition-all"
+                  className="group flex items-center justify-between gap-2.5 p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition-all"
                 >
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <div className="w-6 h-6 rounded-md bg-slate-800 border border-slate-700/60 text-cyan-400 flex items-center justify-center shrink-0 font-bold text-[10px]">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <div className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700/60 text-cyan-400 flex items-center justify-center shrink-0 font-bold text-[10px]">
                       {index + 1}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold text-slate-100 truncate">
+                      <p className="text-xs sm:text-sm font-semibold text-slate-100 truncate">
                         {item.file.name}
                       </p>
                       <p className="text-[10px] text-slate-400">
@@ -546,24 +545,24 @@ function PDFProcessor({
                   {/* Controls: Reorder buttons for multi-file tools */}
                   <div className="flex items-center gap-1 shrink-0">
                     {allowMultipleFiles && selectedFiles.length > 1 && (
-                      <div className="flex items-center gap-0.5 bg-slate-800/80 rounded-md p-0.5 border border-slate-700/50">
+                      <div className="flex items-center gap-0.5 bg-slate-800/80 rounded-lg p-0.5 border border-slate-700/50">
                         <button
                           type="button"
                           onClick={() => moveFile(index, 'up')}
                           disabled={index === 0}
                           title="Move Up"
-                          className="p-0.5 text-slate-400 hover:text-cyan-300 disabled:opacity-30 disabled:hover:text-slate-400 transition-colors"
+                          className="p-1 text-slate-400 hover:text-cyan-300 disabled:opacity-30 disabled:hover:text-slate-400 transition-colors"
                         >
-                          <ChevronUpIcon className="w-3 h-3" />
+                          <ChevronUpIcon className="w-3.5 h-3.5" />
                         </button>
                         <button
                           type="button"
                           onClick={() => moveFile(index, 'down')}
                           disabled={index === selectedFiles.length - 1}
                           title="Move Down"
-                          className="p-0.5 text-slate-400 hover:text-cyan-300 disabled:opacity-30 disabled:hover:text-slate-400 transition-colors"
+                          className="p-1 text-slate-400 hover:text-cyan-300 disabled:opacity-30 disabled:hover:text-slate-400 transition-colors"
                         >
-                          <ChevronDownIcon className="w-3 h-3" />
+                          <ChevronDownIcon className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     )}
@@ -572,7 +571,7 @@ function PDFProcessor({
                       type="button"
                       onClick={() => removeFile(item.id)}
                       title="Remove File"
-                      className="p-0.5 text-slate-400 hover:text-rose-400 transition-colors"
+                      className="p-1 text-slate-400 hover:text-rose-400 transition-colors"
                     >
                       <XCircleIcon className="w-4 h-4" />
                     </button>
@@ -583,7 +582,7 @@ function PDFProcessor({
 
             {/* Hint for Merge PDFs */}
             {isMergeTool && selectedFiles.length === 1 && (
-              <p className="text-[11px] text-amber-400/90 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5 rounded-lg text-center">
+              <p className="text-xs text-amber-400/90 bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded-lg text-center">
                 Add at least 1 more PDF file to perform a merge.
               </p>
             )}
@@ -591,169 +590,145 @@ function PDFProcessor({
         )}
       </div>
 
-      {/* 2. Tool Specific Controls & Collapsible Advanced Options */}
+      {/* 2. Tool Specific Controls */}
       {selectedFiles.length > 0 && (controls || isDarkModeTool) && (
-        <div className="pt-1 border-t border-slate-800/80 space-y-2">
+        <div className="py-2 border-t border-slate-800/80 space-y-3">
           {controls}
 
-          {/* Progressive Disclosure: Collapsible Advanced Options for Dark Mode */}
+          {/* User-facing Output Quality selector, Page Range, and Image Dimming for Dark Mode */}
           {isDarkModeTool && (
-            <div className="space-y-2">
-              <button
-                type="button"
-                onClick={() => setShowAdvanced((prev) => !prev)}
-                className="flex items-center justify-between w-full py-2 px-3 rounded-lg bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800 text-slate-300 hover:text-white transition-all text-xs font-semibold cursor-pointer group"
-                aria-expanded={showAdvanced}
-                aria-controls="advanced-darkmode-options"
-              >
-                <span className="flex items-center gap-1.5">
-                  <span className="text-cyan-400 group-hover:text-cyan-300 font-bold text-xs">⚙</span>
-                  <span>Advanced Options</span>
-                </span>
-                <ChevronDownIcon
-                  className={`w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-400 transition-transform duration-200 ${
-                    showAdvanced ? 'rotate-180' : ''
-                  }`}
+            <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3.5">
+              {/* 1. Page Range Selection */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="darkmode-page-range" className="block text-xs font-bold text-slate-200 uppercase tracking-wider">
+                    Pages to Process
+                  </label>
+                  <span className="text-[10px] text-slate-400">Leave blank for all</span>
+                </div>
+                <input
+                  id="darkmode-page-range"
+                  type="text"
+                  value={pageRange}
+                  onChange={(e) => setPageRange(e.target.value)}
+                  placeholder="e.g., 1-5, 8, 11 (Leave blank for all)"
+                  disabled={isProcessing}
+                  className="w-full px-3 py-2 text-xs bg-slate-950/80 border border-slate-800 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500/70 focus:ring-1 focus:ring-cyan-500/40 disabled:opacity-50 transition-colors"
                 />
-              </button>
+                <p className="text-[10px] text-slate-400 leading-snug">
+                  Note: Preview shows all pages. Only the downloaded PDF will be cropped to your selection.
+                </p>
+              </div>
 
-              <AnimatePresence initial={false}>
-                {showAdvanced && (
-                  <motion.div
-                    id="advanced-darkmode-options"
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.25, ease: 'easeInOut' }}
-                    className="overflow-hidden"
-                  >
-                    <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
-                      {/* 1. Page Range Selection */}
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <label htmlFor="darkmode-page-range" className="block text-[11px] font-bold text-slate-200 uppercase tracking-wider">
-                            Pages to Process
-                          </label>
-                          <span className="text-[10px] text-slate-400">Leave blank for all</span>
-                        </div>
-                        <input
-                          id="darkmode-page-range"
-                          type="text"
-                          value={pageRange}
-                          onChange={(e) => setPageRange(e.target.value)}
-                          placeholder="e.g., 1-5, 8, 11 (Leave blank for all)"
-                          disabled={isProcessing}
-                          className="w-full px-2.5 py-1.5 text-xs bg-slate-950/80 border border-slate-800 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500/70 focus:ring-1 focus:ring-cyan-500/40 disabled:opacity-50 transition-colors"
-                        />
-                        <p className="text-[10px] text-slate-400 leading-snug">
-                          Note: Preview shows all pages. Download will include only selected pages.
-                        </p>
-                      </div>
+              {/* 2. Output Quality Selector */}
+              <div className="space-y-1.5 pt-2 border-t border-slate-800/60">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider">
+                    Output Quality
+                  </label>
+                  <span className="text-[11px] text-cyan-400 font-medium">
+                    {outputQuality === 'low'
+                      ? '1.0x scale • 60% quality'
+                      : outputQuality === 'medium'
+                      ? '1.5x scale • 85% quality'
+                      : '2.0x scale • 95% quality'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    {
+                      value: 'low',
+                      label: 'Low',
+                      badge: 'Small File',
+                    },
+                    {
+                      value: 'medium',
+                      label: 'Medium',
+                      badge: 'Balanced',
+                    },
+                    {
+                      value: 'high',
+                      label: 'High',
+                      badge: 'Sharpest',
+                    },
+                  ].map((item) => {
+                    const isActive = outputQuality === item.value;
+                    return (
+                      <button
+                        key={item.value}
+                        type="button"
+                        onClick={() => setOutputQuality(item.value as 'low' | 'medium' | 'high')}
+                        disabled={isProcessing}
+                        className={`relative flex flex-col items-center justify-center py-2 px-1.5 rounded-xl border text-center transition-all cursor-pointer ${
+                          isActive
+                            ? 'border-cyan-500/80 bg-cyan-500/10 text-cyan-300 ring-2 ring-cyan-500/30 font-bold shadow-sm'
+                            : 'border-slate-800 bg-slate-950/70 text-slate-300 hover:text-white hover:border-slate-700'
+                        } disabled:opacity-50 disabled:cursor-not-allowed`}
+                        aria-pressed={isActive}
+                        aria-label={`Output Quality: ${item.label} (${item.badge})`}
+                      >
+                        <span className="text-xs">{item.label}</span>
+                        <span className="text-[10px] text-slate-400 mt-0.5 font-normal">
+                          ({item.badge})
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
-                      {/* 2. Output Quality Selector */}
-                      <div className="space-y-1 pt-2 border-t border-slate-800/60">
-                        <div className="flex items-center justify-between">
-                          <label className="block text-[11px] font-bold text-slate-200 uppercase tracking-wider">
-                            Output Quality
-                          </label>
-                          <span className="text-[10px] text-cyan-400 font-medium">
-                            {outputQuality === 'low'
-                              ? '1.0x scale • 60% quality'
-                              : outputQuality === 'medium'
-                              ? '1.5x scale • 85% quality'
-                              : '2.0x scale • 95% quality'}
-                          </span>
-                        </div>
-                        <div className="grid grid-cols-3 gap-1.5">
-                          {[
-                            { value: 'low', label: 'Low', badge: 'Small File' },
-                            { value: 'medium', label: 'Medium', badge: 'Balanced' },
-                            { value: 'high', label: 'High', badge: 'Sharpest' },
-                          ].map((item) => {
-                            const isActive = outputQuality === item.value;
-                            return (
-                              <button
-                                key={item.value}
-                                type="button"
-                                onClick={() => setOutputQuality(item.value as 'low' | 'medium' | 'high')}
-                                disabled={isProcessing}
-                                className={`relative flex flex-col items-center justify-center py-1.5 px-1 rounded-lg border text-center transition-all cursor-pointer ${
-                                  isActive
-                                    ? 'border-cyan-500/80 bg-cyan-500/10 text-cyan-300 ring-1 ring-cyan-500/40 font-bold'
-                                    : 'border-slate-800 bg-slate-950/70 text-slate-300 hover:text-white hover:border-slate-700'
-                                } disabled:opacity-50 disabled:cursor-not-allowed`}
-                                aria-pressed={isActive}
-                                aria-label={`Output Quality: ${item.label} (${item.badge})`}
-                              >
-                                <span className="text-xs">{item.label}</span>
-                                <span className="text-[9px] text-slate-400 mt-0.5 font-normal">
-                                  ({item.badge})
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
+              {/* 3. Image Dimming Slider */}
+              <div className="space-y-1.5 pt-2 border-t border-slate-800/60">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="darkmode-image-dimming" className="block text-xs font-bold text-slate-200 uppercase tracking-wider">
+                    Image Dimming
+                  </label>
+                  <span className="text-[11px] font-semibold text-cyan-400">
+                    {Math.round(imageDimming * 100)}%
+                  </span>
+                </div>
+                <input
+                  id="darkmode-image-dimming"
+                  type="range"
+                  min="0"
+                  max="0.5"
+                  step="0.05"
+                  value={imageDimming}
+                  onChange={(e) => setImageDimming(parseFloat(e.target.value))}
+                  disabled={isProcessing}
+                  className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400 focus:outline-none disabled:opacity-50"
+                />
+                <div className="flex items-center justify-between text-[10px] text-slate-400">
+                  <span>0% (Untouched)</span>
+                  <span>50% (Max dimming)</span>
+                </div>
+              </div>
 
-                      {/* 3. Image Dimming Slider */}
-                      <div className="space-y-1 pt-2 border-t border-slate-800/60">
-                        <div className="flex items-center justify-between">
-                          <label htmlFor="darkmode-image-dimming" className="block text-[11px] font-bold text-slate-200 uppercase tracking-wider">
-                            Image Dimming
-                          </label>
-                          <span className="text-[10px] font-semibold text-cyan-400">
-                            {Math.round(imageDimming * 100)}%
-                          </span>
-                        </div>
-                        <input
-                          id="darkmode-image-dimming"
-                          type="range"
-                          min="0"
-                          max="0.5"
-                          step="0.05"
-                          value={imageDimming}
-                          onChange={(e) => setImageDimming(parseFloat(e.target.value))}
-                          disabled={isProcessing}
-                          className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400 focus:outline-none disabled:opacity-50"
-                        />
-                        <div className="flex items-center justify-between text-[9px] text-slate-400">
-                          <span>0% (Untouched)</span>
-                          <span>50% (Max dimming)</span>
-                        </div>
-                      </div>
-
-                      {/* 4. Preview Approximation Disclaimer */}
-                      <div className="pt-2 border-t border-slate-800/60">
-                        <p className="text-[10px] text-slate-500 italic leading-snug">
-                          Note: Preview uses CSS filters for speed. The final downloaded PDF is generated with a higher-fidelity algorithm that may look slightly different.
-                        </p>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {/* Preview Approximation Disclaimer */}
+              <div className="pt-2 border-t border-slate-800/60">
+                <p className="text-[10px] text-slate-500 italic leading-snug">
+                  Note: Preview uses CSS filters for speed. The final downloaded PDF is generated with a higher-fidelity algorithm that may look slightly different.
+                </p>
+              </div>
             </div>
           )}
         </div>
       )}
 
-      {/* 3. Prominent Primary CTA Button (Visible above the fold, with glowing ring and helper text) */}
-      <div className="pt-1 space-y-1.5">
+      {/* 3. Prominent Primary CTA Button (Visible above the fold, above the download/status section) */}
+      <div className="pt-2">
         <button
           type="button"
           onClick={handleProcessClick}
           disabled={selectedFiles.length === 0 || isProcessing || isProcessDisabled()}
-          className="w-full py-3 px-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 disabled:border-slate-800 disabled:shadow-none text-slate-950 font-bold rounded-xl transition-all shadow-lg shadow-cyan-500/25 ring-2 ring-cyan-400/50 hover:ring-cyan-300/80 hover:shadow-cyan-500/40 text-sm disabled:cursor-not-allowed flex items-center justify-center gap-2 tracking-wide cursor-pointer focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-950"
+          className="w-full py-3.5 px-5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 disabled:border-slate-800 disabled:shadow-none text-slate-950 font-bold rounded-xl transition-all shadow-lg shadow-cyan-500/25 text-sm disabled:cursor-not-allowed flex items-center justify-center gap-2 tracking-wide cursor-pointer focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-950"
         >
           <span>{primaryActionLabel()}</span>
         </button>
-        <p className="text-[11px] text-slate-400 text-center leading-tight">
-          Uses your current settings to generate the download.
-        </p>
       </div>
 
       {/* 4. Result, Download, or Instructional State Area */}
-      <div className="pt-1 border-t border-slate-800/80 space-y-2.5">
+      <div className="pt-2 border-t border-slate-800/80 space-y-3">
         {/* If isProcessing is true: Show loading pipeline */}
         {isProcessing ? (
           <PipelineProgressCard
@@ -767,7 +742,7 @@ function PDFProcessor({
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="p-3.5 sm:p-4 rounded-2xl bg-cyan-950/30 border border-cyan-500/40 space-y-2.5 text-center"
+            className="p-4 rounded-2xl bg-cyan-950/30 border border-cyan-500/40 space-y-3 text-center"
           >
             <div className="flex items-center justify-center gap-2 text-cyan-400 font-bold text-sm">
               <CheckCircleIcon className="w-5 h-5 text-cyan-400" />
@@ -775,7 +750,7 @@ function PDFProcessor({
             </div>
 
             {resultStats?.originalSize && resultStats?.processedSize && (
-              <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-left space-y-1.5 shadow-sm">
+              <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 text-left space-y-2 shadow-sm">
                 <div className="flex items-center justify-between text-xs font-bold text-white">
                   <span className="flex items-center gap-1.5">
                     <PresentationChartLineIcon className="w-4 h-4 text-cyan-400 shrink-0" />
@@ -789,26 +764,26 @@ function PDFProcessor({
                       const savedPct = (savedBytes / resultStats.originalSize) * 100;
                       if (savedPct >= 1) {
                         return (
-                          <span className="text-[10px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                          <span className="text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                             Saved {Math.round(savedPct)}% ({formatFileSize(savedBytes)})
                           </span>
                         );
                       }
                       return (
-                        <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                        <span className="text-[10px] uppercase tracking-wider font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
                           Minimal Reduction
                         </span>
                       );
                     }
                     if (isCompressTool) {
                       return (
-                        <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                        <span className="text-[10px] uppercase tracking-wider font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
                           Already Optimized
                         </span>
                       );
                     }
                     return (
-                      <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                      <span className="text-[10px] uppercase tracking-wider font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
                         Transformed
                       </span>
                     );
@@ -822,7 +797,7 @@ function PDFProcessor({
                   </span>
                 </div>
                 {resultStats.originalSize <= resultStats.processedSize && (
-                  <div className="text-[10px] text-slate-400 border-t border-slate-800/80 pt-1 leading-snug">
+                  <div className="text-[10px] text-slate-400 border-t border-slate-800/80 pt-1.5 leading-snug">
                     {isDarkModeTool
                       ? `File size adjusted (+${formatFileSize(resultStats.processedSize - resultStats.originalSize)}) to embed high-clarity dark theme canvas layers.`
                       : isCompressTool
@@ -837,7 +812,7 @@ function PDFProcessor({
               href={downloadUrl}
               download={downloadFileName()}
               onClick={(e) => { if (isProcessing) e.preventDefault(); }}
-              className={`flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl transition-colors shadow-lg shadow-cyan-500/20 text-sm cursor-pointer ${
+              className={`flex items-center justify-center gap-2 w-full py-3 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl transition-colors shadow-lg shadow-cyan-500/20 text-sm cursor-pointer ${
                 isProcessing ? 'pointer-events-none opacity-50 cursor-not-allowed' : ''
               }`}
               aria-disabled={isProcessing}
@@ -850,7 +825,7 @@ function PDFProcessor({
               type="button"
               onClick={clearAllFiles}
               disabled={isProcessing}
-              className="w-full py-1.5 px-3 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold rounded-xl border border-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-2 px-3 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold rounded-xl border border-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isMergeTool ? 'Start Another Merge' : 'Process Another File'}
             </button>
@@ -864,16 +839,16 @@ function PDFProcessor({
               }
               operationStatus="success"
               customLabel="Something wrong with the result output?"
-              className="pt-0.5"
+              className="pt-1"
             />
           </motion.div>
         ) : !isProcessing && downloadUrl === null && selectedFiles.length > 0 ? (
           /* If isProcessing is false AND downloadUrl is null AND a file is selected: Show instructional empty state card */
-          <div className="p-3.5 sm:p-4 rounded-2xl bg-cyan-950/20 border border-cyan-500/25 text-center space-y-2">
-            <div className="w-8 h-8 mx-auto rounded-full bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
-              <InformationCircleIcon className="w-4 h-4" />
+          <div className="p-4 sm:p-5 rounded-2xl bg-cyan-950/20 border border-cyan-500/25 text-center space-y-2.5">
+            <div className="w-9 h-9 mx-auto rounded-full bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+              <InformationCircleIcon className="w-5 h-5" />
             </div>
-            <p className="text-xs font-semibold text-slate-200 leading-relaxed max-w-sm mx-auto">
+            <p className="text-xs sm:text-sm font-semibold text-slate-200 leading-relaxed max-w-sm mx-auto">
               Ready to process. Adjust your settings below, then click 'Apply Dark Mode' to generate the download.
             </p>
             <p className="text-[11px] text-slate-400 leading-normal">
@@ -882,14 +857,14 @@ function PDFProcessor({
           </div>
         ) : (
           /* If no file is selected: Show the existing "No document loaded" state */
-          <div className="p-3.5 rounded-2xl border border-dashed border-slate-800 bg-slate-950/40 text-center">
+          <div className="p-4 rounded-2xl border border-dashed border-slate-800 bg-slate-950/40 text-center">
             <p className="text-xs font-medium text-slate-500">No document loaded</p>
           </div>
         )}
       </div>
 
       {/* 5. Short Factual Privacy Note */}
-      <p className="text-[10px] text-slate-500 text-center leading-normal">
+      <p className="text-[11px] text-slate-400 text-center leading-normal">
         Files are processed locally in your browser.
       </p>
     </div>

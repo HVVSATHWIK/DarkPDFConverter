@@ -175,4 +175,56 @@ describe('PDFPreview Component', () => {
 
         expect(screen.getByTestId('page-mock')).toBeInTheDocument();
     });
+
+    it('renders theme background and text overlays in dark mode', async () => {
+        const mockBuffer = new ArrayBuffer(10);
+        vi.mocked(usePdfBufferModule.usePdfBuffer).mockReturnValue({
+            status: 'ready',
+            buffer: mockBuffer,
+            isShared: false
+        });
+
+        // Test Sepia theme (has both bg overlay and text tint overlay)
+        const { unmount } = render(<PDFPreview file={new Blob([])} isDarkMode={true} theme="sepia" mode="text-focused" />);
+
+        await waitFor(() => {
+            expect(screen.getByTestId('page-mock')).toBeInTheDocument();
+        });
+
+        const bgOverlay = screen.getByTestId('theme-bg-overlay');
+        expect(bgOverlay).toBeInTheDocument();
+        expect(bgOverlay).toHaveStyle({ backgroundColor: '#2e1f12', mixBlendMode: 'screen' });
+
+        const textOverlay = screen.getByTestId('theme-text-overlay');
+        expect(textOverlay).toBeInTheDocument();
+        expect(textOverlay).toHaveStyle({ backgroundColor: '#f5e6c7', mixBlendMode: 'color' });
+
+        unmount();
+
+        // Test Midnight theme
+        const { unmount: unmountMidnight } = render(<PDFPreview file={new Blob([])} isDarkMode={true} theme="midnight" mode="text-focused" />);
+
+        await waitFor(() => {
+            expect(screen.getByTestId('page-mock')).toBeInTheDocument();
+        });
+
+        const midnightBg = screen.getByTestId('theme-bg-overlay');
+        expect(midnightBg).toHaveStyle({ backgroundColor: '#0d172e', mixBlendMode: 'multiply' });
+
+        const midnightText = screen.getByTestId('theme-text-overlay');
+        expect(midnightText).toHaveStyle({ backgroundColor: '#dbebff', mixBlendMode: 'color' });
+
+        unmountMidnight();
+
+        // Test Darkest (OLED) theme - no text overlay, pure black bg
+        render(<PDFPreview file={new Blob([])} isDarkMode={true} theme="darkest" mode="text-focused" />);
+
+        await waitFor(() => {
+            expect(screen.getByTestId('page-mock')).toBeInTheDocument();
+        });
+
+        const darkestBg = screen.getByTestId('theme-bg-overlay');
+        expect(darkestBg).toHaveStyle({ backgroundColor: '#000000', mixBlendMode: 'multiply' });
+        expect(screen.queryByTestId('theme-text-overlay')).not.toBeInTheDocument();
+    });
 });

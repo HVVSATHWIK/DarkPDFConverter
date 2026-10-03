@@ -61,6 +61,15 @@ const THEME_CONFIGS: Record<ThemeName, ThemeConfig> = {
   }
 };
 
+export const THEME_PAGE_COLORS: Record<ThemeName, { background: string; foreground: string }> = {
+  dark:     { background: '#171c26', foreground: '#e8edf5' },
+  darker:   { background: '#0f0f14', foreground: '#f0f0f5' },
+  darkest:  { background: '#000000', foreground: '#ffffff' },
+  sepia:    { background: '#2e1f0f', foreground: '#e8d5b0' },
+  midnight: { background: '#0d172e', foreground: '#c8d8f0' },
+  slate:    { background: '#232833', foreground: '#d5dae5' },
+};
+
 
 
 async function canvasToJpegBytes(canvas: HTMLCanvasElement, quality = 0.85): Promise<Uint8Array> {

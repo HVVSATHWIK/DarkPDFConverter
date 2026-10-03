@@ -115,4 +115,28 @@ describe('useDarkMode', () => {
     const { applyDarkMode } = useDarkMode();
     await expect(applyDarkMode(mockPdfDoc)).resolves.toBeDefined();
   });
+
+  it('should return correct theme CSS colors and blend modes via getThemeCssColors', async () => {
+    const { getThemeCssColors } = await import('./useDarkMode');
+
+    const darkest = getThemeCssColors('darkest');
+    expect(darkest.backgroundColor).toBe('#000000');
+    expect(darkest.textColor).toBe('#ffffff');
+    expect(darkest.blendMode).toBe('multiply');
+
+    const sepia = getThemeCssColors('sepia');
+    expect(sepia.backgroundColor).toBe('#2e1f12');
+    expect(sepia.textColor).toBe('#f5e6c7');
+    expect(sepia.blendMode).toBe('screen');
+
+    const midnight = getThemeCssColors('midnight');
+    expect(midnight.backgroundColor).toBe('#0d172e');
+    expect(midnight.textColor).toBe('#dbebff');
+    expect(midnight.blendMode).toBe('multiply');
+
+    const slate = getThemeCssColors('slate');
+    expect(slate.backgroundColor).toBe('#242933');
+    expect(slate.textColor).toBe('#e6ebf2');
+    expect(slate.blendMode).toBe('multiply');
+  });
 });

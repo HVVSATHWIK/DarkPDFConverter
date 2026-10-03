@@ -13,7 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 import '../../config/pdfWorker';
-import { buildCssFilter, DarkModeRenderMode, ThemeName } from '../../hooks/useDarkMode';
+import { buildCssFilter, DarkModeRenderMode, ThemeName, THEME_PAGE_COLORS } from '../../hooks/useDarkMode';
 
 interface PDFPreviewProps {
   file: string | File | Blob | { data: Uint8Array } | null;
@@ -416,47 +416,65 @@ export default function PDFPreview({
           className="flex flex-col items-center gap-6 max-w-full my-4"
         >
           {viewMode === 'single' ? (
-            <div
-              className="relative shadow-2xl shadow-black/90 rounded-xl overflow-hidden border border-white/15 bg-slate-950 transition-[filter] duration-200"
-              style={previewFilter !== 'none' ? { filter: previewFilter } : undefined}
-            >
-              <Page
-                pageNumber={currentPage}
-                scale={scale}
-                renderTextLayer={false}
-                renderAnnotationLayer={false}
-                devicePixelRatio={typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 2) : 1}
-                loading={
-                  <div className="w-[450px] h-[600px] bg-slate-900/60 animate-pulse flex items-center justify-center text-slate-500 rounded-lg">
-                    <span className="text-xs font-mono">Loading Page {currentPage}...</span>
-                  </div>
-                }
-                className="overflow-hidden"
-              />
+            <div className="relative shadow-2xl shadow-black/90 rounded-xl overflow-hidden border border-white/15">
+              {/* Inverted PDF page with mode-aware filter and native pageColors */}
+              <div style={{ filter: previewFilter }}>
+                <Page
+                  pageNumber={currentPage}
+                  scale={scale}
+                  renderTextLayer={false}
+                  renderAnnotationLayer={false}
+                  pageColors={
+                    isDarkMode
+                      ? {
+                          background: THEME_PAGE_COLORS[(theme as ThemeName) || 'dark'].background,
+                          foreground: THEME_PAGE_COLORS[(theme as ThemeName) || 'dark'].foreground,
+                        }
+                      : undefined
+                  }
+                  devicePixelRatio={typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 2) : 1}
+                  loading={
+                    <div className="w-[450px] h-[600px] bg-slate-900/60 animate-pulse flex items-center justify-center text-slate-500 rounded-lg">
+                      <span className="text-xs font-mono">Loading Page {currentPage}...</span>
+                    </div>
+                  }
+                  className="overflow-hidden"
+                />
+              </div>
             </div>
           ) : (
             Array.from({ length: numPages || 1 }, (_, index) => (
               <div
                 key={`page_${index + 1}`}
-                className="relative shadow-2xl shadow-black/90 rounded-xl overflow-hidden border border-white/15 bg-slate-950 flex flex-col items-center transition-[filter] duration-200"
-                style={previewFilter !== 'none' ? { filter: previewFilter } : undefined}
+                className="relative shadow-2xl shadow-black/90 rounded-xl overflow-hidden border border-white/15 flex flex-col items-center"
               >
                 <div className="absolute top-2 left-2 z-10 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-mono text-slate-400 border border-white/10">
                   Page {index + 1}
                 </div>
-                <Page
-                  pageNumber={index + 1}
-                  scale={scale}
-                  renderTextLayer={false}
-                  renderAnnotationLayer={false}
-                  devicePixelRatio={typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 2) : 1}
-                  loading={
-                    <div className="w-[450px] h-[600px] bg-slate-900/60 animate-pulse flex items-center justify-center text-slate-500 rounded-lg">
-                      <span className="text-xs font-mono">Loading Page {index + 1}...</span>
-                    </div>
-                  }
-                  className="overflow-hidden"
-                />
+                {/* Inverted PDF page with mode-aware filter and native pageColors */}
+                <div style={{ filter: previewFilter }}>
+                  <Page
+                    pageNumber={index + 1}
+                    scale={scale}
+                    renderTextLayer={false}
+                    renderAnnotationLayer={false}
+                    pageColors={
+                      isDarkMode
+                        ? {
+                            background: THEME_PAGE_COLORS[(theme as ThemeName) || 'dark'].background,
+                            foreground: THEME_PAGE_COLORS[(theme as ThemeName) || 'dark'].foreground,
+                          }
+                        : undefined
+                    }
+                    devicePixelRatio={typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 2) : 1}
+                    loading={
+                      <div className="w-[450px] h-[600px] bg-slate-900/60 animate-pulse flex items-center justify-center text-slate-500 rounded-lg">
+                        <span className="text-xs font-mono">Loading Page {index + 1}...</span>
+                      </div>
+                    }
+                    className="overflow-hidden"
+                  />
+                </div>
               </div>
             ))
           )}

@@ -1,7 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { SEO } from '@/components/common/SEO';
-import ToolOperationHelper from '@/components/tools/ToolOperationHelper';
 import {
   ChevronDownIcon,
   BuildingLibraryIcon,
@@ -278,7 +277,7 @@ export default function HomePage() {
                       </span>
                     </Link>
 
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5 flex-1">
                       <Link
                         to={tool.path}
                         className="block text-base font-bold text-white group-hover:text-blue-300 transition-colors"
@@ -288,11 +287,6 @@ export default function HomePage() {
                       <p className="text-xs text-slate-300 leading-relaxed">
                         {tool.desc}
                       </p>
-                    </div>
-
-                    {/* Operation Helper Text Component */}
-                    <div className="flex-1 flex flex-col justify-end">
-                      <ToolOperationHelper toolId={tool.toolId} />
                     </div>
                   </div>
 
